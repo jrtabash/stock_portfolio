@@ -1,13 +1,14 @@
-use chrono::{Local, Duration};
-
 mod yfinance;
+mod sputil;
+
 use yfinance::{types, query};
+use sputil::datetime;
 
 fn main() {
     let mut query = query::HistoryQuery::new(
         String::from("AAPL"),
-        Local::today() + Duration::days(-5),
-        Local::today() + Duration::days(1),
+        datetime::today_plus_days(-5),
+        datetime::today_plus_days(1),
         types::Interval::Daily,
         types::Events::History);
 

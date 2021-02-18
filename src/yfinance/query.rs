@@ -4,6 +4,7 @@ use curl;
 use curl::easy;
 
 use crate::yfinance::types::*;
+use crate::sputil::datetime::*;
 
 // --------------------------------------------------------------------------------
 // HistoryQuery
@@ -56,10 +57,6 @@ impl HistoryQuery {
 
 // --------------------------------------------------------------------------------
 // Private Helpers
-
-fn date2timestamp(date: &Date<Local>) -> i64 {
-    date.and_hms(0, 0, 0).timestamp()
-}
 
 fn url_request(url: &String, result: &mut String) -> Result<(), curl::Error> {
     let mut handle = easy::Easy::new();
