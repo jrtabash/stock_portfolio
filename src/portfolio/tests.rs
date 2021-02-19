@@ -17,14 +17,14 @@ mod tests {
         assert!(price_equal(stock.net_notional(), 925.0));
     }
 
-    fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: f64, current: f64) -> Stock {
+    fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: Price, current: Price) -> Stock {
         let symbol = String::from(sym);
         let mut stock = Stock::new(symbol, date, qty, base);
         stock.set_current_price(current);
         stock
     }
 
-    fn price_equal(lhs: f64, rhs: f64) -> bool {
+    fn price_equal(lhs: Price, rhs: Price) -> bool {
         format!("{:2}", lhs) == format!("{:2}", rhs)
     }
 }
