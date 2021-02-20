@@ -51,7 +51,7 @@ impl fmt::Display for Stock {
 }
 
 // --------------------------------------------------------------------------------
-// Stock Portfolio
+// Stock List
 
 pub struct StockList {
     pub stocks: Vec<Stock>
