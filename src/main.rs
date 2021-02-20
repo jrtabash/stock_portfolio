@@ -22,7 +22,7 @@ fn main() {
 
     let mut s = stock::Stock::new(
         String::from("AAPL"),
-        datetime::today_plus_days(0),
+        datetime::today_plus_days(-3),
         100,
         120.25);
     s.set_current_price(129.50);
@@ -32,4 +32,23 @@ fn main() {
     println!("   Base Notional: ${:.2}", s.base_notional());
     println!("Current Notional: ${:.2}", s.current_notional());
     println!("    Net Notional: ${:.2}", s.net_notional());
+
+    println!("-----");
+
+    let mut s2 = stock::Stock::new(
+        String::from("DELL"),
+        datetime::today_plus_days(-2),
+        100,
+        79.21);
+    s2.set_current_price(80.14);
+    println!("{}", s2);
+
+    let mut portfolio = stock::StockPortfolio::new();
+    portfolio.add_stock(s);
+    portfolio.add_stock(s2);
+
+    println!("{}", portfolio);
+    println!("-----");
+
+    portfolio.report();
 }

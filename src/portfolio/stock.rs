@@ -3,6 +3,9 @@ use chrono::{Date, Local};
 
 pub type Price = f64;
 
+// --------------------------------------------------------------------------------
+// Stock
+
 pub struct Stock {
     pub symbol: String,
     pub date: Date<Local>,
@@ -43,6 +46,69 @@ impl Stock {
 
 impl fmt::Display for Stock {
     fn fmt(self: &Stock, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} {}@{:.2}", self.symbol, self.quantity, self.current_price)
+        write!(f, "Stock({} {}@{:.2})", self.symbol, self.quantity, self.current_price)
+    }
+}
+
+// --------------------------------------------------------------------------------
+// Stock Portfolio
+
+pub struct StockPortfolio {
+    pub stocks: Vec<Stock>
+}
+
+impl StockPortfolio {
+    pub fn new() -> StockPortfolio {
+        let stocks: Vec<Stock> = Vec::new();
+        StockPortfolio { stocks }
+    }
+
+    pub fn count(self: &StockPortfolio) -> usize {
+        self.stocks.len()
+    }
+
+    pub fn add_stock(self: &mut StockPortfolio, stock: Stock) {
+        self.stocks.push(stock);
+    }
+
+    pub fn current_notional(self: &StockPortfolio) -> Price {
+        self.stocks.iter().map(|stock| stock.current_notional()).sum()
+    }
+
+    pub fn net_notional(self: &StockPortfolio) -> Price {
+        self.stocks.iter().map(|stock| stock.net_notional()).sum()
+    }
+
+    pub fn report(self: &StockPortfolio) {
+        let header = vec!["Ticker", "Date\t", "Qty", "Base", "Current", " Net", "NetVal", "CurrentVal"];
+        let seprts = vec!["------", "----\t", "---", "----", "-------", " ---", "------", "----------"];
+
+        println!("Stock Portfolio");
+        println!("---------------");
+        println!("            Date: {}", Local::today().format("%Y-%m-%d"));
+        println!("           Count: {}", self.count());
+        println!("    Net Notional: {:.2}", self.net_notional());
+        println!("Current Notional: {:.2}", self.current_notional());
+        println!("");
+        println!("{}", header.join("\t"));
+        println!("{}", seprts.join("\t"));
+
+        for stock in self.stocks.iter() {
+            println!("{}\t{}\t{}\t{:.2}\t{:.2}\t {:.2}\t{:.2}\t{:.2}",
+                     stock.symbol,
+                     stock.date.format("%Y-%m-%d"),
+                     stock.quantity,
+                     stock.base_price,
+                     stock.current_price,
+                     stock.net_price(),
+                     stock.net_notional(),
+                     stock.current_notional());
+        }
+    }
+}
+
+impl fmt::Display for StockPortfolio {
+    fn fmt(self: &StockPortfolio, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "StockPortfolio({})", self.stocks.len())
     }
 }
