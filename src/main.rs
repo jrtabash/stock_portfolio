@@ -4,7 +4,7 @@ mod yfinance;
 
 use sputil::datetime;
 use yfinance::{types, query};
-use portfolio::stock;
+use portfolio::{stock, reports};
 
 fn main() {
     let mut query = query::HistoryQuery::new(
@@ -43,12 +43,12 @@ fn main() {
     s2.set_current_price(80.14);
     println!("{}", s2);
 
-    let mut portfolio = stock::StockPortfolio::new();
-    portfolio.add_stock(s);
-    portfolio.add_stock(s2);
+    let mut stocks = stock::StockList::new();
+    stocks.add_stock(s);
+    stocks.add_stock(s2);
 
-    println!("{}", portfolio);
+    println!("{}", stocks);
     println!("-----");
 
-    portfolio.report();
+    reports::value_report(&stocks);
 }

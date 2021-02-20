@@ -19,13 +19,16 @@ mod tests {
     }
 
     #[test]
-    fn test_stock_portfolio() {
-        let mut portfolio = StockPortfolio::new();
-        portfolio.add_stock(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
-        portfolio.add_stock(make_stock("DELL", today_plus_days(-2), 100, 79.21, 79.71));
-        assert_eq!(portfolio.count(), 2);
-        assert!(price_equal(portfolio.net_notional(), 550.0));
-        assert!(price_equal(portfolio.current_notional(), 20496.0));
+    fn test_stock_list() {
+        let mut list = StockList::new();
+        list.add_stock(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
+        list.add_stock(make_stock("DELL", today_plus_days(-2), 100, 79.21, 79.71));
+        assert_eq!(list.count(), 2);
+        assert!(price_equal(list.net_notional(), 550.0));
+        assert!(price_equal(list.current_notional(), 20496.0));
+
+        let total_size: u32 = list.iter().map(|stock| stock.quantity).sum();
+        assert_eq!(total_size, 200);
     }
 
     fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: Price, current: Price) -> Stock {
