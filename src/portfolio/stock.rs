@@ -3,9 +3,6 @@ use chrono::{Date, Local};
 
 pub type Price = f64;
 
-// --------------------------------------------------------------------------------
-// Stock
-
 pub struct Stock {
     pub symbol: String,
     pub date: Date<Local>,
@@ -13,6 +10,8 @@ pub struct Stock {
     pub base_price: Price,
     pub current_price: Price
 }
+
+pub type StockList = Vec<Stock>;
 
 impl Stock {
     pub fn new(symbol: String,
@@ -47,66 +46,5 @@ impl Stock {
 impl fmt::Display for Stock {
     fn fmt(self: &Stock, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Stock({} {}@{:.2})", self.symbol, self.quantity, self.current_price)
-    }
-}
-
-// --------------------------------------------------------------------------------
-// Stock List
-
-pub struct StockList {
-    pub stocks: Vec<Stock>
-}
-
-pub struct StockIterator<'a> {
-    stocks_ref: &'a Vec<Stock>,
-    index: usize,
-}
-
-impl StockList {
-    pub fn new() -> StockList {
-        let stocks: Vec<Stock> = Vec::new();
-        StockList { stocks }
-    }
-
-    pub fn count(self: &StockList) -> usize {
-        self.stocks.len()
-    }
-
-    pub fn add_stock(self: &mut StockList, stock: Stock) {
-        self.stocks.push(stock);
-    }
-
-    pub fn current_notional(self: &StockList) -> Price {
-        self.stocks.iter().map(|stock| stock.current_notional()).sum()
-    }
-
-    pub fn net_notional(self: &StockList) -> Price {
-        self.stocks.iter().map(|stock| stock.net_notional()).sum()
-    }
-
-    pub fn iter(self: &StockList) -> StockIterator {
-        let stocks_ref = &self.stocks;
-        let index = 0;
-        StockIterator { stocks_ref, index }
-    }
-}
-
-impl fmt::Display for StockList {
-    fn fmt(self: &StockList, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "StockList({})", self.stocks.len())
-    }
-}
-
-impl<'a> Iterator for StockIterator<'a> {
-    type Item = &'a Stock;
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.index < self.stocks_ref.len() {
-            let idx = self.index;
-            self.index += 1;
-            Some(&self.stocks_ref[idx])
-        }
-        else {
-            None
-        }
     }
 }

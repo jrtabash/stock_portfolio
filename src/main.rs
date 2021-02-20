@@ -41,14 +41,10 @@ fn main() {
         100,
         79.21);
     s2.set_current_price(80.14);
-    println!("{}", s2);
 
     let mut stocks = stock::StockList::new();
-    stocks.add_stock(s);
-    stocks.add_stock(s2);
-
-    println!("{}", stocks);
-    println!("-----");
+    stocks.push(s);
+    stocks.push(s2);
 
     reports::value_report(&stocks);
 }

@@ -1,6 +1,7 @@
 use chrono::Local;
 
 use crate::portfolio::stock::*;
+use crate::portfolio::algorithms::*;
 
 pub fn value_report(stocks: &StockList) {
     let header = vec!["Ticker", "Date\t", "Qty", "Base", "Current", " Net", "NetVal", "CurVal"];
@@ -9,9 +10,9 @@ pub fn value_report(stocks: &StockList) {
     println!("Stocks Value Report");
     println!("-------------------");
     println!("            Date: {}", Local::today().format("%Y-%m-%d"));
-    println!("Number of Stocks: {}", stocks.count());
-    println!("       Net Value: {:.2}", stocks.net_notional());
-    println!("   Current Value: {:.2}", stocks.current_notional());
+    println!("Number of Stocks: {}", stocks.len());
+    println!("       Net Value: {:.2}", net_notional(&stocks));
+    println!("   Current Value: {:.2}", current_notional(&stocks));
     println!("");
     println!("{}", header.join("\t"));
     println!("{}", seprts.join("\t"));
