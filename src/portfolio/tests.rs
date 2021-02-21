@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
     use chrono::{Date, Local};
     use crate::sputil::datetime::*;
     use crate::portfolio::stock::*;
@@ -32,6 +33,36 @@ mod tests {
         assert_eq!(total_size, 200);
     }
 
+    #[test]
+    fn test_stock_groupby() {
+        fn test(groupby: &HashMap<String, (u32, Price)>, symbol: &str, size: u32, price: Price) {
+            if let Some(size_price) = groupby.get(symbol) {
+                if size_price.0 != size {
+                    println!("Symbol {} size actual={} expected={}", symbol, size_price.0, size);
+                    assert!(false);
+                }
+                if !price_equal(size_price.1, price) {
+                    println!("Symbol {} price actual={:.2} expected={:.2}", symbol, size_price.1, price);
+                    assert!(false);
+                }
+            }
+            else {
+                println!("Symbol {} not in groupby", symbol);
+                assert!(false);
+            }
+        }
+
+        let mut list = StockList::new();
+        list.push(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
+        list.push(make_stock("DELL", today_plus_days(-2), 100, 79.21, 79.71));
+        list.push(make_stock("AAPL", today_plus_days(-2), 100, 122.0, 125.25));
+
+        let gby = stock_groupby(&list);
+        assert_eq!(gby.len(), 2);
+        test(&gby, "AAPL", 200, 25050.0);
+        test(&gby, "DELL", 100, 7971.0);
+    }
+
     fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: Price, current: Price) -> Stock {
         let symbol = String::from(sym);
         let mut stock = Stock::new(symbol, date, qty, base);
@@ -40,6 +71,6 @@ mod tests {
     }
 
     fn price_equal(lhs: Price, rhs: Price) -> bool {
-        format!("{:2}", lhs) == format!("{:2}", rhs)
+        format!("{:.2}", lhs) == format!("{:.2}", rhs)
     }
 }
