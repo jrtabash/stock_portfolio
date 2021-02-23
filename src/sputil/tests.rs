@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use chrono::{TimeZone, Local, Duration};
+    use chrono::{TimeZone, Local, Duration, Date, Datelike};
     use crate::sputil::datetime::*;
 
     #[test]
@@ -15,5 +15,22 @@ mod tests {
         assert_eq!(today_plus_days(0), today);
         assert_eq!(today_plus_days(1), today + Duration::days(1));
         assert_eq!(today_plus_days(-1), today + Duration::days(-1));
+    }
+
+    #[test]
+    fn test_parse_date() {
+        fn test(date: Date<Local>) {
+            let date_str = format!("{:04}-{:02}-{:02}", date.year(), date.month(), date.day());
+            match parse_date(&date_str) {
+                Ok(dt) => assert_eq!(dt, date),
+                Err(_) => assert!(false)
+            }
+        }
+
+        test(Local::today());
+        test(today_plus_days(-1));
+        test(today_plus_days(1));
+        test(today_plus_days(-30));
+        test(today_plus_days(30));
     }
 }

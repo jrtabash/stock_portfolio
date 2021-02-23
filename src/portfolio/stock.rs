@@ -30,6 +30,7 @@ impl Stock {
         self.current_price - self.base_price
     }
 
+    #[allow(dead_code)]
     pub fn base_notional(self: &Stock) -> Price {
         self.quantity as Price * self.base_price
     }
