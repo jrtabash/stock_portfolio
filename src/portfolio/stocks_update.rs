@@ -4,6 +4,8 @@ use crate::yfinance::query::*;
 use crate::yfinance::types::*;
 
 pub fn update_stock(stock: &mut Stock) -> bool {
+    let mut success = false;
+
     let mut query = HistoryQuery::new(
         stock.symbol.to_string(),
         today_plus_days(-4),
@@ -23,11 +25,12 @@ pub fn update_stock(stock: &mut Stock) -> bool {
 
             if current_price > 0.0 {
                 stock.set_current_price(current_price);
-                return true
+                success = true;
             }
         }
     }
-    return false
+
+    success
 }
 
 pub fn update_stocks(stocks: &mut StockList) -> usize {
@@ -37,5 +40,5 @@ pub fn update_stocks(stocks: &mut StockList) -> usize {
             count += 1;
         }
     }
-    return count;
+    count
 }
