@@ -34,11 +34,11 @@ impl StocksReader {
     fn parse_content(self: &StocksReader, content: &String) -> Result<StockList, String> {
         let mut stocks = StockList::new();
 
-        let mut skip: bool = true;
+        let mut skip_header: bool = true;
         for stock_line in content.split("\n") {
             // Assume first line is a header and skip it.
-            if skip {
-                skip = false;
+            if skip_header {
+                skip_header = false;
                 continue;
             }
 
