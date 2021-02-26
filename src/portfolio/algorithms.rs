@@ -9,6 +9,10 @@ pub fn net_notional(stocks: &StockList) -> Price {
     stocks.iter().map(|stock| stock.net_notional()).sum()
 }
 
+pub fn base_notional(stocks: &StockList) -> Price {
+    stocks.iter().map(|stock| stock.base_notional()).sum()
+}
+
 // Group by stock symbol, and calcuate aggregate quantity and current value.
 pub fn stock_groupby(stocks: &StockList) -> HashMap<String, (u32, Price)> {
     let mut groupby = HashMap::new();
