@@ -14,18 +14,23 @@ pub fn update_stock(stock: &mut Stock) -> bool {
         Events::History);
 
     if query.execute() {
-        let history: Vec<&str> = query.result.split("\n").collect();
-        if history.len() > 1 {
-            let latest: Vec<&str> = history[history.len() - 1].split(",").collect();
+        match query.result.rfind('\n') {
+            Some(last_newline) => {
+                let last_line = &query.result[last_newline..];
+                let latest: Vec<&str> = last_line.split(',').collect();
 
-            let current_price = latest[5].parse::<Price>().unwrap_or_else(|error| {
-                println!("Failed to update {} current price - {}", stock.symbol, error);
-                return 0.0
-            });
+                let current_price = latest[5].parse::<Price>().unwrap_or_else(|error| {
+                    println!("Failed to update {} current price - {}", stock.symbol, error);
+                    return 0.0
+                });
 
-            if current_price > 0.0 {
-                stock.set_current_price(current_price);
-                success = true;
+                if current_price > 0.0 {
+                    stock.set_current_price(current_price);
+                    success = true;
+                }
+            }
+            None => {
+                println!("Failed to update {} current price - no data", stock.symbol);
             }
         }
     }
