@@ -39,7 +39,7 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
         println!("{:8} {:10} {:10} {:8} {:8.2} {:8.2} {:8.2} {:12.2} {:12.2} {:10.2}",
                  stock.symbol,
                  stock.date.format("%Y-%m-%d"),
-                 stock.latest_update.format("%Y-%m-%d"),
+                 stock.latest_date.format("%Y-%m-%d"),
                  stock.quantity,
                  stock.base_price,
                  stock.latest_price,

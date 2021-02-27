@@ -14,7 +14,7 @@ mod tests {
         assert_eq!(stock.quantity, 100);
         assert!(price_equal(stock.base_price, 120.25));
         assert!(price_equal(stock.latest_price, 129.50));
-        assert_eq!(stock.latest_update, today_plus_days(-1));
+        assert_eq!(stock.latest_date, today_plus_days(-1));
         assert!(price_equal(stock.net_price(), 9.25));
         assert!(price_equal(stock.base_notional(), 12025.0));
         assert!(price_equal(stock.latest_notional(), 12950.0));

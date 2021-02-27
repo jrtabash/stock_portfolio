@@ -20,14 +20,14 @@ pub fn update_stock(stock: &mut Stock) -> bool {
                 let latest: Vec<&str> = last_line.split(',').collect();
 
                 match parse_date(&latest[0]) {
-                    Ok(latest_update) => {
+                    Ok(latest_date) => {
                         let latest_price = latest[5].parse::<Price>().unwrap_or_else(|error| {
                             println!("Failed to update {} latest price - {}", stock.symbol, error);
                             return 0.0
                         });
 
                         if latest_price > 0.0 {
-                            stock.set_latest_price(latest_price, latest_update);
+                            stock.set_latest_price(latest_price, latest_date);
                             success = true;
                         }
                     }
