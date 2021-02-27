@@ -1,14 +1,17 @@
 use std::fmt;
 use chrono::{Date, Local};
 
+use crate::sputil::datetime::*;
+
 pub type Price = f64;
 
 pub struct Stock {
-    pub symbol: String,
-    pub date: Date<Local>,
-    pub quantity: u32,
-    pub base_price: Price,
-    pub current_price: Price
+    pub symbol: String,            // Ticker
+    pub date: Date<Local>,         // Buy Date
+    pub quantity: u32,             // Buy Quantity
+    pub base_price: Price,         // Buy Price
+    pub latest_price: Price,       // Latest Price
+    pub latest_update: Date<Local> // Latest Date
 }
 
 pub type StockList = Vec<Stock>;
@@ -18,24 +21,26 @@ impl Stock {
                date: Date<Local>,
                quantity: u32,
                base_price: Price) -> Stock {
-        let current_price: Price = 0.0;
-        Stock { symbol, date, quantity, base_price, current_price }
+        let latest_price: Price = 0.0;
+        let latest_update = earliest_date();
+        Stock { symbol, date, quantity, base_price, latest_price, latest_update }
     }
 
-    pub fn set_current_price(self: &mut Stock, price: Price) {
-        self.current_price = price
+    pub fn set_latest_price(self: &mut Stock, price: Price, date: Date<Local>) {
+        self.latest_price = price;
+        self.latest_update = date;
     }
 
     pub fn net_price(self: &Stock) -> Price {
-        self.current_price - self.base_price
+        self.latest_price - self.base_price
     }
 
     pub fn base_notional(self: &Stock) -> Price {
         self.quantity as Price * self.base_price
     }
 
-    pub fn current_notional(self: &Stock) -> Price {
-        self.quantity as Price * self.current_price
+    pub fn latest_notional(self: &Stock) -> Price {
+        self.quantity as Price * self.latest_price
     }
 
     pub fn net_notional(self: &Stock) -> Price {
@@ -45,6 +50,6 @@ impl Stock {
 
 impl fmt::Display for Stock {
     fn fmt(self: &Stock, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Stock({} {}@{:.2})", self.symbol, self.quantity, self.current_price)
+        write!(f, "Stock({} {}@{:.2})", self.symbol, self.quantity, self.latest_price)
     }
 }

@@ -8,6 +8,10 @@ pub fn today_plus_days(days: i64) -> Date<Local> {
     Local::today() + Duration::days(days)
 }
 
+pub fn earliest_date() -> Date<Local> {
+    chrono::Local.ymd(1970, 1, 1)
+}
+
 pub fn parse_date(date_str: &str) -> Result<Date<Local>, String> {
     match NaiveDate::parse_from_str(&date_str, "%Y-%m-%d") {
         Ok(dt) => Ok(chrono::Local.ymd(dt.year(), dt.month(), dt.day())),
