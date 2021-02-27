@@ -5,6 +5,7 @@ mod tests {
     use crate::sputil::datetime::*;
     use crate::portfolio::stock::*;
     use crate::portfolio::algorithms::*;
+    use crate::portfolio::stocks_update::*;
 
     #[test]
     fn test_stock() {
@@ -29,6 +30,7 @@ mod tests {
         assert_eq!(list.len(), 2);
         assert!(price_equal(net_notional(&list), 550.0));
         assert!(price_equal(latest_notional(&list), 20496.0));
+        assert!(price_equal(base_notional(&list), 19946.0));
 
         let total_size: u32 = list.iter().map(|stock| stock.quantity).sum();
         assert_eq!(total_size, 200);
@@ -62,6 +64,28 @@ mod tests {
         assert_eq!(gby.len(), 2);
         test(&gby, "AAPL", 200, 25050.0);
         test(&gby, "DELL", 100, 7971.0);
+    }
+
+    #[test]
+    fn test_stock_update_from_csv() {
+        let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
+                   2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
+        let mut stock = Stock::new(String::from("STCK"), parse_date("2021-02-01").unwrap(), 100, 24.0);
+        assert!(update_stock_from_csv(&mut stock, &csv));
+        assert!(price_equal(stock.latest_price, 28.25));
+        assert_eq!(stock.latest_date, parse_date("2021-02-26").unwrap());
+    }
+
+    #[test]
+    fn test_stock_update_from_csv2() {
+        let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
+                   2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
+                   2021-02-25,26.10,31.0,22.0,24.0,24.0,9000\n\
+                   2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
+        let mut stock = Stock::new(String::from("STCK"), parse_date("2021-02-01").unwrap(), 100, 24.0);
+        assert!(update_stock_from_csv(&mut stock, &csv));
+        assert!(price_equal(stock.latest_price, 28.25));
+        assert_eq!(stock.latest_date, parse_date("2021-02-26").unwrap());
     }
 
     fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: Price, latest: Price) -> Stock {
