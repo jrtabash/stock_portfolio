@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 chrono = "0.4"
 curl = "0.4.34"
+clap = "2.33.3"
 
 # [dependencies.peroxide]
 # version = "0.30"
