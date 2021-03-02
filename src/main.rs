@@ -10,7 +10,6 @@ use portfolio::{reports, stocks_reader, stocks_update};
 fn main() {
     let parsed_args = App::new("Stock Portfolio Tool")
         .version("0.0.1")
-        .author("jrtabash <jrtabash@yahoo.com>")
         .about("Get latest close prices and report performance of stocks in portfolio.")
         .arg(Arg::with_name("stocks_file")
              .short("s")
