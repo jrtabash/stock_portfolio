@@ -20,7 +20,7 @@ fn main() {
         .arg(Arg::with_name("show_groupby")
              .short("g")
              .long("show-groupby")
-             .help("Show quantities and latest prices grouped by ticker"))
+             .help("Show quantities and current notional values grouped by ticker"))
         .get_matches();
 
     let stocks_file = parsed_args.value_of("stocks_file").unwrap();
