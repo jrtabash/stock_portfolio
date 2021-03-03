@@ -14,7 +14,7 @@ USAGE:
 
 FLAGS:
    -h, --help            Prints help information
-   -g, --show-groupby    Show quantities and latest prices grouped by ticker
+   -g, --show-groupby    Show quantities and current notional values grouped by ticker
    -V, --version         Prints version information
 
 OPTIONS:
