@@ -1,11 +1,11 @@
 # Stock Portfolio Tool
-Get latest close prices and report performance of stocks in portfolio.
+Get latest close prices and report gain and loss of stocks in portfolio.
 
 Given a stocks file, containing ticker, date purchased, quantity purchased, and purchase/base price,
 get the latest close prices and generate a stocks value report, showing base, current and net prices
 and notional values.
 
-Optionally, the tool also reports quantities and current notional values groupby by ticker.
+Optionally, the tool also reports quantities and current notional values grouped by ticker.
 
 ## Usage
 ```bash
