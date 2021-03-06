@@ -10,7 +10,7 @@ use portfolio::{reports, stocks_reader, stocks_update};
 fn main() {
     let parsed_args = App::new("Stock Portfolio Tool")
         .version("0.1.0")
-        .about("Get latest close prices and report performance of stocks in portfolio.")
+        .about("Get latest close prices and report the gains and losses of stocks in portfolio.")
         .arg(Arg::with_name("stocks_file")
              .short("s")
              .long("stocks")
@@ -20,7 +20,7 @@ fn main() {
         .arg(Arg::with_name("show_groupby")
              .short("g")
              .long("show-groupby")
-             .help("Show quantities and current notional values grouped by ticker"))
+             .help("Show quantities and current notional values grouped by symbol"))
         .get_matches();
 
     let stocks_file = parsed_args.value_of("stocks_file").unwrap();
