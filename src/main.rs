@@ -21,15 +21,25 @@ fn main() {
              .short("g")
              .long("show-groupby")
              .help("Show quantities and current notional values grouped by symbol"))
+        .arg(Arg::with_name("use_cache")
+             .short("c")
+             .long("use-cache")
+             .help("Use local cache to store latest stock prices"))
         .get_matches();
 
     let stocks_file = parsed_args.value_of("stocks_file").unwrap();
     let show_groupby = parsed_args.is_present("show_groupby");
+    let use_cache = parsed_args.is_present("use_cache");
 
     let reader = stocks_reader::StocksReader::new(String::from(stocks_file));
     match reader.read() {
         Ok(mut stocks) => {
-            let count_updated = stocks_update::update_stocks(&mut stocks);
+            let count_updated =
+                if use_cache {
+                    stocks_update::update_stocks_with_cache(&mut stocks)
+                } else {
+                    stocks_update::update_stocks(&mut stocks)
+                };
             if count_updated == stocks.len() {
                 reports::value_report(&stocks, show_groupby);
             }

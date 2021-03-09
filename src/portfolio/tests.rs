@@ -6,6 +6,7 @@ mod tests {
     use crate::portfolio::stock::*;
     use crate::portfolio::algorithms::*;
     use crate::portfolio::stocks_update::*;
+    use crate::portfolio::stocks_cache::*;
 
     #[test]
     fn test_stock() {
@@ -86,6 +87,91 @@ mod tests {
         assert!(update_stock_from_csv(&mut stock, &csv));
         assert!(price_equal(stock.latest_price, 28.25));
         assert_eq!(stock.latest_date, parse_date("2021-02-26").unwrap());
+    }
+
+    #[test]
+    fn test_stock_cache_entry() {
+        let cache_entry = CacheEntry::new(10.25, Local::today());
+        assert_eq!(cache_entry.latest_price, 10.25);
+        assert_eq!(cache_entry.latest_date, Local::today());
+    }
+
+    #[test]
+    fn test_stocks_cache() {
+        let mut cache = StocksCache::new();
+        assert_eq!(cache.size(), 0);
+
+        cache.add(String::from("AAPL"), CacheEntry::new(125.0, Local::today()));
+        assert_eq!(cache.size(), 1);
+
+        match cache.get("AAPL") {
+            Some(entry) => {
+                assert_eq!(entry.latest_price, 125.0);
+                assert_eq!(entry.latest_date, Local::today());
+            },
+            None => { assert!(false); }
+        }
+
+        cache.add(String::from("DELL"), CacheEntry::new(80.0, today_plus_days(-1)));
+        assert_eq!(cache.size(), 2);
+
+        match cache.get_mut("DELL") {
+            Some(entry) => {
+                entry.latest_price = 81.0;
+                entry.latest_date = Local::today();
+            },
+            None => { assert!(false); }
+        }
+
+        match cache.get("DELL") {
+            Some(entry) => {
+                assert_eq!(entry.latest_price, 81.0);
+                assert_eq!(entry.latest_date, Local::today());
+            },
+            None => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn test_stocks_cache_from_csv() {
+        fn test_cache_entry(entry: Option<&CacheEntry>, price: Price, date: &Date<Local>) -> bool {
+            match entry {
+                Some(ce) => price_equal(ce.latest_price, price) && ce.latest_date == *date,
+                None => false
+            }
+        }
+
+        let csv_data = "AAPL,2021-02-26,125.0\n\
+                        DELL,2021-02-26,80.0\n";
+
+        match StocksCache::from_csv(&csv_data) {
+            Ok(cache) => {
+                let date = parse_date("2021-02-26").unwrap();
+                assert_eq!(cache.size(), 2);
+                assert!(test_cache_entry(cache.get("AAPL"), 125.0, &date));
+                assert!(test_cache_entry(cache.get("DELL"), 80.0, &date));
+            },
+            Err(e) => {
+                println!("{}", e);
+                assert!(false);
+            }
+        }
+
+        match StocksCache::from_csv("bad csv data") {
+            Ok(_) => { assert!(false); },
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn test_stocks_cache_from_cache_file() {
+        match StocksCache::from_cache_file() {
+            Ok(_) => {},
+            Err(e) => {
+                println!("{}", e);
+                assert!(false);
+            }
+        }
     }
 
     fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: Price, latest: Price) -> Stock {

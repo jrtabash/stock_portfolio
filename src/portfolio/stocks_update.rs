@@ -1,5 +1,7 @@
+use chrono::Local;
 use crate::sputil::datetime::*;
 use crate::portfolio::stock::*;
+use crate::portfolio::stocks_cache::*;
 use crate::yfinance::query::*;
 use crate::yfinance::types::*;
 
@@ -60,4 +62,44 @@ pub fn update_stocks(stocks: &mut StockList) -> usize {
         }
     }
     count
+}
+
+pub fn update_stocks_with_cache(stocks: &mut StockList) -> usize {
+    let today = Local::today();
+    match StocksCache::from_cache_file() {
+        Ok(mut cache) => {
+            let mut count: usize = 0;
+            for stock in stocks.iter_mut() {
+                match cache.get_mut(&stock.symbol) {
+                    Some(cache_entry) => {
+                        if today == cache_entry.latest_date {
+                            stock.set_latest_price(cache_entry.latest_price, cache_entry.latest_date.clone());
+                            count += 1;
+                        }
+                        else {
+                            if update_stock(stock) {
+                                count += 1;
+                                cache_entry.latest_price = stock.latest_price;
+                                cache_entry.latest_date = stock.latest_date.clone();
+                            }
+                        }
+                    },
+                    None => {
+                        if update_stock(stock) {
+                            count += 1;
+                            cache.add(stock.symbol.to_string(), CacheEntry::new(stock.latest_price, stock.latest_date.clone()));
+                        }
+                    }
+                }
+            }
+            if let Err(error) = StocksCache::save_cache_file(&cache) {
+                println!("Error: Failed to save cache file - {}", error);
+            }
+            count
+        },
+        Err(e) => {
+            println!("Error: {}", e);
+            0
+        }
+    }
 }

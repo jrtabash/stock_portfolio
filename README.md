@@ -15,6 +15,7 @@ USAGE:
 FLAGS:
    -h, --help            Prints help information
    -g, --show-groupby    Show quantities and current notional values grouped by symbol
+   -c, --use-cache       Use local cache to store latest stock prices
    -V, --version         Prints version information
 
 OPTIONS:
