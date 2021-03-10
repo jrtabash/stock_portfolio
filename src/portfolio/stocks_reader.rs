@@ -1,6 +1,7 @@
 use std::io::prelude::*;
 use std::fs::File;
 use std::io::BufReader;
+use std::error::Error;
 
 use crate::sputil::datetime::*;
 use crate::portfolio::stock::*;
@@ -14,24 +15,24 @@ impl StocksReader {
         StocksReader { stocks_file }
     }
 
-    pub fn read(self: &StocksReader) -> Result<StockList, String> {
+    pub fn read(self: &StocksReader) -> Result<StockList, Box<dyn Error>> {
         match File::open(&self.stocks_file) {
             Ok(file) => {
                 let mut reader = BufReader::new(file);
                 let mut content = String::new();
                 match reader.read_to_string(&mut content) {
                     Ok(_) => self.parse_content(&content),
-                    Err(e) => Result::Err(format!("StocksReader::read - {}", e))
+                    Err(e) => Result::Err(format!("StocksReader::read - {}", e).into())
                 }
             },
-            Err(e) => Result::Err(format!("StocksReader::read - {}", e))
+            Err(e) => Result::Err(format!("StocksReader::read - {}", e).into())
         }
     }
 
     // --------------------------------------------------------------------------------
     // Private
 
-    fn parse_content(self: &StocksReader, content: &String) -> Result<StockList, String> {
+    fn parse_content(self: &StocksReader, content: &String) -> Result<StockList, Box<dyn Error>> {
         let mut stocks = StockList::new();
 
         let mut skip_header: bool = true;
@@ -48,7 +49,7 @@ impl StocksReader {
 
             let stock_tokens: Vec<&str> = stock_line.split(",").collect();
             if stock_tokens.len() != 4 {
-                return Result::Err(format!("StocksReadr::parse_content - Invalid stock line '{}'", stock_line))
+                return Result::Err(format!("StocksReadr::parse_content - Invalid stock line '{}'", stock_line).into())
             }
 
             let symbol = String::from(stock_tokens[0]);
@@ -56,12 +57,12 @@ impl StocksReader {
 
             let quantity = match stock_tokens[2].parse::<u32>() {
                 Ok(qty) => qty,
-                Err(e) => return Result::Err(format!("StocksReader::parse_content - Invalid quantity '{}'", e))
+                Err(e) => return Result::Err(format!("StocksReader::parse_content - Invalid quantity '{}'", e).into())
             };
 
             let base_price = match stock_tokens[3].parse::<Price>() {
                 Ok(px) => px,
-                Err(e) => return Result::Err(format!("StocksReader::parse_content - Invalid base_price '{}'", e))
+                Err(e) => return Result::Err(format!("StocksReader::parse_content - Invalid base_price '{}'", e).into())
             };
 
             stocks.push(Stock::new(symbol, date, quantity, base_price));
