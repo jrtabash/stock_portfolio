@@ -9,7 +9,7 @@ use portfolio::{reports, stocks_reader, stocks_update};
 
 fn main() {
     let parsed_args = App::new("Stock Portfolio Tool")
-        .version("0.1.0")
+        .version("0.1.1")
         .about("Get latest close prices and report the gains and losses of stocks in portfolio.")
         .arg(Arg::with_name("stocks_file")
              .short("s")
