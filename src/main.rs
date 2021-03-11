@@ -21,7 +21,7 @@ fn main() {
         .arg(Arg::with_name("order_by")
              .short("o")
              .long("orderby")
-             .help("Order stocks in gains/loses report by order_by field; one of symbol, date or value")
+             .help("Order stocks in gains/loses report by order_by; one of symbol, date or value")
              .takes_value(true))
         .arg(Arg::with_name("show_groupby")
              .short("g")
