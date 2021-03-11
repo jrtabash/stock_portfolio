@@ -4,8 +4,9 @@ mod yfinance;
 
 extern crate clap;
 
+use std::process;
 use clap::{Arg, App};
-use portfolio::{reports, stocks_reader, stocks_update};
+use portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
 
 fn main() {
     let parsed_args = App::new("Stock Portfolio Tool")
@@ -17,6 +18,11 @@ fn main() {
              .help("CSV file containing stocks in portfolio, formatted as 'symbol,date,quantity,base_price' including a header line")
              .required(true)
              .takes_value(true))
+        .arg(Arg::with_name("order_by")
+             .short("o")
+             .long("orderby")
+             .help("Order stocks in gains/loses report by order_by field; one of symbol, date or value")
+             .takes_value(true))
         .arg(Arg::with_name("show_groupby")
              .short("g")
              .long("show-groupby")
@@ -25,28 +31,64 @@ fn main() {
              .short("c")
              .long("use-cache")
              .help("Use local cache to store latest stock prices"))
+        .arg(Arg::with_name("desc")
+             .short("d")
+             .long("desc")
+             .help("Used with order by option to sort in descending order"))
         .get_matches();
 
     let stocks_file = parsed_args.value_of("stocks_file").unwrap();
     let show_groupby = parsed_args.is_present("show_groupby");
     let use_cache = parsed_args.is_present("use_cache");
+    let order_by = parsed_args.value_of("order_by");
+    let desc = parsed_args.is_present("desc");
 
     let reader = stocks_reader::StocksReader::new(String::from(stocks_file));
     match reader.read() {
         Ok(mut stocks) => {
-            let count_updated =
-                if use_cache {
-                    stocks_update::update_stocks_with_cache(&mut stocks)
-                } else {
-                    stocks_update::update_stocks(&mut stocks)
-                };
-            if count_updated == stocks.len() {
-                reports::value_report(&stocks, show_groupby);
+            if !update(&mut stocks, use_cache) {
+                process::exit(1);
             }
-            else {
-                println!("update_stocks failed; updated={} expected={}", count_updated, stocks.len());
+
+            if !sort(&mut stocks, order_by, desc) {
+                process::exit(1);
             }
+
+            reports::value_report(&stocks, show_groupby);
         }
-        Err(e) => println!("{}", e)
+        Err(e) => {
+            println!("{}", e);
+            process::exit(1);
+        }
+    }
+}
+
+fn update(stocks: &mut stock::StockList, use_cache: bool) -> bool {
+    let count =
+        if use_cache {
+            stocks_update::update_stocks_with_cache(stocks)
+        } else {
+            stocks_update::update_stocks(stocks)
+        };
+
+    let success = count == stocks.len();
+    if !success {
+        println!("update_stocks failed; updated={} expected={}", count, stocks.len());
+    }
+    success
+}
+
+fn sort(stocks: &mut stock::StockList, opt_order_by: Option<&str>, desc: bool) -> bool {
+    match opt_order_by {
+        Some(order_by) => {
+            match algorithms::sort_stocks(stocks, &order_by, desc) {
+                Ok(_) => true,
+                Err(error) => {
+                    println!("Error: {}", error);
+                    false
+                }
+            }
+        },
+        None => true
     }
 }

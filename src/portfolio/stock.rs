@@ -2,8 +2,9 @@ use std::fmt;
 use chrono::{Date, Local};
 
 use crate::sputil::datetime::*;
+use crate::sputil::price_type::*;
 
-pub type Price = f64;
+pub type Price = PriceType;
 
 pub struct Stock {
     pub symbol: String,            // Ticker

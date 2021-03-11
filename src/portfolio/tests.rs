@@ -174,6 +174,36 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_sort_stocks() {
+        fn test_sort(stocks: &mut StockList, field: &str, desc: bool, first: &str, second: &str, third: &str) {
+            if let Err(e) = sort_stocks(stocks, field, desc) {
+                println!("{}", e);
+                assert!(false);
+            }
+            assert_eq!(&stocks[0].symbol, first);
+            assert_eq!(&stocks[1].symbol, second);
+            assert_eq!(&stocks[2].symbol, third);
+        }
+
+        let mut list = StockList::new();
+        list.push(make_stock("DELL", today_plus_days(-2), 100, 79.21, 79.71));
+        list.push(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
+        list.push(make_stock("ICLN", today_plus_days(0), 100, 24.10, 24.12));
+
+        let asc = false;
+        let desc = true;
+
+        test_sort(&mut list, "symbol", asc, "AAPL", "DELL", "ICLN");
+        test_sort(&mut list, "symbol", desc, "ICLN", "DELL", "AAPL");
+
+        test_sort(&mut list, "date", asc, "AAPL", "DELL", "ICLN");
+        test_sort(&mut list, "date", desc, "ICLN", "DELL", "AAPL");
+
+        test_sort(&mut list, "value", desc, "AAPL", "DELL", "ICLN");
+        test_sort(&mut list, "value", asc, "ICLN", "DELL", "AAPL");
+    }
+
     fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: Price, latest: Price) -> Stock {
         let symbol = String::from(sym);
         let mut stock = Stock::new(symbol, date, qty, base);
