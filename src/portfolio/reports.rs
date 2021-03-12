@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use chrono::Local;
 
 use crate::portfolio::stock::*;
@@ -53,8 +54,16 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
         println!("");
         println!("{:8} {:8} {:12}", "GroupBy", "Size", "Cur Value");
         println!("{:8} {:8} {:12}", "-------", "----", "---------");
-        for (symbol, size_value) in stock_groupby(&stocks).iter() {
-            println!("{:8} {:8} {:12.2}", symbol, size_value.0, size_value.1);
+
+        let groupby = stock_groupby(&stocks);
+
+        let mut seen = HashSet::new();
+        for stock in stocks.iter() {
+            if seen.contains(&stock.symbol) { continue; }
+            seen.insert(&stock.symbol);
+
+            let size_value = groupby.get(&stock.symbol).unwrap();
+            println!("{:8} {:8} {:12.2}", stock.symbol, size_value.0, size_value.1);
         }
     }
 }
