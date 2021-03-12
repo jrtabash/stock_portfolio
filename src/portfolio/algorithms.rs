@@ -28,12 +28,15 @@ pub fn stock_groupby(stocks: &StockList) -> HashMap<String, (u32, Price)> {
 
 pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result<(), Box<dyn Error>> {
     match (order_by, desc) {
-        ("symbol", false) => { stocks.sort_by(|a, b| a.symbol.cmp(&b.symbol)); Ok(()) },
-        ("symbol", true) => { stocks.sort_by(|a, b| b.symbol.cmp(&a.symbol)); Ok(()) },
-        ("date", false) => { stocks.sort_by(|a, b| a.date.cmp(&b.date)); Ok(()) },
-        ("date", true) => { stocks.sort_by(|a, b| b.date.cmp(&a.date)); Ok(()) },
-        ("value", false) => { stocks.sort_by(|a, b| price_cmp(a.latest_notional(), b.latest_notional())); Ok(()) },
-        ("value", true) => { stocks.sort_by(|a, b| price_cmp(b.latest_notional(), a.latest_notional())); Ok(()) },
+        ("symbol", false) => { stocks.sort_by(|lhs, rhs| lhs.symbol.cmp(&rhs.symbol)); Ok(()) },
+        ("symbol", true)  => { stocks.sort_by(|lhs, rhs| rhs.symbol.cmp(&lhs.symbol)); Ok(()) },
+
+        ("date", false) => { stocks.sort_by(|lhs, rhs| lhs.date.cmp(&rhs.date)); Ok(()) },
+        ("date", true)  => { stocks.sort_by(|lhs, rhs| rhs.date.cmp(&lhs.date)); Ok(()) },
+
+        ("value", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.latest_notional(), rhs.latest_notional())); Ok(()) },
+        ("value", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.latest_notional(), lhs.latest_notional())); Ok(()) },
+
         _ => Result::Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }
 }
