@@ -5,6 +5,7 @@ mod yfinance;
 extern crate clap;
 
 use std::process;
+use std::collections::HashSet;
 use clap::{Arg, App};
 use portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
 
@@ -22,6 +23,11 @@ fn main() {
              .short("o")
              .long("orderby")
              .help("Order stocks by one of symbol, date or value")
+             .takes_value(true))
+        .arg(Arg::with_name("filter")
+             .short("f")
+             .long("filter")
+             .help("Filter stocks by specified symbols; Comma separated list of symbols.")
              .takes_value(true))
         .arg(Arg::with_name("show_groupby")
              .short("g")
@@ -42,10 +48,15 @@ fn main() {
     let use_cache = parsed_args.is_present("use_cache");
     let order_by = parsed_args.value_of("order_by");
     let desc = parsed_args.is_present("desc");
+    let symbols_filter = parsed_args.value_of("filter");
 
     let reader = stocks_reader::StocksReader::new(String::from(stocks_file));
     match reader.read() {
         Ok(mut stocks) => {
+            if !filter(&mut stocks, symbols_filter) {
+                process::exit(1);
+            }
+
             if !update(&mut stocks, use_cache) {
                 process::exit(1);
             }
@@ -60,6 +71,17 @@ fn main() {
             println!("{}", e);
             process::exit(1);
         }
+    }
+}
+
+fn filter(stocks: &mut stock::StockList, opt_symbols: Option<&str>) -> bool {
+    match opt_symbols {
+        Some(symbols) => {
+            let symbol_set: HashSet<&str> = symbols.split(',').map(|name| name.trim()).collect();
+            stocks.retain(|stock| symbol_set.contains(stock.symbol.as_str()));
+            true
+        },
+        None => true
     }
 }
 
