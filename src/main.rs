@@ -27,7 +27,7 @@ fn main() {
         .arg(Arg::with_name("filter")
              .short("f")
              .long("filter")
-             .help("Filter stocks by specified symbols; Comma separated list of symbols.")
+             .help("Filter stocks by specified symbols; Comma separated list of symbols")
              .takes_value(true))
         .arg(Arg::with_name("show_groupby")
              .short("g")
