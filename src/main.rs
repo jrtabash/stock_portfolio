@@ -1,9 +1,4 @@
-mod application;
-mod portfolio;
-mod sputil;
-mod yfinance;
-
-use application::application::Application;
+use stock_portfolio::application::Application;
 
 fn main() {
     let mut app = Application::new();
