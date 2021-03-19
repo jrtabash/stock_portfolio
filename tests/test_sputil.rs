@@ -2,8 +2,8 @@
 mod tests {
     use std::cmp::Ordering;
     use chrono::{TimeZone, Local, Duration, Date, Datelike};
-    use crate::sputil::datetime::*;
-    use crate::sputil::price_type::*;
+    use stock_portfolio::sputil::datetime::*;
+    use stock_portfolio::sputil::price_type::*;
 
     #[test]
     fn test_date2timestamp() {

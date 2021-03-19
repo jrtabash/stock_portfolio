@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
     use chrono::TimeZone;
-    use crate::yfinance::types::*;
-    use crate::yfinance::query::*;
+    use stock_portfolio::yfinance::types::*;
+    use stock_portfolio::yfinance::query::*;
 
     #[test]
     fn test_events() {

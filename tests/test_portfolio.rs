@@ -2,11 +2,11 @@
 mod tests {
     use std::collections::HashMap;
     use chrono::{Date, Local};
-    use crate::sputil::datetime::*;
-    use crate::portfolio::stock::*;
-    use crate::portfolio::algorithms::*;
-    use crate::portfolio::stocks_update::*;
-    use crate::portfolio::stocks_cache::*;
+    use stock_portfolio::sputil::datetime::*;
+    use stock_portfolio::portfolio::stock::*;
+    use stock_portfolio::portfolio::algorithms::*;
+    use stock_portfolio::portfolio::stocks_update::*;
+    use stock_portfolio::portfolio::stocks_cache::*;
 
     #[test]
     fn test_stock() {
