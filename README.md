@@ -20,6 +20,7 @@ FLAGS:
    -V, --version         Prints version information
 
 OPTIONS:
+   -e, --export <export>         Export gains and losses table to a csv file
    -f, --filter <filter>         Filter stocks by specified symbols; Comma separated list of symbols
    -o, --orderby <order_by>      Order stocks by one of symbol, date or value
    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
