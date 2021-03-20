@@ -1,4 +1,7 @@
+use std::io::prelude::*;
 use std::collections::HashSet;
+use std::error::Error;
+use std::fs::File;
 use chrono::Local;
 
 use crate::portfolio::stock::*;
@@ -66,4 +69,23 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
             println!("{:8} {:8} {:12.2}", stock.symbol, size_value.0, size_value.1);
         }
     }
+}
+
+pub fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
+    let mut file = File::create(&filename)?;
+    write!(file, "Ticker,Buy Date,Upd Date,Size,Base,Cur,Net,Base Value,Cur Value,Net Value\n")?;
+    for stock in stocks.iter() {
+        write!(file, "{},{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2}\n",
+               stock.symbol,
+               stock.date.format("%Y-%m-%d"),
+               stock.latest_date.format("%Y-%m-%d"),
+               stock.quantity,
+               stock.base_price,
+               stock.latest_price,
+               stock.net_price(),
+               stock.base_notional(),
+               stock.latest_notional(),
+               stock.net_notional())?;
+    }
+    Ok(())
 }

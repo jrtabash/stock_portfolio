@@ -1,12 +1,15 @@
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
+    use std::env;
+    use std::fs;
     use chrono::{Date, Local};
     use stock_portfolio::sputil::datetime::*;
     use stock_portfolio::portfolio::stock::*;
     use stock_portfolio::portfolio::algorithms::*;
     use stock_portfolio::portfolio::stocks_update::*;
     use stock_portfolio::portfolio::stocks_cache::*;
+    use stock_portfolio::portfolio::reports::value_export;
 
     #[test]
     fn test_stock() {
@@ -16,7 +19,7 @@ mod tests {
         assert_eq!(stock.quantity, 100);
         assert!(price_equal(stock.base_price, 120.25));
         assert!(price_equal(stock.latest_price, 129.50));
-        assert_eq!(stock.latest_date, today_plus_days(-1));
+        assert_eq!(stock.latest_date, today_plus_days(0));
         assert!(price_equal(stock.net_price(), 9.25));
         assert!(price_equal(stock.base_notional(), 12025.0));
         assert!(price_equal(stock.latest_notional(), 12950.0));
@@ -204,14 +207,50 @@ mod tests {
         test_sort(&mut list, "value", asc, "ICLN", "DELL", "AAPL");
     }
 
+    #[test]
+    fn test_value_export() {
+        let mut list = StockList::new();
+        list.push(make_stock("DELL", today_plus_days(-2), 100, 75.50, 80.0));
+        list.push(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
+        list.push(make_stock("ICLN", today_plus_days(0), 100, 24.10, 24.15));
+
+        let csv_filename = make_temp_file("sp_test_value_export.csv");
+        value_export(&list, &csv_filename).unwrap();
+
+        let csv_content = fs::read_to_string(&csv_filename).unwrap();
+        let today_str = today_plus_days(0).format("%Y-%m-%d");
+        let expected = format!("Ticker,Buy Date,Upd Date,Size,Base,Cur,Net,Base Value,Cur Value,Net Value\n\
+                                DELL,{},{},100,75.50,80.00,4.50,7550.00,8000.00,450.00\n\
+                                AAPL,{},{},100,120.25,125.25,5.00,12025.00,12525.00,500.00\n\
+                                ICLN,{},{},100,24.10,24.15,0.05,2410.00,2415.00,5.00\n",
+                               today_plus_days(-2).format("%Y-%m-%d"),
+                               today_str,
+                               today_plus_days(-3).format("%Y-%m-%d"),
+                               today_str,
+                               today_str,
+                               today_str);
+        assert_eq!(csv_content, expected);
+
+        fs::remove_file(&csv_filename).unwrap();
+    }
+
+    // --------------------------------------------------------------------------------
+    // Helpers
+
     fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: Price, latest: Price) -> Stock {
         let symbol = String::from(sym);
         let mut stock = Stock::new(symbol, date, qty, base);
-        stock.set_latest_price(latest, today_plus_days(-1));
+        stock.set_latest_price(latest, today_plus_days(0));
         stock
     }
 
     fn price_equal(lhs: Price, rhs: Price) -> bool {
         format!("{:.2}", lhs) == format!("{:.2}", rhs)
+    }
+
+    fn make_temp_file(filename: &str) -> String {
+        let mut pbuf = env::temp_dir();
+        pbuf.push(filename);
+        format!("{}", pbuf.to_str().unwrap())
     }
 }

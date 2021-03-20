@@ -6,6 +6,7 @@ pub struct Arguments {
     stocks_file: String,
     order_by: Option<String>,
     filter: Option<String>,
+    export: Option<String>,
     use_cache: bool,
     show_groupby: bool,
     desc: bool
@@ -32,6 +33,11 @@ impl Arguments {
                  .long("filter")
                  .help("Filter stocks by specified symbols; Comma separated list of symbols")
                  .takes_value(true))
+            .arg(Arg::with_name("export")
+                 .short("e")
+                 .long("export")
+                 .help("Export gains and losses table to a csv file")
+                 .takes_value(true))
             .arg(Arg::with_name("show_groupby")
                  .short("g")
                  .long("show-groupby")
@@ -55,11 +61,15 @@ impl Arguments {
             Some(value) => Some(String::from(value)),
             None => None
         };
+        let export = match parsed_args.value_of("export") {
+            Some(value) => Some(String::from(value)),
+            None => None
+        };
         let use_cache = parsed_args.is_present("use_cache");
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");
 
-        Arguments { stocks_file, order_by, filter, use_cache, show_groupby, desc }
+        Arguments { stocks_file, order_by, filter, export, use_cache, show_groupby, desc }
     }
 
     pub fn get_stocks_file(self: &Arguments) -> &String {
@@ -75,6 +85,13 @@ impl Arguments {
 
     pub fn get_filter(self: &Arguments) -> Option<&String> {
         match &self.filter {
+            Some(value) => Some(&value),
+            None => None
+        }
+    }
+
+    pub fn get_export(self: &Arguments) -> Option<&String> {
+        match &self.export {
             Some(value) => Some(&value),
             None => None
         }

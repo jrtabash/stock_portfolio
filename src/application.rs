@@ -15,7 +15,7 @@ impl Application {
     }
 
     pub fn run(self: &mut Application) -> bool {
-        self.read() && self.filter() && self.update() && self.sort() && self.report()
+        self.read() && self.filter() && self.update() && self.sort() && self.report() && self.export()
     }
 
     // --------------------------------------------------------------------------------
@@ -70,6 +70,16 @@ impl Application {
 
     fn report(self: &Application) -> bool {
         reports::value_report(&self.stocks, self.args.get_show_groupby());
+        true
+    }
+
+    fn export(self: &Application) -> bool {
+        if let Some(export_file) = self.args.get_export() {
+            if let Err(error) = reports::value_export(&self.stocks, &export_file) {
+                println!("Error: {}", error);
+                return false
+            }
+        }
         true
     }
 }
