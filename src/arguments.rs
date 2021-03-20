@@ -77,24 +77,15 @@ impl Arguments {
     }
 
     pub fn get_order_by(self: &Arguments) -> Option<&String> {
-        match &self.order_by {
-            Some(value) => Some(&value),
-            None => None
-        }
+        self.order_by.as_ref()
     }
 
     pub fn get_filter(self: &Arguments) -> Option<&String> {
-        match &self.filter {
-            Some(value) => Some(&value),
-            None => None
-        }
+        self.filter.as_ref()
     }
 
     pub fn get_export(self: &Arguments) -> Option<&String> {
-        match &self.export {
-            Some(value) => Some(&value),
-            None => None
-        }
+        self.export.as_ref()
     }
 
     pub fn get_use_cache(self: &Arguments) -> bool {
