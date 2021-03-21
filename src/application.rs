@@ -74,7 +74,7 @@ impl Application {
     }
 
     fn export(self: &Application) -> bool {
-        if let Some(export_file) = self.args.get_export() {
+        if let Some(export_file) = self.args.get_export_file() {
             if let Err(error) = reports::value_export(&self.stocks, &export_file) {
                 println!("Error: {}", error);
                 return false
