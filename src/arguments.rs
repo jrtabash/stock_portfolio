@@ -26,7 +26,7 @@ impl Arguments {
             .arg(Arg::with_name("order_by")
                  .short("o")
                  .long("orderby")
-                 .help("Order stocks by one of symbol, date or value")
+                 .help("Order stocks by one of symbol, date, price, net, size or value")
                  .takes_value(true))
             .arg(Arg::with_name("filter")
                  .short("f")

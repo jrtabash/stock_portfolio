@@ -22,7 +22,7 @@ FLAGS:
 OPTIONS:
    -e, --export <export_file>    Export gains and losses table to a csv file
    -f, --filter <filter>         Filter stocks by specified symbols; Comma separated list of symbols
-   -o, --orderby <order_by>      Order stocks by one of symbol, date or value
+   -o, --orderby <order_by>      Order stocks by one of symbol, date, price, net, size or value
    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                  'symbol,date,quantity,base_price' including a header line
 ```

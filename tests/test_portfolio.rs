@@ -191,8 +191,8 @@ mod tests {
 
         let mut list = StockList::new();
         list.push(make_stock("DELL", today_plus_days(-2), 100, 79.21, 79.71));
-        list.push(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
-        list.push(make_stock("ICLN", today_plus_days(0), 100, 24.10, 24.12));
+        list.push(make_stock("AAPL", today_plus_days(-3), 200, 120.25, 125.25));
+        list.push(make_stock("ICLN", today_plus_days(0), 300, 24.10, 24.12));
 
         let asc = false;
         let desc = true;
@@ -205,6 +205,15 @@ mod tests {
 
         test_sort(&mut list, "value", desc, "AAPL", "DELL", "ICLN");
         test_sort(&mut list, "value", asc, "ICLN", "DELL", "AAPL");
+
+        test_sort(&mut list, "price", desc, "AAPL", "DELL", "ICLN");
+        test_sort(&mut list, "price", asc, "ICLN", "DELL", "AAPL");
+
+        test_sort(&mut list, "net", desc, "AAPL", "DELL", "ICLN");
+        test_sort(&mut list, "net", asc, "ICLN", "DELL", "AAPL");
+
+        test_sort(&mut list, "size", asc, "DELL", "AAPL", "ICLN");
+        test_sort(&mut list, "size", desc, "ICLN", "AAPL", "DELL");
     }
 
     #[test]

@@ -37,6 +37,15 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("value", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.latest_notional(), rhs.latest_notional())); Ok(()) },
         ("value", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.latest_notional(), lhs.latest_notional())); Ok(()) },
 
+        ("price", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.latest_price, rhs.latest_price)); Ok(()) },
+        ("price", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.latest_price, lhs.latest_price)); Ok(()) },
+
+        ("net", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.net_price(), rhs.net_price())); Ok(()) },
+        ("net", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.net_price(), lhs.net_price())); Ok(()) },
+
+        ("size", false) => { stocks.sort_by(|lhs, rhs| lhs.quantity.cmp(&rhs.quantity)); Ok(()) },
+        ("size", true)  => { stocks.sort_by(|lhs, rhs| rhs.quantity.cmp(&lhs.quantity)); Ok(()) },
+
         _ => Result::Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }
 }
