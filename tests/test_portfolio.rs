@@ -99,6 +99,28 @@ mod tests {
     }
 
     #[test]
+    fn test_stock_cache_entry_is_updated() {
+        let thu = make_date(2021, 3, 18);
+        let fri = make_date(2021, 3, 19);
+        let sat = make_date(2021, 3, 20);
+        let sun = make_date(2021, 3, 21);
+        let mon = make_date(2021, 3, 22);
+
+        let mut cache_entry = CacheEntry::new(10.25, thu);
+        assert!(cache_entry.is_updated(&thu));
+        assert!(!cache_entry.is_updated(&fri));
+
+        cache_entry.latest_date = fri.clone();
+        assert!(cache_entry.is_updated(&fri));
+        assert!(cache_entry.is_updated(&sat));
+        assert!(cache_entry.is_updated(&sun));
+        assert!(!cache_entry.is_updated(&mon));
+
+        cache_entry.latest_date = mon.clone();
+        assert!(cache_entry.is_updated(&mon));
+    }
+
+    #[test]
     fn test_stocks_cache() {
         let mut cache = StocksCache::new();
         assert_eq!(cache.size(), 0);

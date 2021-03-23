@@ -67,6 +67,30 @@ mod tests {
     }
 
     #[test]
+    fn test_is_friday() {
+        let thu = make_date(2021, 3, 18);
+        let fri = make_date(2021, 3, 19);
+        let sat = make_date(2021, 3, 20);
+
+        assert!(!is_friday(&thu));
+        assert!(is_friday(&fri));
+        assert!(!is_friday(&sat));
+    }
+
+    #[test]
+    fn test_is_weekend() {
+        let fri = make_date(2021, 3, 19);
+        let sat = make_date(2021, 3, 20);
+        let sun = make_date(2021, 3, 21);
+        let mon = make_date(2021, 3, 22);
+
+        assert!(!is_weekend(&fri));
+        assert!(is_weekend(&sat));
+        assert!(is_weekend(&sun));
+        assert!(!is_weekend(&mon));
+    }
+
+    #[test]
     fn test_price_type_price_cmp() {
         assert_eq!(price_cmp(10.50, 1.0), Ordering::Greater);
         assert_eq!(price_cmp(1.0, 10.50), Ordering::Less);

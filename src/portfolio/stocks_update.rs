@@ -71,7 +71,7 @@ pub fn update_stocks_with_cache(stocks: &mut StockList) -> usize {
             for stock in stocks.iter_mut() {
                 match cache.get_mut(&stock.symbol) {
                     Some(cache_entry) => {
-                        if today == cache_entry.latest_date {
+                        if cache_entry.is_updated(&today) {
                             stock.set_latest_price(cache_entry.latest_price, cache_entry.latest_date.clone());
                             count += 1;
                         }

@@ -6,7 +6,8 @@ use std::fs::File;
 use std::io::{BufReader, ErrorKind};
 use std::collections::HashMap;
 
-use crate::sputil::datetime::*;
+use crate::sputil::datetime;
+use crate::sputil::datetime::LocalDate;
 use crate::portfolio::stock::Price;
 
 // --------------------------------------------------------------------------------
@@ -20,6 +21,11 @@ pub struct CacheEntry {
 impl CacheEntry {
     pub fn new(latest_price: Price, latest_date: LocalDate) -> CacheEntry {
         CacheEntry { latest_price, latest_date }
+    }
+
+    #[inline(always)]
+    pub fn is_updated(self: &CacheEntry, today: &LocalDate) -> bool {
+        self.latest_date.eq(today) || (datetime::is_friday(&self.latest_date) && datetime::is_weekend(&today))
     }
 }
 
@@ -38,20 +44,24 @@ impl StocksCache {
         StocksCache { table }
     }
 
+    #[inline(always)]
     pub fn add(self: &mut StocksCache, symbol: String, entry: CacheEntry) {
         self.table.insert(symbol, entry);
     }
 
     #[allow(dead_code)]
+    #[inline(always)]
     pub fn get(self: &StocksCache, symbol: &str) -> Option<&CacheEntry> {
         self.table.get(symbol)
     }
 
+    #[inline(always)]
     pub fn get_mut(self: &mut StocksCache, symbol: &str) -> Option<&mut CacheEntry> {
         self.table.get_mut(symbol)
     }
 
     #[allow(dead_code)]
+    #[inline(always)]
     pub fn size(self: &StocksCache) -> usize {
         self.table.len()
     }
@@ -85,7 +95,7 @@ impl StocksCache {
             }
 
             let symbol = String::from(cache_tokens[0]);
-            let date = parse_date(&cache_tokens[1])?;
+            let date = datetime::parse_date(&cache_tokens[1])?;
             let price = cache_tokens[2].parse::<Price>()?;
             cache.add(symbol, CacheEntry::new(price, date));
         }
