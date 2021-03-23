@@ -22,7 +22,7 @@ impl Application {
     // Private
 
     fn read(self: &mut Application) -> bool {
-        let reader = stocks_reader::StocksReader::new(String::from(self.args.get_stocks_file()));
+        let reader = stocks_reader::StocksReader::new(String::from(self.args.stocks_file()));
         match reader.read() {
             Ok(stocks) => {
                 self.stocks = stocks;
@@ -36,7 +36,7 @@ impl Application {
     }
 
     fn filter(self: &mut Application) -> bool {
-        if let Some(symbols) = self.args.get_filter() {
+        if let Some(symbols) = self.args.filter() {
             let symbol_set: HashSet<&str> = symbols.split(',').map(|name| name.trim()).collect();
             self.stocks.retain(|stock| symbol_set.contains(stock.symbol.as_str()));
         }
@@ -45,7 +45,7 @@ impl Application {
 
     fn update(self: &mut Application) -> bool {
         let count =
-            if self.args.get_use_cache() {
+            if self.args.use_cache() {
                 stocks_update::update_stocks_with_cache(&mut self.stocks)
             } else {
                 stocks_update::update_stocks(&mut self.stocks)
@@ -59,8 +59,8 @@ impl Application {
     }
 
     fn sort(self: &mut Application) -> bool {
-        if let Some(order_by) = self.args.get_order_by() {
-            if let Err(error) = algorithms::sort_stocks(&mut self.stocks, &order_by, self.args.get_desc()) {
+        if let Some(order_by) = self.args.order_by() {
+            if let Err(error) = algorithms::sort_stocks(&mut self.stocks, &order_by, self.args.desc()) {
                 println!("Error: {}", error);
                 return false
             }
@@ -69,12 +69,12 @@ impl Application {
     }
 
     fn report(self: &Application) -> bool {
-        reports::value_report(&self.stocks, self.args.get_show_groupby());
+        reports::value_report(&self.stocks, self.args.show_groupby());
         true
     }
 
     fn export(self: &Application) -> bool {
-        if let Some(export_file) = self.args.get_export_file() {
+        if let Some(export_file) = self.args.export_file() {
             if let Err(error) = reports::value_export(&self.stocks, &export_file) {
                 println!("Error: {}", error);
                 return false

@@ -72,31 +72,31 @@ impl Arguments {
         Arguments { stocks_file, order_by, filter, export_file, use_cache, show_groupby, desc }
     }
 
-    pub fn get_stocks_file(self: &Arguments) -> &String {
+    pub fn stocks_file(self: &Arguments) -> &String {
         &self.stocks_file
     }
 
-    pub fn get_order_by(self: &Arguments) -> Option<&String> {
+    pub fn order_by(self: &Arguments) -> Option<&String> {
         self.order_by.as_ref()
     }
 
-    pub fn get_filter(self: &Arguments) -> Option<&String> {
+    pub fn filter(self: &Arguments) -> Option<&String> {
         self.filter.as_ref()
     }
 
-    pub fn get_export_file(self: &Arguments) -> Option<&String> {
+    pub fn export_file(self: &Arguments) -> Option<&String> {
         self.export_file.as_ref()
     }
 
-    pub fn get_use_cache(self: &Arguments) -> bool {
+    pub fn use_cache(self: &Arguments) -> bool {
         self.use_cache
     }
 
-    pub fn get_show_groupby(self: &Arguments) -> bool {
+    pub fn show_groupby(self: &Arguments) -> bool {
         self.show_groupby
     }
 
-    pub fn get_desc(self: &Arguments) -> bool {
+    pub fn desc(self: &Arguments) -> bool {
         self.desc
     }
 }
