@@ -1,9 +1,23 @@
 #[cfg(test)]
 mod tests {
     use std::cmp::Ordering;
-    use chrono::{Duration, Datelike};
+    use chrono::{Duration, Datelike, Local};
     use stock_portfolio::sputil::datetime::*;
     use stock_portfolio::sputil::price_type::*;
+
+    #[test]
+    fn test_today() {
+        let date = today();
+        assert_eq!(date, Local::today());
+    }
+
+    #[test]
+    fn test_make_date() {
+        let date = make_date(2021, 2, 17);
+        assert_eq!(date.year(), 2021);
+        assert_eq!(date.month(), 2);
+        assert_eq!(date.day(), 17);
+    }
 
     #[test]
     fn test_date2timestamp() {
@@ -42,6 +56,14 @@ mod tests {
         test(today_plus_days(1));
         test(today_plus_days(-30));
         test(today_plus_days(30));
+    }
+
+    #[test]
+    fn test_parse_date_error() {
+        match parse_date("20211701") {
+            Ok(_) => assert!(false),
+            Err(error) => assert!(format!("{}", error).starts_with("parse_date: "))
+        }
     }
 
     #[test]
