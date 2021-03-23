@@ -1,19 +1,19 @@
 #[cfg(test)]
 mod tests {
     use std::cmp::Ordering;
-    use chrono::{TimeZone, Local, Duration, Date, Datelike};
+    use chrono::{Duration, Datelike};
     use stock_portfolio::sputil::datetime::*;
     use stock_portfolio::sputil::price_type::*;
 
     #[test]
     fn test_date2timestamp() {
-        let date = chrono::Local.ymd(2021, 2, 17);
+        let date = make_date(2021, 2, 17);
         assert_eq!(date2timestamp(&date), 1613541600);
     }
 
     #[test]
     fn test_today_plus_delta() {
-        let today = Local::today();
+        let today = today();
         assert_eq!(today_plus_days(0), today);
         assert_eq!(today_plus_days(1), today + Duration::days(1));
         assert_eq!(today_plus_days(-1), today + Duration::days(-1));
@@ -29,7 +29,7 @@ mod tests {
 
     #[test]
     fn test_parse_date() {
-        fn test(date: Date<Local>) {
+        fn test(date: LocalDate) {
             let date_str = format!("{:04}-{:02}-{:02}", date.year(), date.month(), date.day());
             match parse_date(&date_str) {
                 Ok(dt) => assert_eq!(dt, date),
@@ -37,7 +37,7 @@ mod tests {
             }
         }
 
-        test(Local::today());
+        test(today());
         test(today_plus_days(-1));
         test(today_plus_days(1));
         test(today_plus_days(-30));

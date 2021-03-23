@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use chrono::TimeZone;
+    use stock_portfolio::sputil::datetime;
     use stock_portfolio::yfinance::types::*;
     use stock_portfolio::yfinance::query::*;
 
@@ -20,8 +20,8 @@ mod tests {
 
     #[test]
     fn test_history_query() {
-        let start = chrono::Local.ymd(2021, 2, 11);
-        let end = chrono::Local.ymd(2021, 2, 13);
+        let start = datetime::make_date(2021, 2, 11);
+        let end = datetime::make_date(2021, 2, 13);
         let mut query = HistoryQuery::new(String::from("AAPL"), start, end, Interval::Daily, Events::History);
 
         assert!(query.execute());

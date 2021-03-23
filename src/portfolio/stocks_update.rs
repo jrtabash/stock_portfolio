@@ -1,4 +1,3 @@
-use chrono::Local;
 use crate::sputil::datetime::*;
 use crate::portfolio::stock::*;
 use crate::portfolio::stocks_cache::*;
@@ -65,7 +64,7 @@ pub fn update_stocks(stocks: &mut StockList) -> usize {
 }
 
 pub fn update_stocks_with_cache(stocks: &mut StockList) -> usize {
-    let today = Local::today();
+    let today = today();
     match StocksCache::from_cache_file() {
         Ok(mut cache) => {
             let mut count: usize = 0;

@@ -5,7 +5,6 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{BufReader, ErrorKind};
 use std::collections::HashMap;
-use chrono::{Date, Local};
 
 use crate::sputil::datetime::*;
 use crate::portfolio::stock::Price;
@@ -15,11 +14,11 @@ use crate::portfolio::stock::Price;
 
 pub struct CacheEntry {
     pub latest_price: Price,
-    pub latest_date: Date<Local>
+    pub latest_date: LocalDate
 }
 
 impl CacheEntry {
-    pub fn new(latest_price: Price, latest_date: Date<Local>) -> CacheEntry {
+    pub fn new(latest_price: Price, latest_date: LocalDate) -> CacheEntry {
         CacheEntry { latest_price, latest_date }
     }
 }

@@ -2,15 +2,15 @@ use std::io::prelude::*;
 use std::collections::HashSet;
 use std::error::Error;
 use std::fs::File;
-use chrono::Local;
 
+use crate::sputil::datetime;
 use crate::portfolio::stock::*;
 use crate::portfolio::algorithms::*;
 
 pub fn value_report(stocks: &StockList, groupby: bool) {
     println!("Stocks Value Report");
     println!("-------------------");
-    println!("            Date: {}", Local::today().format("%Y-%m-%d"));
+    println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
     println!("Number of Stocks: {}", stocks.len());
     println!("      Base Value: {:.2}", base_notional(&stocks));
     println!("    Latest Value: {:.2}", latest_notional(&stocks));

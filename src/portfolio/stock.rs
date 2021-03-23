@@ -1,5 +1,4 @@
 use std::fmt;
-use chrono::{Date, Local};
 
 use crate::sputil::datetime::*;
 use crate::sputil::price_type::*;
@@ -7,19 +6,19 @@ use crate::sputil::price_type::*;
 pub type Price = PriceType;
 
 pub struct Stock {
-    pub symbol: String,            // Ticker
-    pub date: Date<Local>,         // Buy Date
-    pub quantity: u32,             // Buy Quantity
-    pub base_price: Price,         // Buy Price
-    pub latest_price: Price,       // Latest Price
-    pub latest_date: Date<Local>   // Latest Date
+    pub symbol: String,          // Ticker
+    pub date: LocalDate,         // Buy Date
+    pub quantity: u32,           // Buy Quantity
+    pub base_price: Price,       // Buy Price
+    pub latest_price: Price,     // Latest Price
+    pub latest_date: LocalDate   // Latest Date
 }
 
 pub type StockList = Vec<Stock>;
 
 impl Stock {
     pub fn new(symbol: String,
-               date: Date<Local>,
+               date: LocalDate,
                quantity: u32,
                base_price: Price) -> Stock {
         let latest_price: Price = 0.0;
@@ -27,7 +26,7 @@ impl Stock {
         Stock { symbol, date, quantity, base_price, latest_price, latest_date }
     }
 
-    pub fn set_latest_price(self: &mut Stock, price: Price, date: Date<Local>) {
+    pub fn set_latest_price(self: &mut Stock, price: Price, date: LocalDate) {
         self.latest_price = price;
         self.latest_date = date;
     }

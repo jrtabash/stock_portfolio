@@ -1,5 +1,4 @@
 use std::str;
-use chrono::{Date, Local};
 use curl;
 use curl::easy;
 
@@ -11,8 +10,8 @@ use crate::sputil::datetime::*;
 
 pub struct HistoryQuery {
     symbol: String,
-    from_date: Date<Local>,
-    to_date: Date<Local>,
+    from_date: LocalDate,
+    to_date: LocalDate,
     interval: Interval,
     events: Events,
     pub result: String
@@ -20,8 +19,8 @@ pub struct HistoryQuery {
 
 impl HistoryQuery {
     pub fn new(symbol: String,
-               from_date: Date<Local>,
-               to_date: Date<Local>,
+               from_date: LocalDate,
+               to_date: LocalDate,
                interval: Interval,
                events: Events) -> HistoryQuery {
         let result = String::new();

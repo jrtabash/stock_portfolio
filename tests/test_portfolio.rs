@@ -3,7 +3,6 @@ mod tests {
     use std::collections::HashMap;
     use std::env;
     use std::fs;
-    use chrono::{Date, Local};
     use stock_portfolio::sputil::datetime::*;
     use stock_portfolio::portfolio::stock::*;
     use stock_portfolio::portfolio::algorithms::*;
@@ -13,9 +12,9 @@ mod tests {
 
     #[test]
     fn test_stock() {
-        let stock = make_stock("AAPL", Local::today(), 100, 120.25, 129.50);
+        let stock = make_stock("AAPL", today(), 100, 120.25, 129.50);
         assert_eq!(stock.symbol, "AAPL");
-        assert_eq!(stock.date, Local::today());
+        assert_eq!(stock.date, today());
         assert_eq!(stock.quantity, 100);
         assert!(price_equal(stock.base_price, 120.25));
         assert!(price_equal(stock.latest_price, 129.50));
@@ -94,9 +93,9 @@ mod tests {
 
     #[test]
     fn test_stock_cache_entry() {
-        let cache_entry = CacheEntry::new(10.25, Local::today());
+        let cache_entry = CacheEntry::new(10.25, today());
         assert_eq!(cache_entry.latest_price, 10.25);
-        assert_eq!(cache_entry.latest_date, Local::today());
+        assert_eq!(cache_entry.latest_date, today());
     }
 
     #[test]
@@ -104,13 +103,13 @@ mod tests {
         let mut cache = StocksCache::new();
         assert_eq!(cache.size(), 0);
 
-        cache.add(String::from("AAPL"), CacheEntry::new(125.0, Local::today()));
+        cache.add(String::from("AAPL"), CacheEntry::new(125.0, today()));
         assert_eq!(cache.size(), 1);
 
         match cache.get("AAPL") {
             Some(entry) => {
                 assert_eq!(entry.latest_price, 125.0);
-                assert_eq!(entry.latest_date, Local::today());
+                assert_eq!(entry.latest_date, today());
             },
             None => { assert!(false); }
         }
@@ -121,7 +120,7 @@ mod tests {
         match cache.get_mut("DELL") {
             Some(entry) => {
                 entry.latest_price = 81.0;
-                entry.latest_date = Local::today();
+                entry.latest_date = today();
             },
             None => { assert!(false); }
         }
@@ -129,7 +128,7 @@ mod tests {
         match cache.get("DELL") {
             Some(entry) => {
                 assert_eq!(entry.latest_price, 81.0);
-                assert_eq!(entry.latest_date, Local::today());
+                assert_eq!(entry.latest_date, today());
             },
             None => { assert!(false); }
         }
@@ -137,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_stocks_cache_from_csv() {
-        fn test_cache_entry(entry: Option<&CacheEntry>, price: Price, date: &Date<Local>) -> bool {
+        fn test_cache_entry(entry: Option<&CacheEntry>, price: Price, date: &LocalDate) -> bool {
             match entry {
                 Some(ce) => price_equal(ce.latest_price, price) && ce.latest_date == *date,
                 None => false
@@ -246,7 +245,7 @@ mod tests {
     // --------------------------------------------------------------------------------
     // Helpers
 
-    fn make_stock(sym: &str, date: Date<Local>, qty: u32, base: Price, latest: Price) -> Stock {
+    fn make_stock(sym: &str, date: LocalDate, qty: u32, base: Price, latest: Price) -> Stock {
         let symbol = String::from(sym);
         let mut stock = Stock::new(symbol, date, qty, base);
         stock.set_latest_price(latest, today_plus_days(0));
