@@ -46,6 +46,9 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("size", false) => { stocks.sort_by(|lhs, rhs| lhs.quantity.cmp(&rhs.quantity)); Ok(()) },
         ("size", true)  => { stocks.sort_by(|lhs, rhs| rhs.quantity.cmp(&lhs.quantity)); Ok(()) },
 
+        ("type", false) => { stocks.sort_by(|lhs, rhs| lhs.stype.cmp(&rhs.stype)); Ok(()) },
+        ("type", true)  => { stocks.sort_by(|lhs, rhs| rhs.stype.cmp(&lhs.stype)); Ok(()) },
+
         _ => Result::Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }
 }

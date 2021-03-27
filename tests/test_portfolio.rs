@@ -4,6 +4,7 @@ mod tests {
     use std::env;
     use std::fs;
     use stock_portfolio::sputil::datetime::*;
+    use stock_portfolio::portfolio::stock_type::*;
     use stock_portfolio::portfolio::stock::*;
     use stock_portfolio::portfolio::algorithms::*;
     use stock_portfolio::portfolio::stocks_update::*;
@@ -11,8 +12,26 @@ mod tests {
     use stock_portfolio::portfolio::reports::value_export;
 
     #[test]
+    fn test_stock_type() {
+        let stock = StockType::Stock;
+        let etf = StockType::ETF;
+        let stock_str = "stock";
+        let etf_str = "etf";
+
+        assert_eq!(stocktype2str(stock), stock_str);
+        assert_eq!(stocktype2str(etf), etf_str);
+        assert!(str2stocktype(&stock_str).unwrap() == stock);
+        assert!(str2stocktype(&etf_str).unwrap() == etf);
+
+        match str2stocktype("foobar") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(format!("{}", err), "Unknown stock type 'foobar'")
+        };
+    }
+
+    #[test]
     fn test_stock() {
-        let stock = make_stock("AAPL", today(), 100, 120.25, 129.50);
+        let stock = make_stock("AAPL", StockType::Stock, today(), 100, 120.25, 129.50);
         assert_eq!(stock.symbol, "AAPL");
         assert_eq!(stock.date, today());
         assert_eq!(stock.quantity, 100);
@@ -28,8 +47,8 @@ mod tests {
     #[test]
     fn test_stock_list() {
         let mut list = StockList::new();
-        list.push(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
-        list.push(make_stock("DELL", today_plus_days(-2), 100, 79.21, 79.71));
+        list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
+        list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
         assert_eq!(list.len(), 2);
         assert!(price_equal(net_notional(&list), 550.0));
         assert!(price_equal(latest_notional(&list), 20496.0));
@@ -59,9 +78,9 @@ mod tests {
         }
 
         let mut list = StockList::new();
-        list.push(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
-        list.push(make_stock("DELL", today_plus_days(-2), 100, 79.21, 79.71));
-        list.push(make_stock("AAPL", today_plus_days(-2), 100, 122.0, 125.25));
+        list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
+        list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
+        list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-2), 100, 122.0, 125.25));
 
         let gby = stock_groupby(&list);
         assert_eq!(gby.len(), 2);
@@ -73,7 +92,7 @@ mod tests {
     fn test_stock_update_from_csv() {
         let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
                    2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
-        let mut stock = Stock::new(String::from("STCK"), parse_date("2021-02-01").unwrap(), 100, 24.0);
+        let mut stock = Stock::new(String::from("STCK"), StockType::Stock, parse_date("2021-02-01").unwrap(), 100, 24.0);
         assert!(update_stock_from_csv(&mut stock, &csv));
         assert!(price_equal(stock.latest_price, 28.25));
         assert_eq!(stock.latest_date, parse_date("2021-02-26").unwrap());
@@ -85,7 +104,7 @@ mod tests {
                    2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
                    2021-02-25,26.10,31.0,22.0,24.0,24.0,9000\n\
                    2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
-        let mut stock = Stock::new(String::from("STCK"), parse_date("2021-02-01").unwrap(), 100, 24.0);
+        let mut stock = Stock::new(String::from("STCK"), StockType::Stock, parse_date("2021-02-01").unwrap(), 100, 24.0);
         assert!(update_stock_from_csv(&mut stock, &csv));
         assert!(price_equal(stock.latest_price, 28.25));
         assert_eq!(stock.latest_date, parse_date("2021-02-26").unwrap());
@@ -211,9 +230,9 @@ mod tests {
         }
 
         let mut list = StockList::new();
-        list.push(make_stock("DELL", today_plus_days(-2), 100, 79.21, 79.71));
-        list.push(make_stock("AAPL", today_plus_days(-3), 200, 120.25, 125.25));
-        list.push(make_stock("ICLN", today_plus_days(0), 300, 24.10, 24.12));
+        list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
+        list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+        list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
 
         let asc = false;
         let desc = true;
@@ -235,14 +254,17 @@ mod tests {
 
         test_sort(&mut list, "size", asc, "DELL", "AAPL", "ICLN");
         test_sort(&mut list, "size", desc, "ICLN", "AAPL", "DELL");
+
+        test_sort(&mut list, "type", asc, "AAPL", "DELL", "ICLN");
+        test_sort(&mut list, "type", desc, "ICLN", "AAPL", "DELL");
     }
 
     #[test]
     fn test_value_export() {
         let mut list = StockList::new();
-        list.push(make_stock("DELL", today_plus_days(-2), 100, 75.50, 80.0));
-        list.push(make_stock("AAPL", today_plus_days(-3), 100, 120.25, 125.25));
-        list.push(make_stock("ICLN", today_plus_days(0), 100, 24.10, 24.15));
+        list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 75.50, 80.0));
+        list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
+        list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 100, 24.10, 24.15));
 
         let csv_filename = make_temp_file("sp_test_value_export.csv");
         value_export(&list, &csv_filename).unwrap();
@@ -267,9 +289,9 @@ mod tests {
     // --------------------------------------------------------------------------------
     // Helpers
 
-    fn make_stock(sym: &str, date: LocalDate, qty: u32, base: Price, latest: Price) -> Stock {
+    fn make_stock(sym: &str, stype: StockType, date: LocalDate, qty: u32, base: Price, latest: Price) -> Stock {
         let symbol = String::from(sym);
-        let mut stock = Stock::new(symbol, date, qty, base);
+        let mut stock = Stock::new(symbol, stype, date, qty, base);
         stock.set_latest_price(latest, today_plus_days(0));
         stock
     }

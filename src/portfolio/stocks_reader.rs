@@ -4,6 +4,7 @@ use std::io::BufReader;
 use std::error::Error;
 
 use crate::sputil::datetime::*;
+use crate::portfolio::stock_type::*;
 use crate::portfolio::stock::*;
 
 pub struct StocksReader {
@@ -48,24 +49,25 @@ impl StocksReader {
             }
 
             let stock_tokens: Vec<&str> = stock_line.split(",").collect();
-            if stock_tokens.len() != 4 {
+            if stock_tokens.len() != 5 {
                 return Result::Err(format!("StocksReadr::parse_content - Invalid stock line '{}'", stock_line).into())
             }
 
             let symbol = String::from(stock_tokens[0]);
-            let date = parse_date(&stock_tokens[1])?;
+            let stype = str2stocktype(stock_tokens[1])?;
+            let date = parse_date(&stock_tokens[2])?;
 
-            let quantity = match stock_tokens[2].parse::<u32>() {
+            let quantity = match stock_tokens[3].parse::<u32>() {
                 Ok(qty) => qty,
                 Err(e) => return Result::Err(format!("StocksReader::parse_content - Invalid quantity '{}'", e).into())
             };
 
-            let base_price = match stock_tokens[3].parse::<Price>() {
+            let base_price = match stock_tokens[4].parse::<Price>() {
                 Ok(px) => px,
                 Err(e) => return Result::Err(format!("StocksReader::parse_content - Invalid base_price '{}'", e).into())
             };
 
-            stocks.push(Stock::new(symbol, date, quantity, base_price));
+            stocks.push(Stock::new(symbol, stype, date, quantity, base_price));
         }
 
         Ok(stocks)

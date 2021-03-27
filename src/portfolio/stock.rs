@@ -2,11 +2,13 @@ use std::fmt;
 
 use crate::sputil::datetime::*;
 use crate::sputil::price_type::*;
+use crate::portfolio::stock_type::*;
 
 pub type Price = PriceType;
 
 pub struct Stock {
     pub symbol: String,          // Ticker
+    pub stype: StockType,        // Stock Type
     pub date: LocalDate,         // Buy Date
     pub quantity: u32,           // Buy Quantity
     pub base_price: Price,       // Buy Price
@@ -18,12 +20,13 @@ pub type StockList = Vec<Stock>;
 
 impl Stock {
     pub fn new(symbol: String,
+               stype: StockType,
                date: LocalDate,
                quantity: u32,
                base_price: Price) -> Stock {
         let latest_price: Price = 0.0;
         let latest_date = earliest_date();
-        Stock { symbol, date, quantity, base_price, latest_price, latest_date }
+        Stock { symbol, stype, date, quantity, base_price, latest_price, latest_date }
     }
 
     #[inline(always)]
