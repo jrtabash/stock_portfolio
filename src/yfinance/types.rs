@@ -2,7 +2,6 @@
 // Events
 
 #[derive(Copy, Clone)]
-#[allow(dead_code)]
 pub enum Events {
     History,
     Dividend,
@@ -21,7 +20,6 @@ pub fn events2str(evt: Events) -> &'static str {
 // Interval
 
 #[derive(Copy, Clone)]
-#[allow(dead_code)]
 pub enum Interval {
     Daily,
     Weekly,
