@@ -26,23 +26,28 @@ impl Stock {
         Stock { symbol, date, quantity, base_price, latest_price, latest_date }
     }
 
+    #[inline(always)]
     pub fn set_latest_price(self: &mut Stock, price: Price, date: LocalDate) {
         self.latest_price = price;
         self.latest_date = date;
     }
 
+    #[inline(always)]
     pub fn net_price(self: &Stock) -> Price {
         self.latest_price - self.base_price
     }
 
+    #[inline(always)]
     pub fn base_notional(self: &Stock) -> Price {
         self.quantity as Price * self.base_price
     }
 
+    #[inline(always)]
     pub fn latest_notional(self: &Stock) -> Price {
         self.quantity as Price * self.latest_price
     }
 
+    #[inline(always)]
     pub fn net_notional(self: &Stock) -> Price {
         self.quantity as Price * self.net_price()
     }
