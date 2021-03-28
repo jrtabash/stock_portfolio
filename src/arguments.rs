@@ -32,7 +32,7 @@ impl Arguments {
             .arg(Arg::with_name("filter")
                  .short("f")
                  .long("filter")
-                 .help("Filter stocks by specified symbols; Comma separated list of symbols")
+                 .help("Filter stocks by type or symbols; one of stock, etf or a comma separated list of symbols")
                  .takes_value(true))
             .arg(Arg::with_name("export_file")
                  .short("e")

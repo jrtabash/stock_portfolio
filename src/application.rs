@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use crate::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
+use crate::portfolio::{stock_type, stock, reports, stocks_reader, stocks_update, algorithms};
 use crate::arguments::Arguments;
 
 pub struct Application {
@@ -36,9 +36,14 @@ impl Application {
     }
 
     fn filter(self: &mut Application) -> bool {
-        if let Some(symbols) = self.args.filter() {
-            let symbol_set: HashSet<&str> = symbols.split(',').map(|name| name.trim()).collect();
-            self.stocks.retain(|stock| symbol_set.contains(stock.symbol.as_str()));
+        if let Some(filter_expr) = self.args.filter() {
+            if let Ok(stock_type) = stock_type::str2stocktype(&filter_expr) {
+                self.stocks.retain(|stock| stock.stype == stock_type);
+            }
+            else {
+                let symbol_set: HashSet<&str> = filter_expr.split(',').map(|name| name.trim()).collect();
+                self.stocks.retain(|stock| symbol_set.contains(stock.symbol.as_str()));
+            }
         }
         true
     }
