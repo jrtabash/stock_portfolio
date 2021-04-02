@@ -54,6 +54,11 @@ impl Stock {
     pub fn net_notional(self: &Stock) -> Price {
         self.quantity as Price * self.net_price()
     }
+
+    #[inline(always)]
+    pub fn pct_change(self: &Stock) -> f64 {
+        100.0 * self.net_price() / self.base_price
+    }
 }
 
 impl fmt::Display for Stock {

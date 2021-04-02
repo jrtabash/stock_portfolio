@@ -15,6 +15,12 @@ pub fn base_notional(stocks: &StockList) -> Price {
     stocks.iter().map(|stock| stock.base_notional()).sum()
 }
 
+pub fn pct_change(stocks: &StockList) -> f64 {
+    let base: Price = stocks.iter().map(|stock| stock.base_price).sum();
+    let net: Price = stocks.iter().map(|stock| stock.net_price()).sum();
+    100.0 * net / base
+}
+
 // Group by stock symbol, and calcuate aggregate quantity and current value.
 pub fn stock_groupby(stocks: &StockList) -> HashMap<String, (u32, Price)> {
     let mut groupby = HashMap::new();
@@ -48,6 +54,9 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
 
         ("type", false) => { stocks.sort_by(|lhs, rhs| lhs.stype.cmp(&rhs.stype)); Ok(()) },
         ("type", true)  => { stocks.sort_by(|lhs, rhs| rhs.stype.cmp(&lhs.stype)); Ok(()) },
+
+        ("pct", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.pct_change(), rhs.pct_change())); Ok(()) },
+        ("pct", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.pct_change(), lhs.pct_change())); Ok(()) },
 
         _ => Result::Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }

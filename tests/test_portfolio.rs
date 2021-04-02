@@ -42,6 +42,7 @@ mod tests {
         assert!(price_equal(stock.base_notional(), 12025.0));
         assert!(price_equal(stock.latest_notional(), 12950.0));
         assert!(price_equal(stock.net_notional(), 925.0));
+        assert!(price_equal(stock.pct_change(), 7.69));
     }
 
     #[test]
@@ -53,6 +54,7 @@ mod tests {
         assert!(price_equal(net_notional(&list), 550.0));
         assert!(price_equal(latest_notional(&list), 20496.0));
         assert!(price_equal(base_notional(&list), 19946.0));
+        assert!(price_equal(pct_change(&list), 2.76));
 
         let total_size: u32 = list.iter().map(|stock| stock.quantity).sum();
         assert_eq!(total_size, 200);
@@ -257,6 +259,9 @@ mod tests {
 
         test_sort(&mut list, "type", asc, "AAPL", "DELL", "ICLN");
         test_sort(&mut list, "type", desc, "ICLN", "AAPL", "DELL");
+
+        test_sort(&mut list, "pct", desc, "AAPL", "DELL", "ICLN");
+        test_sort(&mut list, "pct", asc, "ICLN", "DELL", "AAPL");
     }
 
     #[test]
@@ -271,10 +276,10 @@ mod tests {
 
         let csv_content = fs::read_to_string(&csv_filename).unwrap();
         let today_str = today_plus_days(0).format("%Y-%m-%d");
-        let expected = format!("Ticker,Buy Date,Upd Date,Size,Base,Cur,Net,Base Value,Cur Value,Net Value\n\
-                                DELL,{},{},100,75.50,80.00,4.50,7550.00,8000.00,450.00\n\
-                                AAPL,{},{},100,120.25,125.25,5.00,12025.00,12525.00,500.00\n\
-                                ICLN,{},{},100,24.10,24.15,0.05,2410.00,2415.00,5.00\n",
+        let expected = format!("Ticker,Buy Date,Upd Date,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value\n\
+                                DELL,{},{},100,75.50,80.00,4.50,5.96,7550.00,8000.00,450.00\n\
+                                AAPL,{},{},100,120.25,125.25,5.00,4.16,12025.00,12525.00,500.00\n\
+                                ICLN,{},{},100,24.10,24.15,0.05,0.21,2410.00,2415.00,5.00\n",
                                today_plus_days(-2).format("%Y-%m-%d"),
                                today_str,
                                today_plus_days(-3).format("%Y-%m-%d"),
