@@ -265,6 +265,37 @@ mod tests {
     }
 
     #[test]
+    fn test_filter_stocks() {
+        fn test_filter(expr: &str, keep: bool, symbols: &Vec<&str>) {
+            let mut list = StockList::new();
+            list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
+            list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+            list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
+
+            filter_stocks(&mut list, expr, keep);
+
+            assert_eq!(list.len(), symbols.len());
+            for i in 0..list.len() {
+                assert_eq!(&list[i].symbol, symbols[i]);
+            }
+        }
+
+        let keep = true;
+        let remove = false;
+
+        test_filter("etf", keep, &vec!["ICLN"]);
+        test_filter("etf", remove, &vec!["DELL", "AAPL"]);
+        test_filter("stock", keep, &vec!["DELL", "AAPL"]);
+        test_filter("stock", remove, &vec!["ICLN"]);
+        test_filter("AAPL", keep, &vec!["AAPL"]);
+        test_filter("AAPL", remove, &vec!["DELL", "ICLN"]);
+        test_filter("AAPL,DELL", keep, &vec!["DELL", "AAPL"]);
+        test_filter("AAPL,DELL", remove, &vec!["ICLN"]);
+        test_filter("MSFT", keep, &vec![]);
+        test_filter("MSFT", remove, &vec!["DELL", "AAPL", "ICLN"]);
+    }
+
+    #[test]
     fn test_value_export() {
         let mut list = StockList::new();
         list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 75.50, 80.0));

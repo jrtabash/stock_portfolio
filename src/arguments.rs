@@ -5,7 +5,8 @@ use clap::{Arg, App};
 pub struct Arguments {
     stocks_file: String,
     order_by: Option<String>,
-    filter: Option<String>,
+    include: Option<String>,
+    exclude: Option<String>,
     export_file: Option<String>,
     use_cache: bool,
     show_groupby: bool,
@@ -17,6 +18,8 @@ impl Arguments {
         let parsed_args = App::new("Stock Portfolio Tool")
             .version("0.1.1")
             .about("Get latest close prices and report the gains and losses of stocks in portfolio.")
+
+            // Options
             .arg(Arg::with_name("stocks_file")
                  .short("s")
                  .long("stocks")
@@ -29,16 +32,23 @@ impl Arguments {
                  .long("orderby")
                  .help("Order stocks by one of symbol, type, date, price, net, pct, size or value")
                  .takes_value(true))
-            .arg(Arg::with_name("filter")
-                 .short("f")
-                 .long("filter")
-                 .help("Filter stocks by type or symbols; one of stock, etf or a comma separated list of symbols")
+            .arg(Arg::with_name("include")
+                 .short("i")
+                 .long("include")
+                 .help("Include stocks by type or symbols; one of stock, etf or a comma separated list of symbols")
+                 .takes_value(true))
+            .arg(Arg::with_name("exclude")
+                 .short("x")
+                 .long("exclude")
+                 .help("Exclude stocks by type or symbols; one of stock, etf or a comma separated list of symbols")
                  .takes_value(true))
             .arg(Arg::with_name("export_file")
                  .short("e")
                  .long("export")
                  .help("Export gains and losses table to a csv file")
                  .takes_value(true))
+
+            // Flags
             .arg(Arg::with_name("show_groupby")
                  .short("g")
                  .long("show-groupby")
@@ -58,7 +68,11 @@ impl Arguments {
             Some(value) => Some(String::from(value)),
             None => None
         };
-        let filter = match parsed_args.value_of("filter") {
+        let include = match parsed_args.value_of("include") {
+            Some(value) => Some(String::from(value)),
+            None => None
+        };
+        let exclude = match parsed_args.value_of("exclude") {
             Some(value) => Some(String::from(value)),
             None => None
         };
@@ -70,7 +84,7 @@ impl Arguments {
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");
 
-        Arguments { stocks_file, order_by, filter, export_file, use_cache, show_groupby, desc }
+        Arguments { stocks_file, order_by, include, exclude, export_file, use_cache, show_groupby, desc }
     }
 
     pub fn stocks_file(self: &Arguments) -> &String {
@@ -81,8 +95,12 @@ impl Arguments {
         self.order_by.as_ref()
     }
 
-    pub fn filter(self: &Arguments) -> Option<&String> {
-        self.filter.as_ref()
+    pub fn include(self: &Arguments) -> Option<&String> {
+        self.include.as_ref()
+    }
+
+    pub fn exclude(self: &Arguments) -> Option<&String> {
+        self.exclude.as_ref()
     }
 
     pub fn export_file(self: &Arguments) -> Option<&String> {

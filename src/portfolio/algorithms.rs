@@ -1,7 +1,8 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use crate::portfolio::stock::*;
 use crate::sputil::price_type::*;
+use crate::portfolio::stock_type;
 
 pub fn latest_notional(stocks: &StockList) -> Price {
     stocks.iter().map(|stock| stock.latest_notional()).sum()
@@ -59,5 +60,15 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("pct", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.pct_change(), lhs.pct_change())); Ok(()) },
 
         _ => Result::Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
+    }
+}
+
+pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) {
+    if let Ok(stock_type) = stock_type::str2stocktype(&filter_expr) {
+        stocks.retain(|stock| (stock.stype == stock_type) == keep);
+    }
+    else {
+        let symbol_set: HashSet<&str> = filter_expr.split(',').map(|name| name.trim()).collect();
+        stocks.retain(|stock| symbol_set.contains(stock.symbol.as_str()) == keep);
     }
 }

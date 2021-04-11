@@ -1,5 +1,4 @@
-use std::collections::HashSet;
-use crate::portfolio::{stock_type, stock, reports, stocks_reader, stocks_update, algorithms};
+use crate::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
 use crate::arguments::Arguments;
 
 pub struct Application {
@@ -15,7 +14,7 @@ impl Application {
     }
 
     pub fn run(self: &mut Application) -> bool {
-        self.read() && self.filter() && self.update() && self.sort() && self.report() && self.export()
+        self.read() && self.include() && self.exclude() && self.update() && self.sort() && self.report() && self.export()
     }
 
     // --------------------------------------------------------------------------------
@@ -35,15 +34,16 @@ impl Application {
         }
     }
 
-    fn filter(self: &mut Application) -> bool {
-        if let Some(filter_expr) = self.args.filter() {
-            if let Ok(stock_type) = stock_type::str2stocktype(&filter_expr) {
-                self.stocks.retain(|stock| stock.stype == stock_type);
-            }
-            else {
-                let symbol_set: HashSet<&str> = filter_expr.split(',').map(|name| name.trim()).collect();
-                self.stocks.retain(|stock| symbol_set.contains(stock.symbol.as_str()));
-            }
+    fn include(self: &mut Application) -> bool {
+        if let Some(include_expr) = self.args.include() {
+            algorithms::filter_stocks(&mut self.stocks, &include_expr, true);
+        }
+        true
+    }
+
+    fn exclude(self: &mut Application) -> bool {
+        if let Some(exclude_expr) = self.args.exclude() {
+            algorithms::filter_stocks(&mut self.stocks, &exclude_expr, false);
         }
         true
     }
