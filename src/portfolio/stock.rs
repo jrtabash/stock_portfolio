@@ -1,8 +1,9 @@
 use std::fmt;
 
-use crate::sputil::datetime::*;
-use crate::sputil::price_type::*;
-use crate::portfolio::stock_type::*;
+use crate::sputil::datetime;
+use crate::sputil::datetime::LocalDate;
+use crate::sputil::price_type::PriceType;
+use crate::portfolio::stock_type::StockType;
 
 pub type Price = PriceType;
 
@@ -25,7 +26,7 @@ impl Stock {
                quantity: u32,
                base_price: Price) -> Stock {
         let latest_price: Price = 0.0;
-        let latest_date = earliest_date();
+        let latest_date = datetime::earliest_date();
         Stock { symbol, stype, date, quantity, base_price, latest_price, latest_date }
     }
 

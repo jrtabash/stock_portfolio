@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use crate::portfolio::stock::*;
-use crate::sputil::price_type::*;
+use crate::portfolio::stock::{Price, StockList};
+use crate::sputil::price_type;
 use crate::portfolio::stock_type;
 
 pub fn latest_notional(stocks: &StockList) -> Price {
@@ -41,14 +41,14 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("date", false) => { stocks.sort_by(|lhs, rhs| lhs.date.cmp(&rhs.date)); Ok(()) },
         ("date", true)  => { stocks.sort_by(|lhs, rhs| rhs.date.cmp(&lhs.date)); Ok(()) },
 
-        ("value", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.latest_notional(), rhs.latest_notional())); Ok(()) },
-        ("value", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.latest_notional(), lhs.latest_notional())); Ok(()) },
+        ("value", false) => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.latest_notional(), rhs.latest_notional())); Ok(()) },
+        ("value", true)  => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.latest_notional(), lhs.latest_notional())); Ok(()) },
 
-        ("price", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.latest_price, rhs.latest_price)); Ok(()) },
-        ("price", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.latest_price, lhs.latest_price)); Ok(()) },
+        ("price", false) => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.latest_price, rhs.latest_price)); Ok(()) },
+        ("price", true)  => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.latest_price, lhs.latest_price)); Ok(()) },
 
-        ("net", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.net_price(), rhs.net_price())); Ok(()) },
-        ("net", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.net_price(), lhs.net_price())); Ok(()) },
+        ("net", false) => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.net_price(), rhs.net_price())); Ok(()) },
+        ("net", true)  => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.net_price(), lhs.net_price())); Ok(()) },
 
         ("size", false) => { stocks.sort_by(|lhs, rhs| lhs.quantity.cmp(&rhs.quantity)); Ok(()) },
         ("size", true)  => { stocks.sort_by(|lhs, rhs| rhs.quantity.cmp(&lhs.quantity)); Ok(()) },
@@ -56,8 +56,8 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("type", false) => { stocks.sort_by(|lhs, rhs| lhs.stype.cmp(&rhs.stype)); Ok(()) },
         ("type", true)  => { stocks.sort_by(|lhs, rhs| rhs.stype.cmp(&lhs.stype)); Ok(()) },
 
-        ("pct", false) => { stocks.sort_by(|lhs, rhs| price_cmp(lhs.pct_change(), rhs.pct_change())); Ok(()) },
-        ("pct", true)  => { stocks.sort_by(|lhs, rhs| price_cmp(rhs.pct_change(), lhs.pct_change())); Ok(()) },
+        ("pct", false) => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.pct_change(), rhs.pct_change())); Ok(()) },
+        ("pct", true)  => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.pct_change(), lhs.pct_change())); Ok(()) },
 
         _ => Result::Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }

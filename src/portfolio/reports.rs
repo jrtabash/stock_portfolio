@@ -4,8 +4,8 @@ use std::error::Error;
 use std::fs::File;
 
 use crate::sputil::datetime;
-use crate::portfolio::stock::*;
-use crate::portfolio::algorithms::*;
+use crate::portfolio::stock::StockList;
+use crate::portfolio::algorithms;
 
 // --------------------------------------------------------------------------------
 // Portfolio Value (Gain & Loss) Report and Export
@@ -15,10 +15,10 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
     println!("-------------------");
     println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
     println!("Number of Stocks: {}", stocks.len());
-    println!("      Base Value: {:.2}", base_notional(&stocks));
-    println!("    Latest Value: {:.2}", latest_notional(&stocks));
-    println!("       Net Value: {:.2}", net_notional(&stocks));
-    println!("  Percent Change: {:.2}", pct_change(&stocks));
+    println!("      Base Value: {:.2}", algorithms::base_notional(&stocks));
+    println!("    Latest Value: {:.2}", algorithms::latest_notional(&stocks));
+    println!("       Net Value: {:.2}", algorithms::net_notional(&stocks));
+    println!("  Percent Change: {:.2}", algorithms::pct_change(&stocks));
     println!("");
 
     println!("{:8} {:10} {:10} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10}",
@@ -65,7 +65,7 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
         println!("{:8} {:8} {:12}", "GroupBy", "Size", "Cur Value");
         println!("{:8} {:8} {:12}", "-------", "----", "---------");
 
-        let groupby = stock_groupby(&stocks);
+        let groupby = algorithms::stock_groupby(&stocks);
 
         let mut seen = HashSet::new();
         for stock in stocks.iter() {

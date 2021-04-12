@@ -1,8 +1,8 @@
-use crate::sputil::datetime::*;
-use crate::portfolio::stock::*;
-use crate::portfolio::stocks_cache::*;
-use crate::yfinance::query::*;
-use crate::yfinance::types::*;
+use crate::sputil::datetime;
+use crate::portfolio::stock::{Price, Stock, StockList};
+use crate::portfolio::stocks_cache::{CacheEntry, StocksCache};
+use crate::yfinance::query::HistoryQuery;
+use crate::yfinance::types::{Interval, Events};
 
 pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> bool {
     // Function assumes multi-line csv data.
@@ -20,7 +20,7 @@ pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> bool {
             let last_line = &csv[last_newline..];
             let latest: Vec<&str> = last_line.split(',').collect();
 
-            match parse_date(&latest[0]) {
+            match datetime::parse_date(&latest[0]) {
                 Ok(latest_date) => {
                     let latest_price = latest[5].parse::<Price>().unwrap_or_else(|error| {
                         println!("Failed to update {} latest price - {}", stock.symbol, error);
@@ -45,8 +45,8 @@ pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> bool {
 pub fn update_stock(stock: &mut Stock) -> bool {
     let mut query = HistoryQuery::new(
         stock.symbol.to_string(),
-        today_plus_days(-4),
-        today_plus_days(1),
+        datetime::today_plus_days(-4),
+        datetime::today_plus_days(1),
         Interval::Daily,
         Events::History);
 
@@ -64,7 +64,7 @@ pub fn update_stocks(stocks: &mut StockList) -> usize {
 }
 
 pub fn update_stocks_with_cache(stocks: &mut StockList) -> usize {
-    let today = today();
+    let today = datetime::today();
     match StocksCache::from_cache_file() {
         Ok(mut cache) => {
             let mut count: usize = 0;

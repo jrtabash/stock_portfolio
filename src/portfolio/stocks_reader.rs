@@ -3,9 +3,9 @@ use std::fs::File;
 use std::io::BufReader;
 use std::error::Error;
 
-use crate::sputil::datetime::*;
-use crate::portfolio::stock_type::*;
-use crate::portfolio::stock::*;
+use crate::sputil::datetime;
+use crate::portfolio::stock_type;
+use crate::portfolio::stock::{Price, Stock, StockList};
 
 pub struct StocksReader {
     stocks_file: String
@@ -54,8 +54,8 @@ impl StocksReader {
             }
 
             let symbol = String::from(stock_tokens[0]);
-            let stype = str2stocktype(stock_tokens[1])?;
-            let date = parse_date(&stock_tokens[2])?;
+            let stype = stock_type::str2stocktype(stock_tokens[1])?;
+            let date = datetime::parse_date(&stock_tokens[2])?;
 
             let quantity = match stock_tokens[3].parse::<u32>() {
                 Ok(qty) => qty,

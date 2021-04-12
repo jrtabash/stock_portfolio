@@ -2,8 +2,10 @@ use std::str;
 use curl;
 use curl::easy;
 
-use crate::yfinance::types::*;
-use crate::sputil::datetime::*;
+use crate::yfinance::types;
+use crate::yfinance::types::{Interval, Events};
+use crate::sputil::datetime;
+use crate::sputil::datetime::LocalDate;
 
 // --------------------------------------------------------------------------------
 // HistoryQuery
@@ -29,10 +31,10 @@ impl HistoryQuery {
 
     pub fn url(self: &HistoryQuery) -> String {
         let base_url = "https://query1.finance.yahoo.com/v7/finance/download";
-        let period1 = date2timestamp(&self.from_date);
-        let period2 = date2timestamp(&self.to_date);
-        let int_str = interval2str(self.interval);
-        let evt_str = events2str(self.events);
+        let period1 = datetime::date2timestamp(&self.from_date);
+        let period2 = datetime::date2timestamp(&self.to_date);
+        let int_str = types::interval2str(self.interval);
+        let evt_str = types::events2str(self.events);
         format!("{}/{}?period1={}&period2={}&interval={}&events={}&includeAdjustedClose=true",
                 base_url,
                 self.symbol,
