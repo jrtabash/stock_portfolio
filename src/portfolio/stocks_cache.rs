@@ -23,6 +23,11 @@ impl CacheEntry {
         CacheEntry { latest_price, latest_date }
     }
 
+    pub fn update(self: &mut CacheEntry, price: Price, date: &LocalDate) {
+        self.latest_price = price;
+        self.latest_date = date.clone();
+    }
+
     #[inline(always)]
     pub fn is_updated(self: &CacheEntry, today: &LocalDate) -> bool {
         self.latest_date.eq(today) || (datetime::is_friday(&self.latest_date) && datetime::is_weekend(&today))

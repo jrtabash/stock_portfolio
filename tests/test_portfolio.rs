@@ -114,9 +114,16 @@ mod tests {
 
     #[test]
     fn test_stock_cache_entry() {
-        let cache_entry = CacheEntry::new(10.25, today());
+        let mut cache_entry = CacheEntry::new(10.25, today());
         assert_eq!(cache_entry.latest_price, 10.25);
         assert_eq!(cache_entry.latest_date, today());
+
+        let new_price = 20.52;
+        let new_date = today_plus_days(1);
+
+        cache_entry.update(new_price, &new_date);
+        assert_eq!(cache_entry.latest_price, new_price);
+        assert_eq!(cache_entry.latest_date, new_date);
     }
 
     #[test]

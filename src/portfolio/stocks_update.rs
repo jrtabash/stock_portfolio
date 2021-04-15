@@ -78,8 +78,7 @@ pub fn update_stocks_with_cache(stocks: &mut StockList) -> usize {
                         else {
                             if update_stock(stock) {
                                 count += 1;
-                                cache_entry.latest_price = stock.latest_price;
-                                cache_entry.latest_date = stock.latest_date.clone();
+                                cache_entry.update(stock.latest_price, &stock.latest_date);
                             }
                         }
                     },
