@@ -37,7 +37,7 @@ impl StocksReader {
         let mut stocks = StockList::new();
 
         let mut skip_header: bool = true;
-        for stock_line in content.split("\n") {
+        for stock_line in content.lines() {
             // Assume first line is a header and skip it.
             if skip_header {
                 skip_header = false;

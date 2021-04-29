@@ -27,7 +27,7 @@ mod tests {
         assert!(query.execute());
         assert!(query.result.len() > 0);
 
-        let result_vec: Vec<&str> = query.result.split("\n").collect();
+        let result_vec: Vec<&str> = query.result.lines().collect();
         assert_eq!(result_vec.len(), 3);
         assert_eq!(result_vec[0], "Date,Open,High,Low,Close,Adj Close,Volume");
 

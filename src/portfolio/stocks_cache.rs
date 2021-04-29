@@ -89,7 +89,7 @@ impl StocksCache {
 
     pub fn from_csv(csv_data: &str) -> Result<StocksCache, Box<dyn Error>> {
         let mut cache = StocksCache::new();
-        for cache_line in csv_data.split("\n") {
+        for cache_line in csv_data.lines() {
             if cache_line == "" {
                 continue;
             }
