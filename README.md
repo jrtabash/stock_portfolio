@@ -1,11 +1,16 @@
 # Stock Portfolio Tool
 Get latest close prices and report the gains and losses of stocks in portfolio.
 
-Given a stocks file, containing symbol, date purchased, quantity purchased, and purchase/base price,
-get the latest close prices and generate a stocks value report, showing base, current and net prices
-and notional values.
+Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
+get the latest close prices from yahoo finance and generate a stocks value report, showing base, current and net prices
+and notional values, as well as percent change.
 
-Optionally, the tool also reports quantities and current notional values grouped by symbol.
+The following features are supported:
+- **Group by**: Report quantities and current notional values grouped by symbol
+- **Order by**: Sort by pre-defined attributes in ascending or descending order
+- **Filter**: Include and/or exclude by type or list of symbols
+- **Export**: Export gains and losses table to a csv file
+- **Cache**: Cache latest close prices. Cache stored in temporary folder
 
 ## Usage
 ```bash
