@@ -15,25 +15,21 @@ pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<d
     // 2021-02-25,26.1,31.0,22.0,24.0,24.0,9000\n
     // 2021-02-26,24.9,32.0,24.0,28.0,28.0,11000
 
-    match csv.rfind('\n') {
-        Some(last_newline) => {
-            let last_line = &csv[last_newline..];
-            let latest: Vec<&str> = last_line.split(',').collect();
+    if let Some(last_newline) = csv.rfind('\n') {
+        let last_line = &csv[last_newline..];
+        let latest: Vec<&str> = last_line.split(',').collect();
+        if latest.len() != 7 {
+            return Err(format!("Incomplete data len={} expected=7", latest.len()).into())
+        }
 
-            let latest_date = datetime::parse_date(&latest[0])?;
-            let latest_price = latest[5].parse::<Price>()?;
-            if latest_price > 0.0 {
-                stock.set_latest_price(latest_price, latest_date);
-                Ok(true)
-            }
-            else {
-                Ok(false)
-            }
-        },
-        None => {
-            Err("No data".into())
+        let latest_date = datetime::parse_date(&latest[0])?;
+        let latest_price = latest[5].parse::<Price>()?;
+        if latest_price > 0.0 {
+            stock.set_latest_price(latest_price, latest_date);
+            return Ok(true)
         }
     }
+    Ok(false)
 }
 
 pub fn update_stock(stock: &mut Stock) -> Result<bool, Box<dyn Error>> {
@@ -46,7 +42,7 @@ pub fn update_stock(stock: &mut Stock) -> Result<bool, Box<dyn Error>> {
 
     query.execute()?;
     match update_stock_from_csv(stock, &query.result) {
-        Ok(success) => Ok(success),
+        Ok(updated) => Ok(updated),
         Err(e) => Err(format!("Failed to update {} - {}", stock.symbol, e).into())
     }
 }
@@ -54,8 +50,7 @@ pub fn update_stock(stock: &mut Stock) -> Result<bool, Box<dyn Error>> {
 pub fn update_stocks(stocks: &mut StockList) -> Result<usize, Box<dyn Error>> {
     let mut count: usize = 0;
     for stock in stocks.iter_mut() {
-        let success = update_stock(stock)?;
-        if success {
+        if update_stock(stock)? {
             count += 1;
         }
     }
@@ -74,16 +69,14 @@ pub fn update_stocks_with_cache(stocks: &mut StockList) -> Result<usize, Box<dyn
                     count += 1;
                 }
                 else {
-                    let success = update_stock(stock)?;
-                    if success {
+                    if update_stock(stock)? {
                         count += 1;
                         cache_entry.update(stock.latest_price, &stock.latest_date);
                     }
                 }
             },
             None => {
-                let success = update_stock(stock)?;
-                if success {
+                if update_stock(stock)? {
                     count += 1;
                     cache.add(stock.symbol.to_string(), CacheEntry::new(stock.latest_price, stock.latest_date.clone()));
                 }

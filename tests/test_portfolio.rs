@@ -102,6 +102,37 @@ mod tests {
     }
 
     #[test]
+    fn test_stock_update_from_csv_zero_price() {
+        let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
+                   2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
+                   2021-02-25,26.10,31.0,22.0,24.0,24.0,9000\n\
+                   2021-02-26,24.90,32.0,24.0,28.0,0.00,11000";
+        let mut stock = Stock::new(String::from("STCK"), StockType::Stock, parse_date("2021-02-01").unwrap(), 100, 24.0);
+        assert!(!update_stock_from_csv(&mut stock, &csv).unwrap());
+        assert!(price_equal(stock.latest_price, 0.00));
+        assert_eq!(stock.latest_date, earliest_date());
+    }
+
+    #[test]
+    fn test_stock_update_from_csv_no_data() {
+        let csv = "Date,Open,High,Low,Close,Adj Close,Volume";
+        let mut stock = Stock::new(String::from("STCK"), StockType::Stock, parse_date("2021-02-01").unwrap(), 100, 24.0);
+        assert!(!update_stock_from_csv(&mut stock, &csv).unwrap());
+        assert!(price_equal(stock.latest_price, 0.00));
+        assert_eq!(stock.latest_date, earliest_date());
+    }
+
+    #[test]
+    fn test_stock_update_from_csv_incomplete_data() {
+        let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
+                   2021-02-24,25.0,30.0";
+        let mut stock = Stock::new(String::from("STCK"), StockType::Stock, parse_date("2021-02-01").unwrap(), 100, 24.0);
+        assert!(update_stock_from_csv(&mut stock, &csv).is_err());
+        assert!(price_equal(stock.latest_price, 0.00));
+        assert_eq!(stock.latest_date, earliest_date());
+    }
+
+    #[test]
     fn test_stock_cache_entry() {
         let mut cache_entry = CacheEntry::new(10.25, today());
         assert_eq!(cache_entry.latest_price, 10.25);
