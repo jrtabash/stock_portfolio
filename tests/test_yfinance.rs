@@ -24,7 +24,7 @@ mod tests {
         let end = datetime::make_date(2021, 2, 13);
         let mut query = HistoryQuery::new(String::from("AAPL"), start, end, Interval::Daily, Events::History);
 
-        assert!(query.execute());
+        assert_eq!(query.execute(), Ok(()));
         assert!(query.result.len() > 0);
 
         let result_vec: Vec<&str> = query.result.lines().collect();

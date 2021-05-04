@@ -31,7 +31,7 @@ pub fn earliest_date() -> LocalDate {
 pub fn parse_date(date_str: &str) -> Result<LocalDate, Box<dyn Error>> {
     match NaiveDate::parse_from_str(&date_str, "%Y-%m-%d") {
         Ok(dt) => Ok(chrono::Local.ymd(dt.year(), dt.month(), dt.day())),
-        Err(e) => Result::Err(format!("parse_date: {}", e).into())
+        Err(e) => Err(format!("parse_date: {}", e).into())
     }
 }
 

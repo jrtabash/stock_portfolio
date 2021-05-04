@@ -82,7 +82,7 @@ impl StocksCache {
             },
             Err(error) => match error.kind() {
                 ErrorKind::NotFound => Ok(StocksCache::new()),
-                _ => Result::Err(Box::new(error))
+                _ => Err(Box::new(error))
             }
         }
     }
@@ -96,7 +96,7 @@ impl StocksCache {
 
             let cache_tokens: Vec<&str> = cache_line.split(",").collect();
             if cache_tokens.len() != 3 {
-                return Result::Err(format!("StocksCache::from_csv - Invalid cache line '{}'", cache_line).into())
+                return Err(format!("StocksCache::from_csv - Invalid cache line '{}'", cache_line).into())
             }
 
             let symbol = String::from(cache_tokens[0]);

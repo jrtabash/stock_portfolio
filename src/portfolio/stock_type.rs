@@ -19,7 +19,7 @@ pub fn str2stocktype(ststr: &str) -> Result<StockType, Box<dyn Error>> {
     match ststr.to_lowercase().as_str() {
         "stock" => Ok(StockType::Stock),
         "etf" => Ok(StockType::ETF),
-        _ => Result::Err(format!("Unknown stock type '{}'", ststr).into())
+        _ => Err(format!("Unknown stock type '{}'", ststr).into())
     }
 }
 

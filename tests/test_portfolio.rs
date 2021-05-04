@@ -63,20 +63,9 @@ mod tests {
     #[test]
     fn test_stock_groupby() {
         fn test(groupby: &HashMap<String, (u32, Price)>, symbol: &str, size: u32, price: Price) {
-            if let Some(size_price) = groupby.get(symbol) {
-                if size_price.0 != size {
-                    println!("Symbol {} size actual={} expected={}", symbol, size_price.0, size);
-                    assert!(false);
-                }
-                if !price_equal(size_price.1, price) {
-                    println!("Symbol {} price actual={:.2} expected={:.2}", symbol, size_price.1, price);
-                    assert!(false);
-                }
-            }
-            else {
-                println!("Symbol {} not in groupby", symbol);
-                assert!(false);
-            }
+            let size_price = groupby.get(symbol).unwrap();
+            assert_eq!(size_price.0, size);
+            assert!(price_equal(size_price.1, price));
         }
 
         let mut list = StockList::new();
@@ -95,7 +84,7 @@ mod tests {
         let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
                    2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
         let mut stock = Stock::new(String::from("STCK"), StockType::Stock, parse_date("2021-02-01").unwrap(), 100, 24.0);
-        assert!(update_stock_from_csv(&mut stock, &csv));
+        assert!(update_stock_from_csv(&mut stock, &csv).unwrap());
         assert!(price_equal(stock.latest_price, 28.25));
         assert_eq!(stock.latest_date, parse_date("2021-02-26").unwrap());
     }
@@ -107,7 +96,7 @@ mod tests {
                    2021-02-25,26.10,31.0,22.0,24.0,24.0,9000\n\
                    2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
         let mut stock = Stock::new(String::from("STCK"), StockType::Stock, parse_date("2021-02-01").unwrap(), 100, 24.0);
-        assert!(update_stock_from_csv(&mut stock, &csv));
+        assert!(update_stock_from_csv(&mut stock, &csv).unwrap());
         assert!(price_equal(stock.latest_price, 28.25));
         assert_eq!(stock.latest_date, parse_date("2021-02-26").unwrap());
     }
@@ -196,18 +185,11 @@ mod tests {
         let csv_data = "AAPL,2021-02-26,125.0\n\
                         DELL,2021-02-26,80.0\n";
 
-        match StocksCache::from_csv(&csv_data) {
-            Ok(cache) => {
-                let date = parse_date("2021-02-26").unwrap();
-                assert_eq!(cache.size(), 2);
-                assert!(test_cache_entry(cache.get("AAPL"), 125.0, &date));
-                assert!(test_cache_entry(cache.get("DELL"), 80.0, &date));
-            },
-            Err(e) => {
-                println!("{}", e);
-                assert!(false);
-            }
-        }
+        let cache = StocksCache::from_csv(&csv_data).unwrap();
+        let date = parse_date("2021-02-26").unwrap();
+        assert_eq!(cache.size(), 2);
+        assert!(test_cache_entry(cache.get("AAPL"), 125.0, &date));
+        assert!(test_cache_entry(cache.get("DELL"), 80.0, &date));
 
         match StocksCache::from_csv("bad csv data") {
             Ok(_) => { assert!(false); },
@@ -219,20 +201,14 @@ mod tests {
     fn test_stocks_cache_from_cache_file() {
         match StocksCache::from_cache_file() {
             Ok(_) => {},
-            Err(e) => {
-                println!("{}", e);
-                assert!(false);
-            }
+            Err(_) => { assert!(false); }
         }
     }
 
     #[test]
     fn test_sort_stocks() {
         fn test_sort(stocks: &mut StockList, field: &str, desc: bool, first: &str, second: &str, third: &str) {
-            if let Err(e) = sort_stocks(stocks, field, desc) {
-                println!("{}", e);
-                assert!(false);
-            }
+            sort_stocks(stocks, field, desc).unwrap();
             assert_eq!(&stocks[0].symbol, first);
             assert_eq!(&stocks[1].symbol, second);
             assert_eq!(&stocks[2].symbol, third);

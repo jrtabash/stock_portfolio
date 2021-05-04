@@ -44,15 +44,10 @@ impl HistoryQuery {
                 evt_str)
     }
 
-    pub fn execute(self: &mut HistoryQuery) -> bool {
+    pub fn execute(self: &mut HistoryQuery) -> Result<(), curl::Error> {
         self.result.clear();
-        match url_request(&self.url(), &mut self.result) {
-            Ok(_) => true,
-            Err(e) => {
-                println!("Error: {}", e);
-                false
-            }
-        }
+        url_request(&self.url(), &mut self.result)?;
+        Ok(())
     }
 }
 

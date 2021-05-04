@@ -59,7 +59,7 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("pct", false) => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.pct_change(), rhs.pct_change())); Ok(()) },
         ("pct", true)  => { stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.pct_change(), lhs.pct_change())); Ok(()) },
 
-        _ => Result::Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
+        _ => Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }
 }
 
