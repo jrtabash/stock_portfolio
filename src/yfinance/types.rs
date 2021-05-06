@@ -33,3 +33,25 @@ pub fn interval2str(int: Interval) -> &'static str {
         Interval::Monthly => "1mo"
     }
 }
+
+// --------------------------------------------------------------------------------
+// Unit Tests
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_events() {
+        assert_eq!(events2str(Events::History), "history");
+        assert_eq!(events2str(Events::Dividend), "div");
+        assert_eq!(events2str(Events::Split), "split");
+    }
+
+    #[test]
+    fn test_interval() {
+        assert_eq!(interval2str(Interval::Daily), "1d");
+        assert_eq!(interval2str(Interval::Weekly), "1wk");
+        assert_eq!(interval2str(Interval::Monthly), "1mo");
+    }
+}

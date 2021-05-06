@@ -122,3 +122,115 @@ impl StocksCache {
         pbuf
     }
 }
+
+// --------------------------------------------------------------------------------
+// Unit Tests
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_cache_entry() {
+        let mut cache_entry = CacheEntry::new(10.25, datetime::today());
+        assert_eq!(cache_entry.latest_price, 10.25);
+        assert_eq!(cache_entry.latest_date, datetime::today());
+
+        let new_price = 20.52;
+        let new_date = datetime::today_plus_days(1);
+
+        cache_entry.update(new_price, &new_date);
+        assert_eq!(cache_entry.latest_price, new_price);
+        assert_eq!(cache_entry.latest_date, new_date);
+    }
+
+    #[test]
+    fn test_cache_entry_is_updated() {
+        let thu = datetime::make_date(2021, 3, 18);
+        let fri = datetime::make_date(2021, 3, 19);
+        let sat = datetime::make_date(2021, 3, 20);
+        let sun = datetime::make_date(2021, 3, 21);
+        let mon = datetime::make_date(2021, 3, 22);
+
+        let mut cache_entry = CacheEntry::new(10.25, thu);
+        assert!(cache_entry.is_updated(&thu));
+        assert!(!cache_entry.is_updated(&fri));
+
+        cache_entry.latest_date = fri.clone();
+        assert!(cache_entry.is_updated(&fri));
+        assert!(cache_entry.is_updated(&sat));
+        assert!(cache_entry.is_updated(&sun));
+        assert!(!cache_entry.is_updated(&mon));
+
+        cache_entry.latest_date = mon.clone();
+        assert!(cache_entry.is_updated(&mon));
+    }
+
+    #[test]
+    fn test_stocks_cache() {
+        let mut cache = StocksCache::new();
+        assert_eq!(cache.size(), 0);
+
+        cache.add(String::from("AAPL"), CacheEntry::new(125.0, datetime::today()));
+        assert_eq!(cache.size(), 1);
+
+        match cache.get("AAPL") {
+            Some(entry) => {
+                assert_eq!(entry.latest_price, 125.0);
+                assert_eq!(entry.latest_date, datetime::today());
+            },
+            None => { assert!(false); }
+        }
+
+        cache.add(String::from("DELL"), CacheEntry::new(80.0, datetime::today_plus_days(-1)));
+        assert_eq!(cache.size(), 2);
+
+        match cache.get_mut("DELL") {
+            Some(entry) => {
+                entry.latest_price = 81.0;
+                entry.latest_date = datetime::today();
+            },
+            None => { assert!(false); }
+        }
+
+        match cache.get("DELL") {
+            Some(entry) => {
+                assert_eq!(entry.latest_price, 81.0);
+                assert_eq!(entry.latest_date, datetime::today());
+            },
+            None => { assert!(false); }
+        }
+    }
+
+    #[test]
+    fn test_stocks_cache_from_csv() {
+        fn test_cache_entry(entry: Option<&CacheEntry>, price: Price, date: &LocalDate) -> bool {
+            match entry {
+                Some(ce) => format!("{:.2}", ce.latest_price) == format!("{:.2}", price) && ce.latest_date == *date,
+                None => false
+            }
+        }
+
+        let csv_data = "AAPL,2021-02-26,125.0\n\
+                        DELL,2021-02-26,80.0\n";
+
+        let cache = StocksCache::from_csv(&csv_data).unwrap();
+        let date = datetime::parse_date("2021-02-26").unwrap();
+        assert_eq!(cache.size(), 2);
+        assert!(test_cache_entry(cache.get("AAPL"), 125.0, &date));
+        assert!(test_cache_entry(cache.get("DELL"), 80.0, &date));
+
+        match StocksCache::from_csv("bad csv data") {
+            Ok(_) => { assert!(false); },
+            Err(_) => {}
+        }
+    }
+
+    #[test]
+    fn test_stocks_cache_from_cache_file() {
+        match StocksCache::from_cache_file() {
+            Ok(_) => {},
+            Err(_) => { assert!(false); }
+        }
+    }
+}

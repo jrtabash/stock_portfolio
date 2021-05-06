@@ -67,3 +67,54 @@ impl fmt::Display for Stock {
         write!(f, "Stock({} {}@{:.2})", self.symbol, self.quantity, self.latest_price)
     }
 }
+
+// --------------------------------------------------------------------------------
+// Unit Tests
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_stock_new() {
+        let stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
+        assert_eq!(stock.symbol, "AAPL");
+        assert!(stock.stype == StockType::Stock);
+        assert_eq!(stock.date, datetime::today());
+        assert_eq!(stock.quantity, 100);
+        assert_eq!(stock.base_price, 120.25);
+        assert_eq!(stock.latest_price, 0.0);
+        assert_eq!(stock.latest_date, datetime::earliest_date());
+    }
+
+    #[test]
+    fn test_stock_set_latest_price() {
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
+        assert_eq!(stock.latest_price, 0.0);
+        assert_eq!(stock.latest_date, datetime::earliest_date());
+
+        stock.set_latest_price(125.50, datetime::today());
+        assert_eq!(stock.latest_price, 125.50);
+        assert_eq!(stock.latest_date, datetime::today());
+    }
+
+    #[test]
+    fn test_stock_getters() {
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
+        stock.set_latest_price(125.50, datetime::today());
+
+        assert_eq!(stock.net_price(), 5.25);
+        assert_eq!(stock.base_notional(), 12025.0);
+        assert_eq!(stock.latest_notional(), 12550.0);
+        assert_eq!(stock.net_notional(), 525.0);
+        assert!((stock.pct_change() - 4.36) <= 0.009);
+    }
+
+    #[test]
+    fn test_stock_display() {
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
+        stock.set_latest_price(125.50, datetime::today());
+
+        assert_eq!(format!("{}", stock), "Stock(AAPL 100@125.50)");
+    }
+}
