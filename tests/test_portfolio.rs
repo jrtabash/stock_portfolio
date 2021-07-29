@@ -185,7 +185,7 @@ fn test_value_export() {
 
     let csv_content = fs::read_to_string(&csv_filename).unwrap();
     let today_str = today_plus_days(0).format("%Y-%m-%d");
-    let expected = format!("Ticker,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value\n\
+    let expected = format!("Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value\n\
                             DELL,{},{},2,100,75.50,80.00,4.50,5.96,7550.00,8000.00,450.00\n\
                             AAPL,{},{},3,100,120.25,125.25,5.00,4.16,12025.00,12525.00,500.00\n\
                             ICLN,{},{},0,100,24.10,24.15,0.05,0.21,2410.00,2415.00,5.00\n",

@@ -54,7 +54,7 @@ Number of Stocks: 3
        Net Value: 7685.00
   Percent Change: 24.87
 
-Ticker   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
 ------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
 AAPL     2020-09-20 2021-07-28    311      100   115.00   144.98    29.98    26.07     11500.00     14498.00    2998.00
 AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
@@ -74,7 +74,7 @@ Number of Stocks: 3
        Net Value: 7685.00
   Percent Change: 24.87
 
-Ticker   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
 ------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
 AAPL     2020-09-20 2021-07-28    311      100   115.00   144.98    29.98    26.07     11500.00     14498.00    2998.00
 AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
@@ -99,7 +99,7 @@ Number of Stocks: 3
        Net Value: 7685.00
   Percent Change: 24.87
 
-Ticker   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
 ------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
 DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
 AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
@@ -124,7 +124,7 @@ Number of Stocks: 1
        Net Value: 2039.00
   Percent Change: 27.01
 
-Ticker   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
 ------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
 DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
 ```

@@ -22,7 +22,7 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
     println!("");
 
     println!("{:8} {:10} {:10} {:6} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10}",
-             "Ticker",
+             "Symbol",
              "Buy Date",
              "Upd Date",
              "Days",
@@ -83,7 +83,7 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
 
 pub fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
     let mut file = File::create(&filename)?;
-    write!(file, "Ticker,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value\n")?;
+    write!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value\n")?;
     for stock in stocks.iter() {
         write!(file, "{},{},{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2}\n",
                stock.symbol,

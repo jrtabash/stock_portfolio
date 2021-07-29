@@ -8,7 +8,7 @@ use crate::portfolio::stock_type::StockType;
 pub type Price = PriceType;
 
 pub struct Stock {
-    pub symbol: String,          // Ticker
+    pub symbol: String,          // Name
     pub stype: StockType,        // Stock Type
     pub date: LocalDate,         // Buy Date
     pub quantity: u32,           // Buy Quantity
