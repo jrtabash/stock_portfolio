@@ -14,7 +14,8 @@ pub struct Stock {
     pub quantity: u32,           // Buy Quantity
     pub base_price: Price,       // Buy Price
     pub latest_price: Price,     // Latest Price
-    pub latest_date: LocalDate   // Latest Date
+    pub latest_date: LocalDate,  // Latest Date
+    pub days_held: i64           // Days Held
 }
 
 pub type StockList = Vec<Stock>;
@@ -27,13 +28,15 @@ impl Stock {
                base_price: Price) -> Stock {
         let latest_price: Price = 0.0;
         let latest_date = datetime::earliest_date();
-        Stock { symbol, stype, date, quantity, base_price, latest_price, latest_date }
+        let days_held: i64 = 0;
+        Stock { symbol, stype, date, quantity, base_price, latest_price, latest_date, days_held }
     }
 
     #[inline(always)]
     pub fn set_latest_price(self: &mut Stock, price: Price, date: LocalDate) {
         self.latest_price = price;
         self.latest_date = date;
+        self.days_held = datetime::count_days(&self.date, &self.latest_date)
     }
 
     #[inline(always)]
@@ -96,6 +99,12 @@ mod tests {
         stock.set_latest_price(125.50, datetime::today());
         assert_eq!(stock.latest_price, 125.50);
         assert_eq!(stock.latest_date, datetime::today());
+        assert_eq!(stock.days_held, 0);
+
+        stock.set_latest_price(125.0, datetime::today_plus_days(10));
+        assert_eq!(stock.latest_price, 125.0);
+        assert_eq!(stock.latest_date, datetime::today_plus_days(10));
+        assert_eq!(stock.days_held, 10);
     }
 
     #[test]

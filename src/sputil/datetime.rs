@@ -45,6 +45,11 @@ pub fn is_weekend(date: &LocalDate) -> bool {
     date.weekday() == Weekday::Sat || date.weekday() == Weekday::Sun
 }
 
+#[inline(always)]
+pub fn count_days(from_date: &LocalDate, to_date: &LocalDate) -> i64 {
+    to_date.signed_duration_since(from_date.clone()).num_days()
+}
+
 // --------------------------------------------------------------------------------
 // Unit Tests
 
@@ -135,5 +140,16 @@ mod tests {
         assert!(is_weekend(&sat));
         assert!(is_weekend(&sun));
         assert!(!is_weekend(&mon));
+    }
+
+    #[test]
+    fn test_count_days() {
+        let dt1 = make_date(2021, 3, 19);
+        let dt2 = make_date(2021, 3, 20);
+        let dt3 = make_date(2021, 3, 21);
+
+        assert_eq!(count_days(&dt1, &dt1), 0);
+        assert_eq!(count_days(&dt1, &dt2), 1);
+        assert_eq!(count_days(&dt1, &dt3), 2);
     }
 }

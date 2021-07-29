@@ -30,7 +30,7 @@ impl Arguments {
             .arg(Arg::with_name("order_by")
                  .short("o")
                  .long("orderby")
-                 .help("Order stocks by one of symbol, type, date, price, net, pct, size or value")
+                 .help("Order stocks by one of symbol, type, date, days, price, net, pct, size or value")
                  .takes_value(true))
             .arg(Arg::with_name("include")
                  .short("i")

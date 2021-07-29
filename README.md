@@ -28,7 +28,7 @@ OPTIONS:
    -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of symbols
    -e, --export <export_file>    Export gains and losses table to a csv file
    -i, --include <include        Include stocks by type or symbols; one of stock, etf or a comma separated list of symbols
-   -o, --orderby <order_by>      Order stocks by one of symbol, type, date, price, net, pct, size or value
+   -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, size or value
    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price'
                                  including a header line. Supported type values include stock and etf
 ```
@@ -47,18 +47,18 @@ $ stock_portfolio --stocks example_stocks.csv
 
 Stocks Value Report
 -------------------
-            Date: 2021-04-01
+            Date: 2021-07-28
 Number of Stocks: 3
       Base Value: 30900.00
-    Latest Value: 33508.00
-       Net Value: 2608.00
-  Percent Change: 8.44
+    Latest Value: 38585.00
+       Net Value: 7685.00
+  Percent Change: 24.87
 
-Ticker   Buy Date   Upd Date   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value
-------   --------   --------   ----     ----     ---      ---      ---      ----------   ---------    ---------
-AAPL     2020-09-20 2021-04-01      100   115.00   123.00     8.00     6.96     11500.00     12300.00     800.00
-AAPL     2020-11-12 2021-04-01      100   118.50   123.00     4.50     3.80     11850.00     12300.00     450.00
-DELL     2021-02-10 2021-04-01      100    75.50    89.08    13.58    17.99      7550.00      8908.00    1358.00
+Ticker   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
+AAPL     2020-09-20 2021-07-28    311      100   115.00   144.98    29.98    26.07     11500.00     14498.00    2998.00
+AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
+DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
 ```
 
 ## Example 2
@@ -67,23 +67,23 @@ $ stock_portfolio --show-groupby --stocks example_stocks.csv
 
 Stocks Value Report
 -------------------
-            Date: 2021-04-01
+            Date: 2021-07-28
 Number of Stocks: 3
       Base Value: 30900.00
-    Latest Value: 33508.00
-       Net Value: 2608.00
-  Percent Change: 8.44
+    Latest Value: 38585.00
+       Net Value: 7685.00
+  Percent Change: 24.87
 
-Ticker   Buy Date   Upd Date   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value
-------   --------   --------   ----     ----     ---      ---      ---      ----------   ---------    ---------
-AAPL     2020-09-20 2021-04-01      100   115.00   123.00     8.00     6.96     11500.00     12300.00     800.00
-AAPL     2020-11-12 2021-04-01      100   118.50   123.00     4.50     3.80     11850.00     12300.00     450.00
-DELL     2021-02-10 2021-04-01      100    75.50    89.08    13.58    17.99      7550.00      8908.00    1358.00
+Ticker   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
+AAPL     2020-09-20 2021-07-28    311      100   115.00   144.98    29.98    26.07     11500.00     14498.00    2998.00
+AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
+DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
 
-GroupBy  Size     Cur Value
--------  ----     ---------
-AAPL          200     24600.00
-DELL          100      8908.00
+GroupBy  Size     Cur Value   
+-------  ----     ---------   
+AAPL          200     28996.00
+DELL          100      9589.00
 ```
 
 ## Example 3
@@ -92,23 +92,23 @@ $ stock_portfolio --show-groupby --stocks example_stocks.csv --orderby date --de
 
 Stocks Value Report
 -------------------
-            Date: 2021-04-01
+            Date: 2021-07-28
 Number of Stocks: 3
       Base Value: 30900.00
-    Latest Value: 33508.00
-       Net Value: 2608.00
-  Percent Change: 8.44
+    Latest Value: 38585.00
+       Net Value: 7685.00
+  Percent Change: 24.87
 
-Ticker   Buy Date   Upd Date   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value
-------   --------   --------   ----     ----     ---      ---      ---      ----------   ---------    ---------
-DELL     2021-02-10 2021-04-01      100    75.50    89.08    13.58    17.99      7550.00      8908.00    1358.00
-AAPL     2020-11-12 2021-04-01      100   118.50   123.00     4.50     3.80     11850.00     12300.00     450.00
-AAPL     2020-09-20 2021-04-01      100   115.00   123.00     8.00     6.96     11500.00     12300.00     800.00
+Ticker   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
+DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
+AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
+AAPL     2020-09-20 2021-07-28    311      100   115.00   144.98    29.98    26.07     11500.00     14498.00    2998.00
 
-GroupBy  Size     Cur Value
--------  ----     ---------
-DELL          100      8908.00
-AAPL          200     24600.00
+GroupBy  Size     Cur Value   
+-------  ----     ---------   
+DELL          100      9589.00
+AAPL          200     28996.00
 ```
 
 ## Example 4
@@ -117,14 +117,14 @@ $ stock_portfolio --stocks example_stocks.csv --include DELL
 
 Stocks Value Report
 -------------------
-            Date: 2021-04-01
+            Date: 2021-07-28
 Number of Stocks: 1
       Base Value: 7550.00
-    Latest Value: 8908.00
-       Net Value: 1358.00
-  Percent Change: 17.99
+    Latest Value: 9589.00
+       Net Value: 2039.00
+  Percent Change: 27.01
 
-Ticker   Buy Date   Upd Date   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value
-------   --------   --------   ----     ----     ---      ---      ---      ----------   ---------    ---------
-DELL     2021-02-10 2021-04-01      100    75.50    89.08    13.58    17.99      7550.00      8908.00    1358.00
+Ticker   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
+DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
 ```
