@@ -26,10 +26,16 @@ impl Stock {
                date: LocalDate,
                quantity: u32,
                base_price: Price) -> Stock {
-        let latest_price: Price = 0.0;
-        let latest_date = datetime::earliest_date();
-        let days_held: i64 = 0;
-        Stock { symbol, stype, date, quantity, base_price, latest_price, latest_date, days_held }
+        Stock {
+            symbol,
+            stype,
+            date,
+            quantity,
+            base_price,
+            latest_price: 0.0,
+            latest_date: datetime::earliest_date(),
+            days_held: 0
+        }
     }
 
     #[inline(always)]

@@ -25,8 +25,14 @@ impl HistoryQuery {
                to_date: LocalDate,
                interval: Interval,
                events: Events) -> HistoryQuery {
-        let result = String::new();
-        HistoryQuery { symbol, from_date, to_date, interval, events, result }
+        HistoryQuery {
+            symbol,
+            from_date,
+            to_date,
+            interval,
+            events,
+            result: String::new()
+        }
     }
 
     pub fn url(self: &HistoryQuery) -> String {

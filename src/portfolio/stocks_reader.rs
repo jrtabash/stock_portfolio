@@ -13,7 +13,9 @@ pub struct StocksReader {
 
 impl StocksReader {
     pub fn new(stocks_file: String) -> StocksReader {
-        StocksReader { stocks_file }
+        StocksReader {
+            stocks_file
+        }
     }
 
     pub fn read(self: &StocksReader) -> Result<StockList, Box<dyn Error>> {

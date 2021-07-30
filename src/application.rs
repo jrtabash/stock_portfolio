@@ -9,9 +9,10 @@ pub struct Application {
 
 impl Application {
     pub fn new() -> Application {
-        let args = Arguments::new();
-        let stocks = stock::StockList::new();
-        Application { args, stocks }
+        Application {
+            args: Arguments::new(),
+            stocks: stock::StockList::new()
+        }
     }
 
     pub fn run(self: &mut Application) -> Result<(), Box<dyn Error>> {

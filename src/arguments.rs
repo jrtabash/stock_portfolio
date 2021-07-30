@@ -84,7 +84,16 @@ impl Arguments {
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");
 
-        Arguments { stocks_file, order_by, include, exclude, export_file, use_cache, show_groupby, desc }
+        Arguments {
+            stocks_file,
+            order_by,
+            include,
+            exclude,
+            export_file,
+            use_cache,
+            show_groupby,
+            desc
+        }
     }
 
     pub fn stocks_file(self: &Arguments) -> &String {

@@ -20,7 +20,10 @@ pub struct CacheEntry {
 
 impl CacheEntry {
     pub fn new(latest_price: Price, latest_date: LocalDate) -> CacheEntry {
-        CacheEntry { latest_price, latest_date }
+        CacheEntry {
+            latest_price,
+            latest_date
+        }
     }
 
     pub fn update(self: &mut CacheEntry, price: Price, date: &LocalDate) {
@@ -45,8 +48,9 @@ pub struct StocksCache {
 
 impl StocksCache {
     pub fn new() -> StocksCache {
-        let table = Table::new();
-        StocksCache { table }
+        StocksCache {
+            table: Table::new()
+        }
     }
 
     #[inline(always)]
