@@ -21,10 +21,10 @@ FLAGS:
    -d, --desc            Used with order by option to sort in descending order
    -h, --help            Prints help information
    -g, --show-groupby    Show quantities and current notional values grouped by symbol
-   -c, --use-cache       Use local cache to store latest stock prices
    -V, --version         Prints version information
 
 OPTIONS:
+   -c, --cache <cache_file>      Local cache file to store latest stock prices
    -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of symbols
    -e, --export <export_file>    Export gains and losses table to a csv file
    -i, --include <include        Include stocks by type or symbols; one of stock, etf or a comma separated list of symbols

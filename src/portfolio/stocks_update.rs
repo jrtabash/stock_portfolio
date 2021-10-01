@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::error::Error;
 use crate::sputil::datetime;
 use crate::portfolio::stock::{Price, Stock, StockList};
@@ -57,9 +58,9 @@ pub fn update_stocks(stocks: &mut StockList) -> Result<usize, Box<dyn Error>> {
     Ok(count)
 }
 
-pub fn update_stocks_with_cache(stocks: &mut StockList) -> Result<usize, Box<dyn Error>> {
+pub fn update_stocks_with_cache(stocks: &mut StockList, cache_file: &Path) -> Result<usize, Box<dyn Error>> {
     let today = datetime::today();
-    let mut cache = StocksCache::from_cache_file()?;
+    let mut cache = StocksCache::from_cache_file(cache_file)?;
     let mut count: usize = 0;
     for stock in stocks.iter_mut() {
         match cache.get_mut(&stock.symbol) {
@@ -83,7 +84,7 @@ pub fn update_stocks_with_cache(stocks: &mut StockList) -> Result<usize, Box<dyn
             }
         }
     }
-    if let Err(error) = StocksCache::save_cache_file(&cache) {
+    if let Err(error) = StocksCache::save_cache_file(&cache, cache_file) {
         eprintln!("Failed to save cache file - {}", error);
     }
     Ok(count)

@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::error::Error;
 use crate::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
 use crate::arguments::Arguments;
@@ -49,10 +50,9 @@ impl Application {
 
     fn update(self: &mut Application) -> Result<(), Box<dyn Error>> {
         let count =
-            if self.args.use_cache() {
-                stocks_update::update_stocks_with_cache(&mut self.stocks)?
-            } else {
-                stocks_update::update_stocks(&mut self.stocks)?
+            match self.args.cache_file() {
+                Some(cache_file) => stocks_update::update_stocks_with_cache(&mut self.stocks, PathBuf::from(cache_file).as_path())?,
+                None => stocks_update::update_stocks(&mut self.stocks)?
             };
 
         if count != self.stocks.len() {

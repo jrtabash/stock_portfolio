@@ -1,6 +1,5 @@
 use std::io::prelude::*;
-use std::env;
-use std::path::PathBuf;
+use std::path::Path;
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufReader, ErrorKind};
@@ -75,9 +74,8 @@ impl StocksCache {
         self.table.len()
     }
 
-    pub fn from_cache_file() -> Result<StocksCache, Box<dyn Error>> {
-        let cache_file = StocksCache::make_cache_file();
-        match File::open(cache_file.as_path()) {
+    pub fn from_cache_file(cache_file: &Path) -> Result<StocksCache, Box<dyn Error>> {
+        match File::open(cache_file) {
             Ok(file) => {
                 let mut reader = BufReader::new(file);
                 let mut content = String::new();
@@ -111,19 +109,12 @@ impl StocksCache {
         Ok(cache)
     }
 
-    pub fn save_cache_file(cache: &StocksCache) -> Result<(), Box<dyn Error>> {
-        let cache_file = StocksCache::make_cache_file();
-        let mut file = File::create(cache_file.as_path())?;
+    pub fn save_cache_file(cache: &StocksCache, cache_file: &Path) -> Result<(), Box<dyn Error>> {
+        let mut file = File::create(cache_file)?;
         for (symbol, cache_entry) in cache.table.iter() {
             write!(file, "{},{},{}\n", symbol, cache_entry.latest_date.format("%Y-%m-%d"), cache_entry.latest_price)?;
         }
         Ok(())
-    }
-
-    fn make_cache_file() -> PathBuf {
-        let mut pbuf = env::temp_dir();
-        pbuf.push("stock_portfolio_cache.spc");
-        pbuf
     }
 }
 
@@ -133,6 +124,7 @@ impl StocksCache {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::sputil::temp_file;
 
     #[test]
     fn test_cache_entry() {
@@ -232,9 +224,16 @@ mod tests {
 
     #[test]
     fn test_stocks_cache_from_cache_file() {
-        match StocksCache::from_cache_file() {
+        let name = "sp_test_cache.spc";
+        let data = "AAPL,2021-02-26,125.0\n\
+                    DELL,2021-02-26,80.0\n";
+
+        assert!(temp_file::create_file(&name, &data));
+        let test_file = temp_file::make_path(&name);
+        match StocksCache::from_cache_file(test_file.as_path()) {
             Ok(_) => {},
             Err(_) => { assert!(false); }
         }
+        assert!(temp_file::remove_file(&name));
     }
 }

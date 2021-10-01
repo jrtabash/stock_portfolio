@@ -8,7 +8,7 @@ pub struct Arguments {
     include: Option<String>,
     exclude: Option<String>,
     export_file: Option<String>,
-    use_cache: bool,
+    cache_file: Option<String>,
     show_groupby: bool,
     desc: bool
 }
@@ -47,16 +47,17 @@ impl Arguments {
                  .long("export")
                  .help("Export gains and losses table to a csv file")
                  .takes_value(true))
+            .arg(Arg::with_name("cache_file")
+                 .short("c")
+                 .long("cache")
+                 .help("Local cache file to store latest stock prices")
+                 .takes_value(true))
 
             // Flags
             .arg(Arg::with_name("show_groupby")
                  .short("g")
                  .long("show-groupby")
                  .help("Show quantities and current notional values grouped by symbol"))
-            .arg(Arg::with_name("use_cache")
-                 .short("c")
-                 .long("use-cache")
-                 .help("Use local cache to store latest stock prices"))
             .arg(Arg::with_name("desc")
                  .short("d")
                  .long("desc")
@@ -80,7 +81,10 @@ impl Arguments {
             Some(value) => Some(String::from(value)),
             None => None
         };
-        let use_cache = parsed_args.is_present("use_cache");
+        let cache_file = match parsed_args.value_of("cache_file") {
+            Some(value) => Some(String::from(value)),
+            None => None
+        };
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");
 
@@ -90,7 +94,7 @@ impl Arguments {
             include,
             exclude,
             export_file,
-            use_cache,
+            cache_file,
             show_groupby,
             desc
         }
@@ -116,8 +120,8 @@ impl Arguments {
         self.export_file.as_ref()
     }
 
-    pub fn use_cache(self: &Arguments) -> bool {
-        self.use_cache
+    pub fn cache_file(self: &Arguments) -> Option<&String> {
+        self.cache_file.as_ref()
     }
 
     pub fn show_groupby(self: &Arguments) -> bool {

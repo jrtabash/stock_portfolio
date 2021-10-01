@@ -1,8 +1,7 @@
-use std::io::prelude::*;
 use std::collections::HashMap;
-use std::env;
 use std::fs;
 use stock_portfolio::sputil::datetime::*;
+use stock_portfolio::sputil::temp_file;
 use stock_portfolio::portfolio::stock_type::*;
 use stock_portfolio::portfolio::stock::*;
 use stock_portfolio::portfolio::algorithms::*;
@@ -180,8 +179,9 @@ fn test_value_export() {
     list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
     list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 100, 24.10, 24.15));
 
-    let csv_filename = make_temp_file("sp_test_value_export.csv");
-    value_export(&list, &csv_filename).unwrap();
+    let temp_name = "sp_test_value_export.csv";
+    let csv_filename = temp_file::make_path(&temp_name);
+    value_export(&list, &csv_filename.to_str().unwrap()).unwrap();
 
     let csv_content = fs::read_to_string(&csv_filename).unwrap();
     let today_str = today_plus_days(0).format("%Y-%m-%d");
@@ -197,19 +197,21 @@ fn test_value_export() {
                            today_str);
     assert_eq!(csv_content, expected);
 
-    fs::remove_file(&csv_filename).unwrap();
+    assert!(temp_file::remove_file(&temp_name));
 }
 
 #[test]
 fn test_stock_reader() {
-    let stocks_filename = make_temp_file("sp_test_stocks_file.csv");
-    let mut file = fs::File::create(stocks_filename.clone()).unwrap();
-    write!(file, "symbol,type,date,quantity,base_price\n").unwrap();
-    write!(file, "AAPL,stock,2020-09-20,100,115.00\n").unwrap();
-    write!(file, "AAPL,stock,2020-11-12,100,118.50\n").unwrap();
-    write!(file, "DELL,stock,2021-02-10,100,75.50\n").unwrap();
+    let temp_name = "sp_test_stocks_file.csv";
+    let stocks_filename = temp_file::make_path(&temp_name);
 
-    let reader = StocksReader::new(stocks_filename.clone());
+    assert!(temp_file::create_file(&temp_name,
+                                   "symbol,type,date,quantity,base_price\n\
+                                    AAPL,stock,2020-09-20,100,115.00\n\
+                                    AAPL,stock,2020-11-12,100,118.50\n\
+                                    DELL,stock,2021-02-10,100,75.50\n"));
+
+    let reader = StocksReader::new(String::from(stocks_filename.to_str().unwrap()));
     let list = reader.read().unwrap();
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["AAPL", "AAPL", "DELL"]);
@@ -222,7 +224,7 @@ fn test_stock_reader() {
     assert_eq!(list.iter().map(|s| s.base_price).collect::<Vec<f64>>(),
                vec![115.0, 118.50, 75.50]);
 
-    fs::remove_file(&stocks_filename).unwrap();
+    assert!(temp_file::remove_file(&temp_name));
 }
 
 // --------------------------------------------------------------------------------
@@ -237,10 +239,4 @@ fn make_stock(sym: &str, stype: StockType, date: LocalDate, qty: u32, base: Pric
 
 fn price_equal(lhs: Price, rhs: Price) -> bool {
     format!("{:.2}", lhs) == format!("{:.2}", rhs)
-}
-
-fn make_temp_file(filename: &str) -> String {
-    let mut pbuf = env::temp_dir();
-    pbuf.push(filename);
-    format!("{}", pbuf.to_str().unwrap())
 }
