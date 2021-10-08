@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 use std::fs;
-use stock_portfolio::sputil::datetime::*;
-use stock_portfolio::sputil::temp_file;
-use stock_portfolio::portfolio::stock_type::*;
-use stock_portfolio::portfolio::stock::*;
-use stock_portfolio::portfolio::algorithms::*;
-use stock_portfolio::portfolio::stocks_update::*;
-use stock_portfolio::portfolio::stocks_reader::*;
-use stock_portfolio::portfolio::reports::value_export;
+use sp_lib::sputil::datetime::*;
+use sp_lib::sputil::temp_file;
+use sp_lib::portfolio::stock_type::*;
+use sp_lib::portfolio::stock::*;
+use sp_lib::portfolio::algorithms::*;
+use sp_lib::portfolio::stocks_update::*;
+use sp_lib::portfolio::stocks_reader::*;
+use sp_lib::portfolio::reports::value_export;
 
 #[test]
 fn test_stock_list() {

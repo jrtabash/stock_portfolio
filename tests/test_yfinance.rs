@@ -1,6 +1,6 @@
-use stock_portfolio::sputil::datetime;
-use stock_portfolio::yfinance::types::*;
-use stock_portfolio::yfinance::query::*;
+use sp_lib::sputil::datetime;
+use sp_lib::yfinance::types::*;
+use sp_lib::yfinance::query::*;
 
 #[test]
 fn test_history_query() {
