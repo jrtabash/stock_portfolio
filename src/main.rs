@@ -1,5 +1,8 @@
+pub mod arguments;
+pub mod application;
+
 use std::process;
-use stock_portfolio::application::Application;
+use crate::application::Application;
 
 fn main() {
     let mut app = Application::new();

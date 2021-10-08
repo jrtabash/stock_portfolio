@@ -15,8 +15,8 @@ pub struct Arguments {
 
 impl Arguments {
     pub fn new() -> Arguments {
-        let parsed_args = App::new("Stock Portfolio Tool")
-            .version("0.1.1")
+        let parsed_args = App::new("Stock Portfolio Report")
+            .version("0.2.0")
             .about("Get latest close prices and report the gains and losses of stocks in portfolio.")
 
             // Options

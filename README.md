@@ -1,4 +1,4 @@
-# Stock Portfolio Tool
+# Stock Portfolio Report
 Get latest close prices and report the gains and losses of stocks in portfolio.
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
@@ -15,7 +15,7 @@ The following features are supported:
 ## Usage
 ```bash
 USAGE:
-    stock_portfolio [FLAGS] [OPTIONS] --stocks <stocks_file>
+    sp_report [FLAGS] [OPTIONS] --stocks <stocks_file>
 
 FLAGS:
    -d, --desc            Used with order by option to sort in descending order
@@ -43,7 +43,7 @@ DELL,stock,2021-02-10,100,75.50
 
 ## Example 1
 ```bash
-$ stock_portfolio --stocks example_stocks.csv
+$ sp_report --stocks example_stocks.csv
 
 Stocks Value Report
 -------------------
@@ -63,7 +63,7 @@ DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.
 
 ## Example 2
 ```bash
-$ stock_portfolio --show-groupby --stocks example_stocks.csv
+$ sp_report --show-groupby --stocks example_stocks.csv
 
 Stocks Value Report
 -------------------
@@ -88,7 +88,7 @@ DELL          100      9589.00
 
 ## Example 3
 ```bash
-$ stock_portfolio --show-groupby --stocks example_stocks.csv --orderby date --desc
+$ sp_report --show-groupby --stocks example_stocks.csv --orderby date --desc
 
 Stocks Value Report
 -------------------
@@ -113,7 +113,7 @@ AAPL          200     28996.00
 
 ## Example 4
 ```bash
-$ stock_portfolio --stocks example_stocks.csv --include DELL
+$ sp_report --stocks example_stocks.csv --include DELL
 
 Stocks Value Report
 -------------------

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use std::error::Error;
-use crate::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
+use stock_portfolio::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
 use crate::arguments::Arguments;
 
 pub struct Application {
