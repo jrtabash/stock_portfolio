@@ -5,8 +5,8 @@ use std::fs::File;
 use std::io::{BufReader, ErrorKind};
 use std::collections::HashMap;
 
-use crate::sputil::datetime;
-use crate::sputil::datetime::LocalDate;
+use crate::util::datetime;
+use crate::util::datetime::LocalDate;
 use crate::portfolio::stock::Price;
 
 // --------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ impl StocksCache {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sputil::temp_file;
+    use crate::util::temp_file;
 
     #[test]
     fn test_cache_entry() {

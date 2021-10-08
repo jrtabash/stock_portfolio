@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::error::Error;
-use crate::sputil::datetime;
+use crate::util::datetime;
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::portfolio::stocks_cache::{CacheEntry, StocksCache};
 use crate::yfinance::query::HistoryQuery;

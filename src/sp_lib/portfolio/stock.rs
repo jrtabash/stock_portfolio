@@ -1,8 +1,8 @@
 use std::fmt;
 
-use crate::sputil::datetime;
-use crate::sputil::datetime::LocalDate;
-use crate::sputil::price_type::PriceType;
+use crate::util::datetime;
+use crate::util::datetime::LocalDate;
+use crate::util::price_type::PriceType;
 use crate::portfolio::stock_type::StockType;
 
 pub type Price = PriceType;

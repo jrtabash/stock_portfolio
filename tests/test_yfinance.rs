@@ -1,4 +1,4 @@
-use sp_lib::sputil::datetime;
+use sp_lib::util::datetime;
 use sp_lib::yfinance::types::*;
 use sp_lib::yfinance::query::*;
 

@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use crate::portfolio::stock::{Price, StockList};
-use crate::sputil::price_type;
+use crate::util::price_type;
 use crate::portfolio::stock_type;
 
 pub fn latest_notional(stocks: &StockList) -> Price {

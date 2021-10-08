@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::fs::File;
 
-use crate::sputil::datetime;
+use crate::util::datetime;
 use crate::portfolio::stock::StockList;
 use crate::portfolio::algorithms;
 

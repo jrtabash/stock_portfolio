@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::error::Error;
 
-use crate::sputil::datetime;
+use crate::util::datetime;
 use crate::portfolio::stock_type;
 use crate::portfolio::stock::{Price, Stock, StockList};
 

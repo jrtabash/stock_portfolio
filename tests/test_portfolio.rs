@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
-use sp_lib::sputil::datetime::*;
-use sp_lib::sputil::temp_file;
+use sp_lib::util::datetime::*;
+use sp_lib::util::temp_file;
 use sp_lib::portfolio::stock_type::*;
 use sp_lib::portfolio::stock::*;
 use sp_lib::portfolio::algorithms::*;

@@ -4,8 +4,8 @@ use curl::easy;
 
 use crate::yfinance::types;
 use crate::yfinance::types::{Interval, Events};
-use crate::sputil::datetime;
-use crate::sputil::datetime::LocalDate;
+use crate::util::datetime;
+use crate::util::datetime::LocalDate;
 
 // --------------------------------------------------------------------------------
 // HistoryQuery
