@@ -60,6 +60,8 @@ impl HistoryEntry {
 // --------------------------------------------------------------------------------
 // History
 
+pub type HistoryPred = fn(&HistoryEntry) -> bool;
+
 pub struct History {
     symbol: String,
     entries: Vec<HistoryEntry>
@@ -80,6 +82,20 @@ impl History {
                 continue;
             }
             hist.entries.push(HistoryEntry::parse_csv(line)?);
+        }
+        Ok(hist)
+    }
+
+    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: HistoryPred) -> Result<History, Box<dyn Error>> {
+        let mut hist = History::new(symbol);
+        for line in csv.split('\n') {
+            if line.starts_with("Date") {
+                continue;
+            }
+            let entry = HistoryEntry::parse_csv(line)?;
+            if pred(&entry) {
+                hist.entries.push(entry);
+            }
         }
         Ok(hist)
     }
@@ -159,6 +175,35 @@ mod tests {
         check_entry(&entries[0], datetime::make_date(2021, 2, 24), 25.0, 30.0, 20.0, 26.0, 26.0, 10000);
         check_entry(&entries[1], datetime::make_date(2021, 2, 25), 26.1, 31.0, 22.0, 24.0, 24.0, 9000);
         check_entry(&entries[2], datetime::make_date(2021, 2, 26), 24.9, 32.0, 24.0, 28.0, 28.0, 11000);
+    }
+
+    #[test]
+    fn test_history_parse_filter_csv() {
+        let csv = "2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
+                   2021-02-25,26.1,31.0,22.0,24.0,24.0,9000\n\
+                   2021-02-26,24.9,32.0,24.0,28.0,28.0,11000";
+        let hist = History::parse_filter_csv("AAPL", &csv, |entry| entry.date > datetime::make_date(2021, 2, 24)).unwrap();
+        assert_eq!(hist.symbol(), "AAPL");
+        assert_eq!(hist.count(), 2);
+
+        let entries = hist.entries();
+        check_entry(&entries[0], datetime::make_date(2021, 2, 25), 26.1, 31.0, 22.0, 24.0, 24.0, 9000);
+        check_entry(&entries[1], datetime::make_date(2021, 2, 26), 24.9, 32.0, 24.0, 28.0, 28.0, 11000);
+    }
+
+    #[test]
+    fn test_history_parse_filter_csv_with_header() {
+        let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
+                   2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
+                   2021-02-25,26.1,31.0,22.0,24.0,24.0,9000\n\
+                   2021-02-26,24.9,32.0,24.0,28.0,28.0,11000";
+        let hist = History::parse_filter_csv("AAPL", &csv, |entry| entry.date > datetime::make_date(2021, 2, 24)).unwrap();
+        assert_eq!(hist.symbol(), "AAPL");
+        assert_eq!(hist.count(), 2);
+
+        let entries = hist.entries();
+        check_entry(&entries[0], datetime::make_date(2021, 2, 25), 26.1, 31.0, 22.0, 24.0, 24.0, 9000);
+        check_entry(&entries[1], datetime::make_date(2021, 2, 26), 24.9, 32.0, 24.0, 28.0, 28.0, 11000);
     }
 
     fn check_entry(entry: &HistoryEntry,
