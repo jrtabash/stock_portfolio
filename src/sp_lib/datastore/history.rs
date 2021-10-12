@@ -75,7 +75,7 @@ impl History {
         }
     }
 
-    pub fn parse_csv(symbol: &str, csv: &str) -> Result<History, Box<dyn Error>> {
+    pub fn parse_csv(symbol: &str, csv: &str) -> Result<Self, Box<dyn Error>> {
         let mut hist = History::new(symbol);
         for line in csv.split('\n') {
             if line.starts_with("Date") {
@@ -86,7 +86,7 @@ impl History {
         Ok(hist)
     }
 
-    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: HistoryPred) -> Result<History, Box<dyn Error>> {
+    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: HistoryPred) -> Result<Self, Box<dyn Error>> {
         let mut hist = History::new(symbol);
         for line in csv.split('\n') {
             if line.starts_with("Date") {
