@@ -49,7 +49,17 @@ impl DataStore {
         }
     }
 
-    pub fn load(&self, symbol: &str) -> Result<String, Box<dyn Error>> {
+    pub fn delete(&self) -> Result<(), Box<dyn Error>> {
+        if self.exists() {
+            fs::remove_dir_all(self.base_path.as_path())?;
+            Ok(())
+        }
+        else {
+            Err(format!("Datastore '{}' does not exist", self.name).into())
+        }
+    }
+
+    pub fn select_symbol(&self, symbol: &str) -> Result<String, Box<dyn Error>> {
         let sym_file = DataStore::make_symbol_file(&self.base_path, symbol);
         let file = fs::File::open(sym_file.as_path())?;
         let mut reader = BufReader::new(&file);
@@ -58,7 +68,7 @@ impl DataStore {
         Ok(content)
     }
 
-    pub fn store(&self, symbol: &str, csv: &str) -> Result<(), Box<dyn Error>> {
+    pub fn insert_symbol(&self, symbol: &str, csv: &str) -> Result<(), Box<dyn Error>> {
         if !csv.is_empty() {
             let sym_file = DataStore::make_symbol_file(&self.base_path, symbol);
             let exists = sym_file.exists();
@@ -74,6 +84,12 @@ impl DataStore {
                 write!(file, "\n")?;
             }
         }
+        Ok(())
+    }
+
+    pub fn drop_symbol(&self, symbol: &str) -> Result<(), Box<dyn Error>> {
+        let sym_file = DataStore::make_symbol_file(&self.base_path, symbol);
+        fs::remove_file(sym_file.as_path())?;
         Ok(())
     }
 
@@ -98,7 +114,6 @@ mod tests {
     use super::*;
     use crate::util::temp_file;
     use std::env;
-    use std::fs;
 
     #[test]
     fn test_datastore_new() {
@@ -113,35 +128,65 @@ mod tests {
     }
 
     #[test]
-    fn test_datastore_create() {
+    fn test_datastore_create_delete() {
         let root = env::temp_dir();
-        let base_path = temp_file::make_path("test_create");
-        let ds = DataStore::new(root.to_str().unwrap(), "test_create");
+        let base_path = temp_file::make_path("test_create_delete");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_create_delete");
         assert!(!ds.exists());
         assert!(ds.create().is_ok());
         assert!(ds.create().is_err());
         assert!(ds.exists());
         assert!(base_path.exists());
-        assert!(fs::remove_dir(base_path.as_path()).is_ok());
+        assert!(ds.delete().is_ok());
+        assert!(ds.delete().is_err());
+        assert!(!base_path.exists());
     }
 
     #[test]
-    fn test_datastore_store_load() {
+    fn test_datastore_create_insert_delete() {
         let root = env::temp_dir();
-        let base_path = temp_file::make_path("test_store_load");
-        let ds = DataStore::new(root.to_str().unwrap(), "test_store_load");
+        let base_path = temp_file::make_path("test_create_delete2");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_create_delete2");
 
         let symbol = "TEST";
         let csv = "1,2,3,4,5\n\
                    6,7,8,9,10\n\
                    11,12,13,14,15\n";
-        let test_file = temp_file::make_path("test_store_load/TEST.csv");
+        let test_file = temp_file::make_path("test_create_delete2/TEST.csv");
 
-        ds.create().unwrap();
-        ds.store(&symbol, &csv).unwrap();
+        assert!(!ds.exists());
+        assert!(ds.create().is_ok());
+        assert!(ds.create().is_err());
+        assert!(ds.exists());
+        assert!(base_path.exists());
+
+        assert!(!test_file.exists());
+        assert!(ds.insert_symbol(&symbol, &csv).is_ok());
         assert!(test_file.exists());
 
-        let data = ds.load(&symbol).unwrap();
+        assert!(ds.delete().is_ok());
+        assert!(ds.delete().is_err());
+        assert!(!base_path.exists());
+        assert!(!test_file.exists());
+    }
+
+    #[test]
+    fn test_datastore_insert_select() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_insert_select");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_insert_select");
+
+        let symbol = "TEST";
+        let csv = "1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15\n";
+        let test_file = temp_file::make_path("test_insert_select/TEST.csv");
+
+        ds.create().unwrap();
+        ds.insert_symbol(&symbol, &csv).unwrap();
+        assert!(test_file.exists());
+
+        let data = ds.select_symbol(&symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
         assert_eq!(dvec.len(), 4);
         assert_eq!(dvec[0], "1,2,3,4,5");
@@ -149,15 +194,15 @@ mod tests {
         assert_eq!(dvec[2], "11,12,13,14,15");
         assert_eq!(dvec[3], "");
 
-        assert!(temp_file::remove_file(test_file.to_str().unwrap()));
-        assert!(fs::remove_dir(base_path.as_path()).is_ok());
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
     }
 
     #[test]
     fn test_datastore_append() {
         let root = env::temp_dir();
-        let base_path = temp_file::make_path("test_store_append");
-        let ds = DataStore::new(root.to_str().unwrap(), "test_store_append");
+        let base_path = temp_file::make_path("test_append");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_append");
 
         let symbol = "TEST";
         let csv = "1,2,3,4,5\n\
@@ -165,13 +210,12 @@ mod tests {
                    11,12,13,14,15";
         let extra_csv = "16,17,18,19,20\n\
                          21,22,23,24,25\n";
-        let test_file = temp_file::make_path("test_store_append/TEST.csv");
 
         ds.create().unwrap();
-        ds.store(&symbol, &csv).unwrap();
-        ds.store(&symbol, &extra_csv).unwrap();
+        ds.insert_symbol(&symbol, &csv).unwrap();
+        ds.insert_symbol(&symbol, &extra_csv).unwrap();
 
-        let data = ds.load(&symbol).unwrap();
+        let data = ds.select_symbol(&symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
         assert_eq!(dvec.len(), 6);
         assert_eq!(dvec[0], "1,2,3,4,5");
@@ -181,7 +225,30 @@ mod tests {
         assert_eq!(dvec[4], "21,22,23,24,25");
         assert_eq!(dvec[5], "");
 
-        assert!(temp_file::remove_file(test_file.to_str().unwrap()));
-        assert!(fs::remove_dir(base_path.as_path()).is_ok());
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
+    fn test_datastore_drop() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_drop");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_drop");
+
+        let symbol = "TEST";
+        let csv = "1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15\n";
+        let test_file = temp_file::make_path("test_drop/TEST.csv");
+
+        ds.create().unwrap();
+        ds.insert_symbol(&symbol, &csv).unwrap();
+        assert!(test_file.exists());
+
+        ds.drop_symbol(&symbol).unwrap();
+        assert!(!test_file.exists());
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
     }
 }
