@@ -78,7 +78,7 @@ impl History {
     pub fn parse_csv(symbol: &str, csv: &str) -> Result<Self, Box<dyn Error>> {
         let mut hist = History::new(symbol);
         for line in csv.split('\n') {
-            if line.starts_with("Date") {
+            if line.is_empty() || line.starts_with(char::is_alphabetic) {
                 continue;
             }
             hist.entries.push(HistoryEntry::parse_csv(line)?);
@@ -89,7 +89,7 @@ impl History {
     pub fn parse_filter_csv(symbol: &str, csv: &str, pred: HistoryPred) -> Result<Self, Box<dyn Error>> {
         let mut hist = History::new(symbol);
         for line in csv.split('\n') {
-            if line.starts_with("Date") {
+            if line.is_empty() || line.starts_with(char::is_alphabetic) {
                 continue;
             }
             let entry = HistoryEntry::parse_csv(line)?;
@@ -167,6 +167,25 @@ mod tests {
                    2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
                    2021-02-25,26.1,31.0,22.0,24.0,24.0,9000\n\
                    2021-02-26,24.9,32.0,24.0,28.0,28.0,11000";
+        let hist = History::parse_csv("AAPL", &csv).unwrap();
+        assert_eq!(hist.symbol(), "AAPL");
+        assert_eq!(hist.count(), 3);
+
+        let entries = hist.entries();
+        check_entry(&entries[0], datetime::make_date(2021, 2, 24), 25.0, 30.0, 20.0, 26.0, 26.0, 10000);
+        check_entry(&entries[1], datetime::make_date(2021, 2, 25), 26.1, 31.0, 22.0, 24.0, 24.0, 9000);
+        check_entry(&entries[2], datetime::make_date(2021, 2, 26), 24.9, 32.0, 24.0, 28.0, 28.0, 11000);
+    }
+
+    #[test]
+    fn test_history_parse_csv_with_empty_lines() {
+        let csv = "\n\
+                   2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
+                   \n\
+                   2021-02-25,26.1,31.0,22.0,24.0,24.0,9000\n\
+                   \n\
+                   2021-02-26,24.9,32.0,24.0,28.0,28.0,11000\n\
+                   \n";
         let hist = History::parse_csv("AAPL", &csv).unwrap();
         assert_eq!(hist.symbol(), "AAPL");
         assert_eq!(hist.count(), 3);
