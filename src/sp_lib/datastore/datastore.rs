@@ -69,7 +69,16 @@ impl DataStore {
     }
 
     pub fn insert_symbol(&self, symbol: &str, csv: &str) -> Result<(), Box<dyn Error>> {
-        if !csv.is_empty() {
+        // Skip non-numeric header if one exists.
+        let csv_ref =
+            match csv.find(char::is_numeric) {
+                Some(pos) => {
+                    if pos > 0 { &csv[pos..] } else { csv }
+                },
+                None => &""
+            };
+
+        if !csv_ref.is_empty() {
             let sym_file = DataStore::make_symbol_file(&self.base_path, symbol);
             let exists = sym_file.exists();
             let mut file =
@@ -79,8 +88,8 @@ impl DataStore {
                     fs::File::create(sym_file)?
                 };
             file.seek(std::io::SeekFrom::End(0))?;
-            write!(file, "{}", csv)?;
-            if !csv.ends_with("\n") {
+            write!(file, "{}", csv_ref)?;
+            if !csv_ref.ends_with("\n") {
                 write!(file, "\n")?;
             }
         }
@@ -199,6 +208,35 @@ mod tests {
     }
 
     #[test]
+    fn test_datastore_insert_with_header() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_insert_with_header");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_insert_with_header");
+
+        let symbol = "TEST";
+        let csv = "A,B,C,D,E\n\
+                   1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15\n";
+        let test_file = temp_file::make_path("test_insert_with_header/TEST.csv");
+
+        ds.create().unwrap();
+        ds.insert_symbol(&symbol, &csv).unwrap();
+        assert!(test_file.exists());
+
+        let data = ds.select_symbol(&symbol).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 4);
+        assert_eq!(dvec[0], "1,2,3,4,5");
+        assert_eq!(dvec[1], "6,7,8,9,10");
+        assert_eq!(dvec[2], "11,12,13,14,15");
+        assert_eq!(dvec[3], "");
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
     fn test_datastore_append() {
         let root = env::temp_dir();
         let base_path = temp_file::make_path("test_append");
@@ -209,6 +247,39 @@ mod tests {
                    6,7,8,9,10\n\
                    11,12,13,14,15";
         let extra_csv = "16,17,18,19,20\n\
+                         21,22,23,24,25\n";
+
+        ds.create().unwrap();
+        ds.insert_symbol(&symbol, &csv).unwrap();
+        ds.insert_symbol(&symbol, &extra_csv).unwrap();
+
+        let data = ds.select_symbol(&symbol).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 6);
+        assert_eq!(dvec[0], "1,2,3,4,5");
+        assert_eq!(dvec[1], "6,7,8,9,10");
+        assert_eq!(dvec[2], "11,12,13,14,15");
+        assert_eq!(dvec[3], "16,17,18,19,20");
+        assert_eq!(dvec[4], "21,22,23,24,25");
+        assert_eq!(dvec[5], "");
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
+    fn test_datastore_append_with_header() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_append_with_header");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_append_with_header");
+
+        let symbol = "TEST";
+        let csv = "AA,BB,CC,DD,EE\n\
+                   1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15";
+        let extra_csv = "AA,BB,CC,DD,EE\n\
+                         16,17,18,19,20\n\
                          21,22,23,24,25\n";
 
         ds.create().unwrap();
