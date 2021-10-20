@@ -52,7 +52,7 @@ impl HistoryEntry {
             })
         }
         else {
-            Err(format!("HistoryEvent: Invalid csv data length={} expected=7", values.len()).into())
+            Err(format!("HistoryEntry: Invalid csv data length={} expected=7", values.len()).into())
         }
     }
 }
@@ -138,7 +138,7 @@ mod tests {
     }
 
     #[test]
-    fn test_history_event_error() {
+    fn test_history_entry_error() {
         let csv = "2021-02-25,26.1,31.0,22.0,24.0,24.0";
         assert!(HistoryEntry::parse_csv(&csv).is_err());
 
