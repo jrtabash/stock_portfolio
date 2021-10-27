@@ -59,8 +59,8 @@ impl DataStore {
         }
     }
 
-    pub fn select_symbol(&self, symbol: &str) -> Result<String, Box<dyn Error>> {
-        let sym_file = DataStore::make_symbol_file(&self.base_path, symbol);
+    pub fn select_symbol(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
+        let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         let file = fs::File::open(sym_file.as_path())?;
         let mut reader = BufReader::new(&file);
         let mut content = String::new();
@@ -68,7 +68,7 @@ impl DataStore {
         Ok(content)
     }
 
-    pub fn insert_symbol(&self, symbol: &str, csv: &str) -> Result<(), Box<dyn Error>> {
+    pub fn insert_symbol(&self, tag: &str, symbol: &str, csv: &str) -> Result<(), Box<dyn Error>> {
         // Skip non-numeric header if one exists.
         let csv_ref =
             match csv.find(char::is_numeric) {
@@ -79,7 +79,7 @@ impl DataStore {
             };
 
         if !csv_ref.is_empty() {
-            let sym_file = DataStore::make_symbol_file(&self.base_path, symbol);
+            let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
             let exists = sym_file.exists();
             let mut file =
                 if exists {
@@ -96,8 +96,8 @@ impl DataStore {
         Ok(())
     }
 
-    pub fn drop_symbol(&self, symbol: &str) -> Result<(), Box<dyn Error>> {
-        let sym_file = DataStore::make_symbol_file(&self.base_path, symbol);
+    pub fn drop_symbol(&self, tag: &str, symbol: &str) -> Result<(), Box<dyn Error>> {
+        let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         fs::remove_file(sym_file.as_path())?;
         Ok(())
     }
@@ -108,9 +108,9 @@ impl DataStore {
         pbuf
     }
 
-    fn make_symbol_file(base: &PathBuf, symbol: &str) -> PathBuf {
+    fn make_symbol_file(base: &PathBuf, tag: &str, symbol: &str) -> PathBuf {
         let mut pbuf = base.clone();
-        pbuf.push(&format!("{}.csv", symbol));
+        pbuf.push(&format!("{}_{}.csv", tag, symbol));
         pbuf
     }
 }
@@ -157,11 +157,12 @@ mod tests {
         let base_path = temp_file::make_path("test_create_delete2");
         let ds = DataStore::new(root.to_str().unwrap(), "test_create_delete2");
 
+        let tag = "tst";
         let symbol = "TEST";
         let csv = "1,2,3,4,5\n\
                    6,7,8,9,10\n\
                    11,12,13,14,15\n";
-        let test_file = temp_file::make_path("test_create_delete2/TEST.csv");
+        let test_file = temp_file::make_path("test_create_delete2/tst_TEST.csv");
 
         assert!(!ds.exists());
         assert!(ds.create().is_ok());
@@ -170,7 +171,7 @@ mod tests {
         assert!(base_path.exists());
 
         assert!(!test_file.exists());
-        assert!(ds.insert_symbol(&symbol, &csv).is_ok());
+        assert!(ds.insert_symbol(&tag, &symbol, &csv).is_ok());
         assert!(test_file.exists());
 
         assert!(ds.delete().is_ok());
@@ -185,17 +186,18 @@ mod tests {
         let base_path = temp_file::make_path("test_insert_select");
         let ds = DataStore::new(root.to_str().unwrap(), "test_insert_select");
 
+        let tag = "tst";
         let symbol = "TEST";
         let csv = "1,2,3,4,5\n\
                    6,7,8,9,10\n\
                    11,12,13,14,15\n";
-        let test_file = temp_file::make_path("test_insert_select/TEST.csv");
+        let test_file = temp_file::make_path("test_insert_select/tst_TEST.csv");
 
         ds.create().unwrap();
-        ds.insert_symbol(&symbol, &csv).unwrap();
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
         assert!(test_file.exists());
 
-        let data = ds.select_symbol(&symbol).unwrap();
+        let data = ds.select_symbol(&tag, &symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
         assert_eq!(dvec.len(), 4);
         assert_eq!(dvec[0], "1,2,3,4,5");
@@ -213,18 +215,19 @@ mod tests {
         let base_path = temp_file::make_path("test_insert_with_header");
         let ds = DataStore::new(root.to_str().unwrap(), "test_insert_with_header");
 
+        let tag = "tst";
         let symbol = "TEST";
         let csv = "A,B,C,D,E\n\
                    1,2,3,4,5\n\
                    6,7,8,9,10\n\
                    11,12,13,14,15\n";
-        let test_file = temp_file::make_path("test_insert_with_header/TEST.csv");
+        let test_file = temp_file::make_path("test_insert_with_header/tst_TEST.csv");
 
         ds.create().unwrap();
-        ds.insert_symbol(&symbol, &csv).unwrap();
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
         assert!(test_file.exists());
 
-        let data = ds.select_symbol(&symbol).unwrap();
+        let data = ds.select_symbol(&tag, &symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
         assert_eq!(dvec.len(), 4);
         assert_eq!(dvec[0], "1,2,3,4,5");
@@ -242,6 +245,7 @@ mod tests {
         let base_path = temp_file::make_path("test_append");
         let ds = DataStore::new(root.to_str().unwrap(), "test_append");
 
+        let tag = "tst";
         let symbol = "TEST";
         let csv = "1,2,3,4,5\n\
                    6,7,8,9,10\n\
@@ -250,10 +254,10 @@ mod tests {
                          21,22,23,24,25\n";
 
         ds.create().unwrap();
-        ds.insert_symbol(&symbol, &csv).unwrap();
-        ds.insert_symbol(&symbol, &extra_csv).unwrap();
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap();
 
-        let data = ds.select_symbol(&symbol).unwrap();
+        let data = ds.select_symbol(&tag, &symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
         assert_eq!(dvec.len(), 6);
         assert_eq!(dvec[0], "1,2,3,4,5");
@@ -273,6 +277,7 @@ mod tests {
         let base_path = temp_file::make_path("test_append_with_header");
         let ds = DataStore::new(root.to_str().unwrap(), "test_append_with_header");
 
+        let tag = "tst";
         let symbol = "TEST";
         let csv = "AA,BB,CC,DD,EE\n\
                    1,2,3,4,5\n\
@@ -283,10 +288,10 @@ mod tests {
                          21,22,23,24,25\n";
 
         ds.create().unwrap();
-        ds.insert_symbol(&symbol, &csv).unwrap();
-        ds.insert_symbol(&symbol, &extra_csv).unwrap();
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap();
 
-        let data = ds.select_symbol(&symbol).unwrap();
+        let data = ds.select_symbol(&tag, &symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
         assert_eq!(dvec.len(), 6);
         assert_eq!(dvec[0], "1,2,3,4,5");
@@ -306,17 +311,18 @@ mod tests {
         let base_path = temp_file::make_path("test_drop");
         let ds = DataStore::new(root.to_str().unwrap(), "test_drop");
 
+        let tag = "tst";
         let symbol = "TEST";
         let csv = "1,2,3,4,5\n\
                    6,7,8,9,10\n\
                    11,12,13,14,15\n";
-        let test_file = temp_file::make_path("test_drop/TEST.csv");
+        let test_file = temp_file::make_path("test_drop/tst_TEST.csv");
 
         ds.create().unwrap();
-        ds.insert_symbol(&symbol, &csv).unwrap();
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
         assert!(test_file.exists());
 
-        ds.drop_symbol(&symbol).unwrap();
+        ds.drop_symbol(&tag, &symbol).unwrap();
         assert!(!test_file.exists());
 
         ds.delete().unwrap();
