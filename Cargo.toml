@@ -8,6 +8,10 @@ edition = "2018"
 name = "sp_report"
 path = "src/sp_report/main.rs"
 
+[[bin]]
+name = "sp_dstool"
+path = "src/sp_dstool/main.rs"
+
 [lib]
 name = "sp_lib"
 path = "src/sp_lib/lib.rs"
