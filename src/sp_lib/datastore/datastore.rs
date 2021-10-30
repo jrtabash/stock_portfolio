@@ -60,13 +60,17 @@ impl DataStore {
         }
     }
 
-    pub fn select_symbol(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
-        let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
-        let file = fs::File::open(sym_file.as_path())?;
+    pub fn read_file(&self, sym_file: &Path) -> Result<String, Box<dyn Error>> {
+        let file = fs::File::open(sym_file)?;
         let mut reader = BufReader::new(&file);
         let mut content = String::new();
         reader.read_to_string(&mut content)?;
         Ok(content)
+    }
+
+    pub fn select_symbol(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
+        let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
+        self.read_file(&sym_file)
     }
 
     pub fn insert_symbol(&self, tag: &str, symbol: &str, csv: &str) -> Result<(), Box<dyn Error>> {

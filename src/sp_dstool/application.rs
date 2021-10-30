@@ -1,6 +1,8 @@
 use std::error::Error;
+use std::path::Path;
+use std::fs;
 use sp_lib::portfolio::{stock, stocks_reader};
-use sp_lib::datastore::datastore;
+use sp_lib::datastore::{datastore, history, dividends};
 use crate::arguments::Arguments;
 
 pub struct Application {
@@ -52,8 +54,48 @@ impl Application {
     }
 
     fn check(self: &mut Self) -> Result<(), Box<dyn Error>> {
-        // TODO
-        eprintln!("Check {}/{}", self.args.ds_root(), self.args.ds_name());
+        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
+        if !ds.exists() {
+            return Err(format!("Datastore {} does not exists", ds).into());
+        }
+
+        let mut count: usize = 0;
+
+        for entry in fs::read_dir(ds.base_path())? {
+            let entry = entry?;
+            let entry_path = entry.path();
+            if entry_path.is_file() {
+                if let Err(err) = self.check_entry(&ds, &entry_path) {
+                    count += 1;
+                    eprintln!("{}: {}", entry.file_name().to_str().unwrap(), err);
+                }
+            }
+        }
+
+        println!("Check found {} error{}", count, if count == 1 { "" } else { "s" });
+        Ok(())
+    }
+
+    fn check_entry(self: &mut Self, ds: &datastore::DataStore, entry_path: &Path) -> Result<(), Box<dyn Error>> {
+        let content = ds.read_file(&entry_path)?;
+
+        let content_ref = match content.find('\n') {
+            Some(pos) => &content[0..pos],
+            None => return Err(format!("Invalid entry data").into())
+        };
+
+        // TODO: Using number of fields is not future proof, fix it!
+        let num_of_fields = content_ref.split(',').count();
+        if num_of_fields == history::HistoryEntry::number_of_fields() {
+            history::History::check_csv(&content)?;
+        }
+        else if num_of_fields == dividends::DividendEntry::number_of_fields() {
+            dividends::Dividends::check_csv(&content)?;
+        }
+        else {
+            return Err(format!("Unknown entry data").into())
+        }
+
         Ok(())
     }
 
@@ -63,17 +105,21 @@ impl Application {
             return Err(format!("Datastore {} already exists", ds).into());
         }
 
-        if ds.create().is_err() {
-            return Err(format!("Failed to create datastore {}", ds).into());
-        }
+        ds.create()?;
 
         println!("Datastore {} created", ds);
         Ok(())
     }
 
     fn delete(self: &mut Self) -> Result<(), Box<dyn Error>> {
-        // TODO
-        eprintln!("delete {}/{}", self.args.ds_root(), self.args.ds_name());
+        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
+        if !ds.exists() {
+            return Err(format!("Datastore {} does not exists", ds).into());
+        }
+
+        ds.delete()?;
+
+        println!("Datastore {} deleted", ds);
         Ok(())
     }
 }

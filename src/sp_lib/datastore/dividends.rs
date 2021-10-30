@@ -24,7 +24,7 @@ impl DividendEntry {
 
     pub fn parse_csv(csv: &str) -> Result<Self, Box<dyn Error>> {
         let values: Vec<&str> = csv.split(',').map(|field| field.trim()).collect();
-        if values.len() == 2 {
+        if values.len() == DividendEntry::number_of_fields() {
             Ok(DividendEntry {
                 date: datetime::parse_date(&values[0])?,
                 price: values[1].parse::<Price>()?
@@ -33,6 +33,11 @@ impl DividendEntry {
         else {
             Err(format!("DividendEntry: Invalid csv data length={} expected=2", values.len()).into())
         }
+    }
+
+    #[inline(always)]
+    pub fn number_of_fields() -> usize {
+        return 2
     }
 }
 
@@ -77,6 +82,26 @@ impl Dividends {
             }
         }
         Ok(div)
+    }
+
+    pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
+        let div = Dividends::parse_csv("dividends_check", csv)?;
+        let cnt = div.count();
+        if cnt > 0 {
+            let entries = div.entries;
+            let mut last_date = entries[0].date;
+            for i in 1..cnt {
+                let curr_date = entries[i].date;
+                if curr_date == last_date {
+                    return Err(format!("Duplicate date {}", curr_date.format("%Y-%m-%d")).into())
+                }
+                else if curr_date < last_date {
+                    return Err(format!("Earlier date {}", curr_date.format("%Y-%m-%d")).into())
+                }
+                last_date = curr_date;
+            }
+        }
+        Ok(())
     }
 
     #[inline(always)]
@@ -131,11 +156,11 @@ mod tests {
         let csv = "2019-02-24,2.5\n\
                    2020-02-21,1.9\n\
                    2021-02-26,2.1";
-        let hist = Dividends::parse_csv("AAPL", &csv).unwrap();
-        assert_eq!(hist.symbol(), "AAPL");
-        assert_eq!(hist.count(), 3);
+        let div = Dividends::parse_csv("AAPL", &csv).unwrap();
+        assert_eq!(div.symbol(), "AAPL");
+        assert_eq!(div.count(), 3);
 
-        let entries = hist.entries();
+        let entries = div.entries();
         check_dividend(&entries[0], datetime::make_date(2019, 2, 24), 2.5);
         check_dividend(&entries[1], datetime::make_date(2020, 2, 21), 1.9);
         check_dividend(&entries[2], datetime::make_date(2021, 2, 26), 2.1);
@@ -147,11 +172,11 @@ mod tests {
                    2019-02-24,2.5\n\
                    2020-02-21,1.9\n\
                    2021-02-26,2.1";
-        let hist = Dividends::parse_csv("AAPL", &csv).unwrap();
-        assert_eq!(hist.symbol(), "AAPL");
-        assert_eq!(hist.count(), 3);
+        let div = Dividends::parse_csv("AAPL", &csv).unwrap();
+        assert_eq!(div.symbol(), "AAPL");
+        assert_eq!(div.count(), 3);
 
-        let entries = hist.entries();
+        let entries = div.entries();
         check_dividend(&entries[0], datetime::make_date(2019, 2, 24), 2.5);
         check_dividend(&entries[1], datetime::make_date(2020, 2, 21), 1.9);
         check_dividend(&entries[2], datetime::make_date(2021, 2, 26), 2.1);
@@ -166,11 +191,11 @@ mod tests {
                    \n\
                    2021-02-26,2.1\n\
                    \n";
-        let hist = Dividends::parse_csv("AAPL", &csv).unwrap();
-        assert_eq!(hist.symbol(), "AAPL");
-        assert_eq!(hist.count(), 3);
+        let div = Dividends::parse_csv("AAPL", &csv).unwrap();
+        assert_eq!(div.symbol(), "AAPL");
+        assert_eq!(div.count(), 3);
 
-        let entries = hist.entries();
+        let entries = div.entries();
         check_dividend(&entries[0], datetime::make_date(2019, 2, 24), 2.5);
         check_dividend(&entries[1], datetime::make_date(2020, 2, 21), 1.9);
         check_dividend(&entries[2], datetime::make_date(2021, 2, 26), 2.1);
@@ -181,11 +206,11 @@ mod tests {
         let csv = "2019-02-24,2.5\n\
                    2020-02-21,1.9\n\
                    2021-02-26,2.1";
-        let hist = Dividends::parse_filter_csv("AAPL", &csv, |entry| entry.date > datetime::make_date(2019, 2, 24)).unwrap();
-        assert_eq!(hist.symbol(), "AAPL");
-        assert_eq!(hist.count(), 2);
+        let div = Dividends::parse_filter_csv("AAPL", &csv, |entry| entry.date > datetime::make_date(2019, 2, 24)).unwrap();
+        assert_eq!(div.symbol(), "AAPL");
+        assert_eq!(div.count(), 2);
 
-        let entries = hist.entries();
+        let entries = div.entries();
         check_dividend(&entries[0], datetime::make_date(2020, 2, 21), 1.9);
         check_dividend(&entries[1], datetime::make_date(2021, 2, 26), 2.1);
     }
@@ -196,13 +221,37 @@ mod tests {
                    2019-02-24,2.5\n\
                    2020-02-21,1.9\n\
                    2021-02-26,2.1";
-        let hist = Dividends::parse_filter_csv("AAPL", &csv, |entry| entry.date > datetime::make_date(2019, 2, 24)).unwrap();
-        assert_eq!(hist.symbol(), "AAPL");
-        assert_eq!(hist.count(), 2);
+        let div = Dividends::parse_filter_csv("AAPL", &csv, |entry| entry.date > datetime::make_date(2019, 2, 24)).unwrap();
+        assert_eq!(div.symbol(), "AAPL");
+        assert_eq!(div.count(), 2);
 
-        let entries = hist.entries();
+        let entries = div.entries();
         check_dividend(&entries[0], datetime::make_date(2020, 2, 21), 1.9);
         check_dividend(&entries[1], datetime::make_date(2021, 2, 26), 2.1);
+    }
+
+    #[test]
+    fn test_check_csv() {
+        let csv = "2019-02-24,2.5\n\
+                   2020-02-21,1.9\n\
+                   2021-02-26,2.1";
+        assert!(Dividends::check_csv(&csv).is_ok());
+
+        let csv = "2019-02-24,2.5\n\
+                   2019-02-24,1.9\n\
+                   2021-02-26,2.1";
+        match Dividends::check_csv(&csv) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(&format!("{}", err), "Duplicate date 2019-02-24")
+        };
+
+        let csv = "2019-02-24,2.5\n\
+                   2020-02-21,1.9\n\
+                   2020-02-20,2.1";
+        match Dividends::check_csv(&csv) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(&format!("{}", err), "Earlier date 2020-02-20")
+        };
     }
 
     fn check_dividend(entry: &DividendEntry, date: LocalDate, price: Price) {

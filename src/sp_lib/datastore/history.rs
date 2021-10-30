@@ -40,7 +40,7 @@ impl HistoryEntry {
 
     pub fn parse_csv(csv: &str) -> Result<Self, Box<dyn Error>> {
         let values: Vec<&str> = csv.split(',').map(|field| field.trim()).collect();
-        if values.len() == 7 {
+        if values.len() == HistoryEntry::number_of_fields() {
             Ok(HistoryEntry {
                 date: datetime::parse_date(&values[0])?,
                 open: values[1].parse::<Price>()?,
@@ -54,6 +54,11 @@ impl HistoryEntry {
         else {
             Err(format!("HistoryEntry: Invalid csv data length={} expected=7", values.len()).into())
         }
+    }
+
+    #[inline(always)]
+    pub fn number_of_fields() -> usize {
+        return 7
     }
 }
 
@@ -98,6 +103,26 @@ impl History {
             }
         }
         Ok(hist)
+    }
+
+    pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
+        let hist = History::parse_csv("history_check", csv)?;
+        let cnt = hist.count();
+        if cnt > 0 {
+            let entries = hist.entries;
+            let mut last_date = entries[0].date;
+            for i in 1..cnt {
+                let curr_date = entries[i].date;
+                if curr_date == last_date {
+                    return Err(format!("Duplicate date {}", curr_date.format("%Y-%m-%d")).into())
+                }
+                else if curr_date < last_date {
+                    return Err(format!("Earlier date {}", curr_date.format("%Y-%m-%d")).into())
+                }
+                last_date = curr_date;
+            }
+        }
+        Ok(())
     }
 
     #[inline(always)]
@@ -223,6 +248,30 @@ mod tests {
         let entries = hist.entries();
         check_entry(&entries[0], datetime::make_date(2021, 2, 25), 26.1, 31.0, 22.0, 24.0, 24.0, 9000);
         check_entry(&entries[1], datetime::make_date(2021, 2, 26), 24.9, 32.0, 24.0, 28.0, 28.0, 11000);
+    }
+
+    #[test]
+    fn test_check_csv() {
+        let csv = "2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
+                   2021-02-25,26.1,31.0,22.0,24.0,24.0,9000\n\
+                   2021-02-26,24.9,32.0,24.0,28.0,28.0,11000";
+        assert!(History::check_csv(&csv).is_ok());
+
+        let csv = "2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
+                   2021-02-24,26.1,31.0,22.0,24.0,24.0,9000\n\
+                   2021-02-26,24.9,32.0,24.0,28.0,28.0,11000";
+        match History::check_csv(&csv) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(&format!("{}", err), "Duplicate date 2021-02-24")
+        };
+
+        let csv = "2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
+                   2021-02-25,26.1,31.0,22.0,24.0,24.0,9000\n\
+                   2021-02-23,24.9,32.0,24.0,28.0,28.0,11000";
+        match History::check_csv(&csv) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(&format!("{}", err), "Earlier date 2021-02-23")
+        };
     }
 
     fn check_entry(entry: &HistoryEntry,
