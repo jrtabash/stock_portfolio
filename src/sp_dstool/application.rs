@@ -1,5 +1,6 @@
 use std::error::Error;
 use sp_lib::portfolio::{stock, stocks_reader};
+use sp_lib::datastore::datastore;
 use crate::arguments::Arguments;
 
 pub struct Application {
@@ -18,8 +19,7 @@ impl Application {
     pub fn run(self: &mut Self) -> Result<(), Box<dyn Error>> {
         self.read_stocks()?;
 
-        let op = self.args.ds_operation().as_str();
-        match op {
+        match self.args.ds_operation().as_str() {
             "update" => self.update()?,
             "check" => self.check()?,
             "create" => self.create()?,
@@ -47,25 +47,33 @@ impl Application {
         }
 
         // TODO
-        println!("Update {}/{} {}", self.args.ds_root(), self.args.ds_name(), self.args.stocks_file().unwrap());
+        eprintln!("Update {}/{} {}", self.args.ds_root(), self.args.ds_name(), self.args.stocks_file().unwrap());
         Ok(())
     }
 
     fn check(self: &mut Self) -> Result<(), Box<dyn Error>> {
         // TODO
-        println!("Check {}/{}", self.args.ds_root(), self.args.ds_name());
+        eprintln!("Check {}/{}", self.args.ds_root(), self.args.ds_name());
         Ok(())
     }
 
     fn create(self: &mut Self) -> Result<(), Box<dyn Error>> {
-        // TODO
-        println!("create {}/{}", self.args.ds_root(), self.args.ds_name());
+        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
+        if ds.exists() {
+            return Err(format!("Datastore {} already exists", ds).into());
+        }
+
+        if ds.create().is_err() {
+            return Err(format!("Failed to create datastore {}", ds).into());
+        }
+
+        println!("Datastore {} created", ds);
         Ok(())
     }
 
     fn delete(self: &mut Self) -> Result<(), Box<dyn Error>> {
         // TODO
-        println!("delete {}/{}", self.args.ds_root(), self.args.ds_name());
+        eprintln!("delete {}/{}", self.args.ds_root(), self.args.ds_name());
         Ok(())
     }
 }

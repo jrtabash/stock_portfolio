@@ -1,4 +1,5 @@
 use std::io::prelude::*;
+use std::fmt;
 use std::fs;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
@@ -112,6 +113,15 @@ impl DataStore {
         let mut pbuf = base.clone();
         pbuf.push(&format!("{}_{}.csv", tag, symbol));
         pbuf
+    }
+}
+
+impl fmt::Display for DataStore {
+    fn fmt(self: &DataStore, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.base_path().to_str() {
+            Some(ds_path) => write!(f, "{}", ds_path),
+            None => write!(f, "{}", self.name())
+        }
     }
 }
 
