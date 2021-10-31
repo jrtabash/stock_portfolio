@@ -50,6 +50,16 @@ pub fn count_days(from_date: &LocalDate, to_date: &LocalDate) -> i64 {
     to_date.signed_duration_since(from_date.clone()).num_days()
 }
 
+pub fn check_dup_or_back_gap(old_date: &LocalDate, new_date: &LocalDate) -> Result<(), Box<dyn Error>> {
+    if old_date == new_date {
+        return Err(format!("Duplicate date {}", new_date.format("%Y-%m-%d")).into())
+    }
+    else if new_date < old_date {
+        return Err(format!("Earlier date {}", new_date.format("%Y-%m-%d")).into())
+    }
+    Ok(())
+}
+
 // --------------------------------------------------------------------------------
 // Unit Tests
 
@@ -151,5 +161,24 @@ mod tests {
         assert_eq!(count_days(&dt1, &dt1), 0);
         assert_eq!(count_days(&dt1, &dt2), 1);
         assert_eq!(count_days(&dt1, &dt3), 2);
+    }
+
+    #[test]
+    fn test_check_dup_or_back_gap() {
+        let dt1 = make_date(2021, 3, 19);
+        let dt2 = make_date(2021, 3, 19);
+        let dt3 = make_date(2021, 3, 20);
+
+        assert!(check_dup_or_back_gap(&dt1, &dt3).is_ok());
+
+        match check_dup_or_back_gap(&dt1, &dt2) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(&format!("{}", err), "Duplicate date 2021-03-19")
+        };
+
+        match check_dup_or_back_gap(&dt3, &dt2) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(&format!("{}", err), "Earlier date 2021-03-19")
+        };
     }
 }

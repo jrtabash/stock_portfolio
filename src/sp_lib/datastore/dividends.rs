@@ -92,12 +92,7 @@ impl Dividends {
             let mut last_date = entries[0].date;
             for i in 1..cnt {
                 let curr_date = entries[i].date;
-                if curr_date == last_date {
-                    return Err(format!("Duplicate date {}", curr_date.format("%Y-%m-%d")).into())
-                }
-                else if curr_date < last_date {
-                    return Err(format!("Earlier date {}", curr_date.format("%Y-%m-%d")).into())
-                }
+                datetime::check_dup_or_back_gap(&last_date, &curr_date)?;
                 last_date = curr_date;
             }
         }
