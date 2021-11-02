@@ -92,36 +92,43 @@ fn sp_ds_select_history() {
         assert_eq!(entry.volume, values[6].parse::<u64>().unwrap());
     }
 
-    match ds.select_symbol(history::tag(), sp_ds_symbol()) {
-        Ok(actual) => {
-            // No Filter
-            match history::History::parse_csv(sp_ds_symbol(), &actual) {
-                Ok(hist) => {
-                    assert_eq!(hist.symbol(), sp_ds_symbol());
-                    assert_eq!(hist.count(), 5);
+    // No Filter
+    match history::History::ds_select_all(&ds, sp_ds_symbol()) {
+        Ok(hist) => {
+            assert_eq!(hist.symbol(), sp_ds_symbol());
+            assert_eq!(hist.count(), 5);
 
-                    let entries = hist.entries();
-                    check_history(&entries[0], "2021-02-22,10.0,12.0,8.0,11.0,11.0,10000");
-                    check_history(&entries[1], "2021-02-23,11.0,12.5,8.5,11.5,11.5,9000");
-                    check_history(&entries[2], "2021-02-24,11.5,14.0,11.0,12.5,12.5,11000");
-                    check_history(&entries[3], "2021-02-25,12.5,13.5,10.5,12.0,12.0,10000");
-                    check_history(&entries[4], "2021-02-26,12.0,14.0,11.0,14.0,14.0,12000");
-                },
-                Err(_) => assert!(false)
-            };
+            let entries = hist.entries();
+            check_history(&entries[0], "2021-02-22,10.0,12.0,8.0,11.0,11.0,10000");
+            check_history(&entries[1], "2021-02-23,11.0,12.5,8.5,11.5,11.5,9000");
+            check_history(&entries[2], "2021-02-24,11.5,14.0,11.0,12.5,12.5,11000");
+            check_history(&entries[3], "2021-02-25,12.5,13.5,10.5,12.0,12.0,10000");
+            check_history(&entries[4], "2021-02-26,12.0,14.0,11.0,14.0,14.0,12000");
+        },
+        Err(_) => assert!(false)
+    };
 
-            // Filter
-            match history::History::parse_filter_csv(sp_ds_symbol(), &actual, |entry| entry.open > 11.0 && entry.close > entry.open) {
-                Ok(hist) => {
-                    assert_eq!(hist.symbol(), sp_ds_symbol());
-                    assert_eq!(hist.count(), 2);
+    // Filter
+    match history::History::ds_select_if(&ds, sp_ds_symbol(), |entry| entry.open > 11.0 && entry.close > entry.open) {
+        Ok(hist) => {
+            assert_eq!(hist.symbol(), sp_ds_symbol());
+            assert_eq!(hist.count(), 2);
 
-                    let entries = hist.entries();
-                    check_history(&entries[0], "2021-02-24,11.5,14.0,11.0,12.5,12.5,11000");
-                    check_history(&entries[1], "2021-02-26,12.0,14.0,11.0,14.0,14.0,12000");
-                },
-                Err(_) => assert!(false)
-            }
+            let entries = hist.entries();
+            check_history(&entries[0], "2021-02-24,11.5,14.0,11.0,12.5,12.5,11000");
+            check_history(&entries[1], "2021-02-26,12.0,14.0,11.0,14.0,14.0,12000");
+        },
+        Err(_) => assert!(false)
+    };
+
+    // Last
+    match history::History::ds_select_last(&ds, sp_ds_symbol()) {
+        Ok(hist) => {
+            assert_eq!(hist.symbol(), sp_ds_symbol());
+            assert_eq!(hist.count(), 1);
+
+            let entries = hist.entries();
+            check_history(&entries[0], "2021-02-26,12.0,14.0,11.0,14.0,14.0,12000");
         },
         Err(_) => assert!(false)
     };
@@ -138,31 +145,38 @@ fn sp_ds_select_dividends() {
         assert_eq!(entry.price, values[1].parse::<Price>().unwrap());
     }
 
-    match ds.select_symbol(dividends::tag(), sp_ds_symbol()) {
-        Ok(actual) => {
-            // No Filter
-            match dividends::Dividends::parse_csv(sp_ds_symbol(), &actual) {
-                Ok(div) => {
-                    assert_eq!(div.symbol(), sp_ds_symbol());
-                    assert_eq!(div.count(), 1);
+    // No Filter
+    match dividends::Dividends::ds_select_all(&ds, sp_ds_symbol()) {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 1);
 
-                    let entries = div.entries();
-                    check_dividend(&entries[0], "2021-02-23,1.2");
-                },
-                Err(_) => assert!(false)
-            };
-
-            // Filter
-            match dividends::Dividends::parse_filter_csv(sp_ds_symbol(), &actual, |entry| entry.price > 1.5) {
-                Ok(div) => {
-                    assert_eq!(div.symbol(), sp_ds_symbol());
-                    assert_eq!(div.count(), 0);
-                },
-                Err(_) => assert!(false)
-            }
+            let entries = div.entries();
+            check_dividend(&entries[0], "2021-02-23,1.2");
         },
         Err(_) => assert!(false)
-    }
+    };
+
+    // Filter
+    match dividends::Dividends::ds_select_if(&ds, sp_ds_symbol(), |entry| entry.price > 1.5) {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 0);
+        },
+        Err(_) => assert!(false)
+    };
+
+    // Last
+    match dividends::Dividends::ds_select_last(&ds, sp_ds_symbol()) {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 1);
+
+            let entries = div.entries();
+            check_dividend(&entries[0], "2021-02-23,1.2");
+        },
+        Err(_) => assert!(false)
+    };
 }
 
 fn sp_ds_drop(which: &str) {

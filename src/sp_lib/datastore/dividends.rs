@@ -3,6 +3,7 @@ use std::error::Error;
 use crate::util::datetime;
 use crate::util::datetime::LocalDate;
 use crate::util::price_type::PriceType;
+use crate::datastore::datastore::DataStore;
 
 pub type Price = PriceType;
 
@@ -90,6 +91,21 @@ impl Dividends {
             }
         }
         Ok(div)
+    }
+
+    pub fn ds_select_all(ds: &DataStore, symbol: &str) -> Result<Self, Box<dyn Error>> {
+        let content = ds.select_symbol(tag(), symbol)?;
+        Dividends::parse_csv(symbol, &content)
+    }
+
+    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: DividendPred) -> Result<Self, Box<dyn Error>> {
+        let content = ds.select_symbol(tag(), symbol)?;
+        Dividends::parse_filter_csv(symbol, &content, pred)
+    }
+
+    pub fn ds_select_last(ds: &DataStore, symbol: &str) -> Result<Self, Box<dyn Error>> {
+        let content = ds.select_last(tag(), symbol)?;
+        Dividends::parse_csv(symbol, &content)
     }
 
     pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
