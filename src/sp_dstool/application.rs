@@ -43,17 +43,51 @@ impl Application {
         Ok(())
     }
 
-    fn update(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn update(self: &Self) -> Result<(), Box<dyn Error>> {
         if self.args.stocks_file().is_none() {
             return Err("Missing stocks file for update operation".into());
         }
 
-        // TODO
-        eprintln!("Update {}/{} {}", self.args.ds_root(), self.args.ds_name(), self.args.stocks_file().unwrap());
+        let stck_count = self.stocks.len();
+        let mut upd_count: usize = 0;
+        let mut err_count: usize = 0;
+
+        for stck in self.stocks.iter() {
+            match self.update_stock_data(&stck.symbol) {
+                Ok(_) => upd_count += 1,
+                Err(err) => {
+                    eprintln!("{}: {}", stck.symbol, err);
+                    err_count += 1;
+                }
+            };
+        }
+
+        println!("Updated {} out of {} stock{}", upd_count, stck_count, if stck_count == 1 { "" } else { "s" });
+        if err_count == 0 {
+            Ok(())
+        }
+        else {
+            Err(format!("Failed to update {} stock{}", err_count, if err_count == 1 { "" } else { "s" }).into())
+        }
+    }
+
+    fn update_stock_data(self: &Self, symbol: &str) -> Result<(), Box<dyn Error>> {
+        self.update_stock_history(symbol)?;
+        self.update_stock_dividends(symbol)?;
         Ok(())
     }
 
-    fn check(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn update_stock_history(self: &Self, _symbol: &str) -> Result<(), Box<dyn Error>> {
+        // TODO
+        Ok(())
+    }
+
+    fn update_stock_dividends(self: &Self, _symbol: &str) -> Result<(), Box<dyn Error>> {
+        // TODO
+        Ok(())
+    }
+
+    fn check(self: &Self) -> Result<(), Box<dyn Error>> {
         let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
         if !ds.exists() {
             return Err(format!("Datastore {} does not exists", ds).into());
@@ -76,7 +110,7 @@ impl Application {
         Ok(())
     }
 
-    fn check_entry(self: &mut Self, ds: &datastore::DataStore, entry_path: &Path) -> Result<(), Box<dyn Error>> {
+    fn check_entry(self: &Self, ds: &datastore::DataStore, entry_path: &Path) -> Result<(), Box<dyn Error>> {
         let content = ds.read_file(&entry_path)?;
 
         let content_ref = match content.find('\n') {
@@ -99,7 +133,7 @@ impl Application {
         Ok(())
     }
 
-    fn create(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn create(self: &Self) -> Result<(), Box<dyn Error>> {
         let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
         if ds.exists() {
             return Err(format!("Datastore {} already exists", ds).into());
@@ -111,7 +145,7 @@ impl Application {
         Ok(())
     }
 
-    fn delete(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn delete(self: &Self) -> Result<(), Box<dyn Error>> {
         let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
         if !ds.exists() {
             return Err(format!("Datastore {} does not exists", ds).into());

@@ -1,6 +1,7 @@
 use std::io::prelude::*;
 use std::fmt;
 use std::fs;
+use std::str;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::error::Error;
@@ -68,9 +69,41 @@ impl DataStore {
         Ok(content)
     }
 
+    pub fn read_last(&self, sym_file: &Path) -> Result<String, Box<dyn Error>> {
+        let mut file = fs::File::open(sym_file)?;
+
+        let meta_data = file.metadata()?;
+        let file_size = meta_data.len();
+        let mut position = if file_size > 1 { file_size - 2 } else { 0 };
+
+        file.seek(std::io::SeekFrom::Start(position))?;
+
+        let mut buf = [0; 1];
+        while position > 0 {
+            file.read(&mut buf)?;
+            if str::from_utf8(&buf)? == "\n" {
+                break;
+            }
+            position = position - 1;
+            file.seek(std::io::SeekFrom::Start(position))?;
+        }
+
+        let mut content = String::new();
+        file.read_to_string(&mut content)?;
+        match content.trim().split('\n').last() {
+            Some(line) => Ok(String::from(line)),
+            None => Ok(String::new())
+        }
+    }
+
     pub fn select_symbol(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
         let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         self.read_file(&sym_file)
+    }
+
+    pub fn select_last(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
+        let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
+        self.read_last(&sym_file)
     }
 
     pub fn insert_symbol(&self, tag: &str, symbol: &str, csv: &str) -> Result<(), Box<dyn Error>> {
@@ -218,6 +251,30 @@ mod tests {
         assert_eq!(dvec[1], "6,7,8,9,10");
         assert_eq!(dvec[2], "11,12,13,14,15");
         assert_eq!(dvec[3], "");
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
+    fn test_datastore_insert_select_last() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_insert_select_last");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_insert_select_last");
+
+        let tag = "tst";
+        let symbol = "TEST";
+        let csv = "1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15\n";
+
+        ds.create().unwrap();
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+
+        let data = ds.select_last(&tag, &symbol).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 1);
+        assert_eq!(dvec[0], "11,12,13,14,15");
 
         ds.delete().unwrap();
         assert!(!base_path.exists());
