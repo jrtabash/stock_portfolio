@@ -7,6 +7,14 @@ use crate::util::price_type::PriceType;
 pub type Price = PriceType;
 
 // --------------------------------------------------------------------------------
+// History Tag
+
+#[inline(always)]
+pub fn tag() -> &'static str {
+    &"history"
+}
+
+// --------------------------------------------------------------------------------
 // History Entry
 
 pub struct HistoryEntry {

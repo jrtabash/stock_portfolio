@@ -4,23 +4,20 @@ use sp_lib::datastore::{datastore, history, dividends};
 
 type Price = history::Price;
 
-const HIST_TAG: &str = "history";
-const DIV_TAG: &str = "dividends";
-
 #[test]
 fn test_datastore() {
     sp_ds_create();
 
-    sp_ds_insert(HIST_TAG, 1);
-    sp_ds_insert(HIST_TAG, 2);
-    sp_ds_insert(DIV_TAG, 1);
-    sp_ds_insert(DIV_TAG, 2);
+    sp_ds_insert(history::tag(), 1);
+    sp_ds_insert(history::tag(), 2);
+    sp_ds_insert(dividends::tag(), 1);
+    sp_ds_insert(dividends::tag(), 2);
 
     sp_ds_select_history();
     sp_ds_select_dividends();
 
-    sp_ds_drop(DIV_TAG);
-    sp_ds_drop(HIST_TAG);
+    sp_ds_drop(dividends::tag());
+    sp_ds_drop(history::tag());
 
     sp_ds_delete();
 }
@@ -38,7 +35,7 @@ fn sp_ds_symbol() -> &'static str {
 }
 
 fn sp_ds_data(which: &str, idx: i32) -> &'static str {
-    if which == HIST_TAG {
+    if which == history::tag() {
         if idx == 1 {
             return &"Date,Open,High,Low,Close,Adj Close,Volume\n\
                      2021-02-22,10.0,12.0,8.0,11.0,11.0,10000\n\
@@ -52,7 +49,7 @@ fn sp_ds_data(which: &str, idx: i32) -> &'static str {
         }
 
     }
-    else if which == DIV_TAG {
+    else if which == dividends::tag() {
         if idx == 1 {
             return &"Date,Dividends\n\
                      2021-02-23,1.2";
@@ -95,7 +92,7 @@ fn sp_ds_select_history() {
         assert_eq!(entry.volume, values[6].parse::<u64>().unwrap());
     }
 
-    match ds.select_symbol(HIST_TAG, sp_ds_symbol()) {
+    match ds.select_symbol(history::tag(), sp_ds_symbol()) {
         Ok(actual) => {
             // No Filter
             match history::History::parse_csv(sp_ds_symbol(), &actual) {
@@ -141,7 +138,7 @@ fn sp_ds_select_dividends() {
         assert_eq!(entry.price, values[1].parse::<Price>().unwrap());
     }
 
-    match ds.select_symbol(DIV_TAG, sp_ds_symbol()) {
+    match ds.select_symbol(dividends::tag(), sp_ds_symbol()) {
         Ok(actual) => {
             // No Filter
             match dividends::Dividends::parse_csv(sp_ds_symbol(), &actual) {

@@ -7,6 +7,14 @@ use crate::util::price_type::PriceType;
 pub type Price = PriceType;
 
 // --------------------------------------------------------------------------------
+// Dividends Tag
+
+#[inline(always)]
+pub fn tag() -> &'static str {
+    &"dividends"
+}
+
+// --------------------------------------------------------------------------------
 // Dividend Entry
 
 pub struct DividendEntry {
