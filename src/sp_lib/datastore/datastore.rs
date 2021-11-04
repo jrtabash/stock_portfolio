@@ -41,6 +41,11 @@ impl DataStore {
         self.root.exists() && self.base_path.exists()
     }
 
+    #[inline(always)]
+    pub fn symbol_exists(&self, tag: &str, symbol: &str) -> bool {
+        DataStore::make_symbol_file(&self.base_path, tag, symbol).exists()
+    }
+
     pub fn create(&self) -> Result<(), Box<dyn Error>> {
         if self.exists() {
             Err(format!("Datastore '{}' already exists", self.name).into())
@@ -241,7 +246,10 @@ mod tests {
         let test_file = temp_file::make_path("test_insert_select/tst_TEST.csv");
 
         ds.create().unwrap();
+        assert!(!ds.symbol_exists(&tag, &symbol));
+
         ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert!(ds.symbol_exists(&tag, &symbol));
         assert!(test_file.exists());
 
         let data = ds.select_symbol(&tag, &symbol).unwrap();
@@ -269,7 +277,10 @@ mod tests {
                    11,12,13,14,15\n";
 
         ds.create().unwrap();
+        assert!(!ds.symbol_exists(&tag, &symbol));
+
         ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert!(ds.symbol_exists(&tag, &symbol));
 
         let data = ds.select_last(&tag, &symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();

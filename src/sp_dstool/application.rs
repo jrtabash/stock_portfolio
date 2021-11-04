@@ -1,7 +1,9 @@
 use std::error::Error;
 use std::path::Path;
 use std::fs;
+use sp_lib::util::datetime;
 use sp_lib::portfolio::{stock, stocks_reader};
+use sp_lib::yfinance::{types, query};
 use sp_lib::datastore::{datastore, history, dividends};
 use crate::arguments::Arguments;
 
@@ -52,11 +54,11 @@ impl Application {
         let mut upd_count: usize = 0;
         let mut err_count: usize = 0;
 
-        for stck in self.stocks.iter() {
-            match self.update_stock_data(&stck.symbol) {
+        for stock in self.stocks.iter() {
+            match self.update_stock_data(&stock) {
                 Ok(_) => upd_count += 1,
                 Err(err) => {
-                    eprintln!("{}: {}", stck.symbol, err);
+                    eprintln!("{}: {}", stock.symbol, err);
                     err_count += 1;
                 }
             };
@@ -71,18 +73,47 @@ impl Application {
         }
     }
 
-    fn update_stock_data(self: &Self, symbol: &str) -> Result<(), Box<dyn Error>> {
-        self.update_stock_history(symbol)?;
-        self.update_stock_dividends(symbol)?;
+    fn update_stock_data(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
+        self.update_stock_history(stock)?;
+        self.update_stock_dividends(stock)?;
         Ok(())
     }
 
-    fn update_stock_history(self: &Self, _symbol: &str) -> Result<(), Box<dyn Error>> {
-        // TODO
+    fn update_stock_history(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
+        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
+        if !ds.exists() {
+            return Err(format!("Datastore {} does not exists", ds).into());
+        }
+
+        let hist =
+            if ds.symbol_exists(history::tag(), &stock.symbol) {
+                history::History::ds_select_last(&ds, &stock.symbol)?
+            } else {
+                history::History::new(&stock.symbol)
+            };
+        let begin_date =
+            if hist.count() == 1 {
+                datetime::date_plus_days(&hist.entries()[0].date, 1)
+            } else {
+                stock.date.clone()
+            };
+
+        let today = datetime::today();
+        if begin_date <= today {
+            let mut query = query::HistoryQuery::new(
+                stock.symbol.to_string(),
+                begin_date,
+                datetime::date_plus_days(&today, 1),
+                types::Interval::Daily,
+                types::Events::History);
+
+            query.execute()?;
+            ds.insert_symbol(history::tag(), &stock.symbol, &query.result)?;
+        }
         Ok(())
     }
 
-    fn update_stock_dividends(self: &Self, _symbol: &str) -> Result<(), Box<dyn Error>> {
+    fn update_stock_dividends(self: &Self, _stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
         // TODO
         Ok(())
     }

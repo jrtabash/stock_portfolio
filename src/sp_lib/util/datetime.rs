@@ -24,6 +24,11 @@ pub fn today_plus_days(days: i64) -> LocalDate {
 }
 
 #[inline(always)]
+pub fn date_plus_days(date: &LocalDate, days: i64) -> LocalDate {
+    *date + Duration::days(days)
+}
+
+#[inline(always)]
 pub fn earliest_date() -> LocalDate {
     chrono::Local.ymd(1970, 1, 1)
 }
@@ -93,6 +98,14 @@ mod tests {
         assert_eq!(today_plus_days(0), today);
         assert_eq!(today_plus_days(1), today + Duration::days(1));
         assert_eq!(today_plus_days(-1), today + Duration::days(-1));
+    }
+
+    #[test]
+    fn test_date_plus_delta() {
+        let dt = today();
+        assert_eq!(date_plus_days(&dt, 0), dt);
+        assert_eq!(date_plus_days(&dt, 1), dt + Duration::days(1));
+        assert_eq!(date_plus_days(&dt, -1), dt + Duration::days(-1));
     }
 
     #[test]
