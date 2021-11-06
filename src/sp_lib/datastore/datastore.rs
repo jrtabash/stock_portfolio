@@ -131,9 +131,19 @@ impl DataStore {
                     fs::File::create(sym_file)?
                 };
             file.seek(std::io::SeekFrom::End(0))?;
-            write!(file, "{}", csv_ref)?;
-            if !csv_ref.ends_with("\n") {
-                write!(file, "\n")?;
+
+            let mut last_line: Option<&str> = None;
+            for line in csv_ref.trim().split('\n') {
+                // Expect and ignore consecutive lines that start with the same date
+                if let Some(last) = last_line {
+                    if let Some(comma) = last.find(',') {
+                        if line.starts_with(&last[..comma]) {
+                            continue;
+                        }
+                    }
+                }
+                write!(file, "{}\n", line)?;
+                last_line = Some(line);
             }
         }
         Ok(())
@@ -265,6 +275,41 @@ mod tests {
     }
 
     #[test]
+    fn test_datastore_insert_dup_first_column_select() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_insert_dup_select");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_insert_dup_select");
+
+        let tag = "tst";
+        let symbol = "TEST";
+        let csv = "1,2,3,4,5\n\
+                   1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   6,7,8,9,10\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15\n";
+        let test_file = temp_file::make_path("test_insert_dup_select/tst_TEST.csv");
+
+        ds.create().unwrap();
+        assert!(!ds.symbol_exists(&tag, &symbol));
+
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert!(ds.symbol_exists(&tag, &symbol));
+        assert!(test_file.exists());
+
+        let data = ds.select_symbol(&tag, &symbol).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 4);
+        assert_eq!(dvec[0], "1,2,3,4,5");
+        assert_eq!(dvec[1], "6,7,8,9,10");
+        assert_eq!(dvec[2], "11,12,13,14,15");
+        assert_eq!(dvec[3], "");
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
     fn test_datastore_insert_select_last() {
         let root = env::temp_dir();
         let base_path = temp_file::make_path("test_insert_select_last");
@@ -322,6 +367,39 @@ mod tests {
     }
 
     #[test]
+    fn test_datastore_insert_dup_first_column_with_header() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_insert_dup_with_header");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_insert_dup_with_header");
+
+        let tag = "tst";
+        let symbol = "TEST";
+        let csv = "A,B,C,D,E\n\
+                   1,2,3,4,5\n\
+                   1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   6,7,8,9,10\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15\n";
+        let test_file = temp_file::make_path("test_insert_dup_with_header/tst_TEST.csv");
+
+        ds.create().unwrap();
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert!(test_file.exists());
+
+        let data = ds.select_symbol(&tag, &symbol).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 4);
+        assert_eq!(dvec[0], "1,2,3,4,5");
+        assert_eq!(dvec[1], "6,7,8,9,10");
+        assert_eq!(dvec[2], "11,12,13,14,15");
+        assert_eq!(dvec[3], "");
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
     fn test_datastore_append() {
         let root = env::temp_dir();
         let base_path = temp_file::make_path("test_append");
@@ -333,6 +411,42 @@ mod tests {
                    6,7,8,9,10\n\
                    11,12,13,14,15";
         let extra_csv = "16,17,18,19,20\n\
+                         21,22,23,24,25\n";
+
+        ds.create().unwrap();
+        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap();
+
+        let data = ds.select_symbol(&tag, &symbol).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 6);
+        assert_eq!(dvec[0], "1,2,3,4,5");
+        assert_eq!(dvec[1], "6,7,8,9,10");
+        assert_eq!(dvec[2], "11,12,13,14,15");
+        assert_eq!(dvec[3], "16,17,18,19,20");
+        assert_eq!(dvec[4], "21,22,23,24,25");
+        assert_eq!(dvec[5], "");
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
+    fn test_datastore_append_dup_first_column() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_append_dup");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_append_dup");
+
+        let tag = "tst";
+        let symbol = "TEST";
+        let csv = "1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   6,7,8,9,10";
+        let extra_csv = "11,12,13,14,15\n\
+                         11,12,13,14,15\n\
+                         16,17,18,19,20\n\
+                         16,17,18,19,20\n\
+                         16,17,18,19,20\n\
                          21,22,23,24,25\n";
 
         ds.create().unwrap();
