@@ -124,6 +124,8 @@ impl DataStore {
         if !csv_ref.is_empty() {
             let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
             let exists = sym_file.exists();
+            let file_last_line = if exists { self.read_last(&sym_file)? } else { String::new() };
+
             let mut file =
                 if exists {
                     fs::OpenOptions::new().write(true).open(sym_file)?
@@ -132,7 +134,7 @@ impl DataStore {
                 };
             file.seek(std::io::SeekFrom::End(0))?;
 
-            let mut last_line: Option<&str> = None;
+            let mut last_line: Option<&str> = if !file_last_line.is_empty() { Some(&file_last_line) } else { None };
             for line in csv_ref.trim().split('\n') {
                 // Expect and ignore consecutive lines that start with the same date
                 if let Some(last) = last_line {
@@ -442,12 +444,14 @@ mod tests {
         let csv = "1,2,3,4,5\n\
                    6,7,8,9,10\n\
                    6,7,8,9,10";
-        let extra_csv = "11,12,13,14,15\n\
-                         11,12,13,14,15\n\
-                         16,17,18,19,20\n\
-                         16,17,18,19,20\n\
-                         16,17,18,19,20\n\
-                         21,22,23,24,25\n";
+        let extra_csv ="6,7,8,9,10\n\
+                        6,7,8,9,10\n\
+                        11,12,13,14,15\n\
+                        11,12,13,14,15\n\
+                        16,17,18,19,20\n\
+                        16,17,18,19,20\n\
+                        16,17,18,19,20\n\
+                        21,22,23,24,25\n";
 
         ds.create().unwrap();
         ds.insert_symbol(&tag, &symbol, &csv).unwrap();
