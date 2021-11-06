@@ -91,6 +91,11 @@ impl Application {
             } else {
                 history::History::new(&stock.symbol)
             };
+
+        if hist.count() > 1 {
+            return Err(format!("Found unexpected history query result size {}, expected 0 or 1", hist.count()).into());
+        }
+
         let begin_date =
             if hist.count() == 1 {
                 datetime::date_plus_days(&hist.entries()[0].date, 1)
