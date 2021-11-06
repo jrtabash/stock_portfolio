@@ -74,17 +74,17 @@ impl Application {
     }
 
     fn update_stock_data(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
-        self.update_stock_history(stock)?;
-        self.update_stock_dividends(stock)?;
-        Ok(())
-    }
-
-    fn update_stock_history(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
         let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
         if !ds.exists() {
             return Err(format!("Datastore {} does not exists", ds).into());
         }
 
+        self.update_stock_history(&ds, stock)?;
+        self.update_stock_dividends(&ds, stock)?;
+        Ok(())
+    }
+
+    fn update_stock_history(self: &Self, ds: &datastore::DataStore, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
         let hist =
             if ds.symbol_exists(history::tag(), &stock.symbol) {
                 history::History::ds_select_last(&ds, &stock.symbol)?
@@ -118,8 +118,37 @@ impl Application {
         Ok(())
     }
 
-    fn update_stock_dividends(self: &Self, _stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
-        // TODO
+    fn update_stock_dividends(self: &Self, ds: &datastore::DataStore, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
+        let div =
+            if ds.symbol_exists(dividends::tag(), &stock.symbol) {
+                dividends::Dividends::ds_select_last(&ds, &stock.symbol)?
+            } else {
+                dividends::Dividends::new(&stock.symbol)
+            };
+
+        if div.count() > 1 {
+            return Err(format!("Found unexpected dividends query result size {}, expected 0 or 1", div.count()).into());
+        }
+
+        let begin_date =
+            if div.count() == 1 {
+                datetime::date_plus_days(&div.entries()[0].date, 1)
+            } else {
+                stock.date.clone()
+            };
+
+        let today = datetime::today();
+        if begin_date <= today {
+            let mut query = query::HistoryQuery::new(
+                stock.symbol.to_string(),
+                begin_date,
+                datetime::date_plus_days(&today, 1),
+                types::Interval::Daily,
+                types::Events::Dividend);
+
+            query.execute()?;
+            ds.insert_symbol(dividends::tag(), &stock.symbol, &query.result)?;
+        }
         Ok(())
     }
 
