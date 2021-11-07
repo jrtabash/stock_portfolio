@@ -5,6 +5,8 @@ use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::portfolio::stocks_cache::{CacheEntry, StocksCache};
 use crate::yfinance::query::HistoryQuery;
 use crate::yfinance::types::{Interval, Events};
+use crate::datastore::datastore::DataStore;
+use crate::datastore::history::History;
 
 pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<dyn Error>> {
     // Function assumes multi-line csv data.
@@ -48,10 +50,34 @@ pub fn update_stock(stock: &mut Stock) -> Result<bool, Box<dyn Error>> {
     }
 }
 
+pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, Box<dyn Error>> {
+    let hist = History::ds_select_last(ds, &stock.symbol)?;
+    if hist.count() != 1 {
+        return Err(format!("Failed to find last history for {} in datastore {}", stock.symbol, ds).into())
+    }
+
+    let entry = &hist.entries()[0];
+    if entry.adj_close > 0.0 {
+        stock.set_latest_price(entry.adj_close, entry.date.clone());
+        return Ok(true)
+    }
+    Ok(false)
+}
+
 pub fn update_stocks(stocks: &mut StockList) -> Result<usize, Box<dyn Error>> {
     let mut count: usize = 0;
     for stock in stocks.iter_mut() {
         if update_stock(stock)? {
+            count += 1;
+        }
+    }
+    Ok(count)
+}
+
+pub fn update_stocks_from_ds(stocks: &mut StockList, ds: &DataStore) -> Result<usize, Box<dyn Error>> {
+    let mut count: usize = 0;
+    for stock in stocks.iter_mut() {
+        if update_stock_from_ds(stock, ds)? {
             count += 1;
         }
     }
