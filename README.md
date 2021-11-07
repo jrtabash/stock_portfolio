@@ -1,4 +1,8 @@
-# Stock Portfolio Report
+# Stock Portfolio Tools
+- sp_report: Stock Portfolio Report
+- sp_dstool: Stock Portfolio Datastore Tool
+
+## Stock Portfolio Report
 Get latest close prices and report the gains and losses of stocks in portfolio.
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
@@ -11,26 +15,50 @@ The following features are supported:
 - **Filter**: Include and/or exclude by type or list of symbols
 - **Export**: Export gains and losses table to a csv file
 - **Cache**: Cache latest close prices. Cache stored in temporary folder
+- **Datastore**: Get latest close price from given datastore, when enabled, disables cache
 
-## Usage
 ```bash
 USAGE:
     sp_report [FLAGS] [OPTIONS] --stocks <stocks_file>
 
 FLAGS:
-   -d, --desc            Used with order by option to sort in descending order
-   -h, --help            Prints help information
-   -g, --show-groupby    Show quantities and current notional values grouped by symbol
-   -V, --version         Prints version information
+    -d, --desc            Used with order by option to sort in descending order
+    -h, --help            Prints help information
+    -g, --show-groupby    Show quantities and current notional values grouped by symbol
+    -V, --version         Prints version information
 
 OPTIONS:
-   -c, --cache <cache_file>      Local cache file to store latest stock prices
-   -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of symbols
-   -e, --export <export_file>    Export gains and losses table to a csv file
-   -i, --include <include        Include stocks by type or symbols; one of stock, etf or a comma separated list of symbols
-   -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, size or value
-   -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price'
-                                 including a header line. Supported type values include stock and etf
+    -c, --cache <cache_file>      Local cache file to store latest stock prices. Ignored when datastore root is specified
+    -n, --name <ds_name>          Datastore name, used with datastore root (default: sp_datastore)
+    -r, --root <ds_root>          Datastore root path, use to update portfolio latest prices. When specified,
+                                  local cache file will be ignored
+    -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of symbols
+    -e, --export <export_file>    Export gains and losses table to a csv file
+    -i, --include <include>       Include stocks by type or symbols; one of stock, etf or a comma separated list of symbols
+    -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, size or value
+    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price'
+                                  including a header line. Supported type values include stock and etf
+```
+
+## Stock Portfolio Datastore Tool
+Create delete, update and check datastore and symbol price and size data.
+
+Maintain a datastore of stock open, high, low, and close prices, stock trading volumes, and stock dividends.
+
+```bash
+USAGE:
+    sp_dstool [OPTIONS] --dsop <ds_operation> --root <ds_root>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -n, --name <ds_name>          Datastore name (default: sp_datastore)
+    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, check
+    -r, --root <ds_root>          Datastore root path
+    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, refer to sp_report --help for more
+                                  information. File is required with update operation.
 ```
 
 ## Example Stocks File
@@ -41,7 +69,7 @@ AAPL,stock,2020-11-12,100,118.50
 DELL,stock,2021-02-10,100,75.50
 ```
 
-## Example 1
+## Example Report 1
 ```bash
 $ sp_report --stocks example_stocks.csv
 
@@ -61,7 +89,7 @@ AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.
 DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
 ```
 
-## Example 2
+## Example Report 2
 ```bash
 $ sp_report --show-groupby --stocks example_stocks.csv
 
@@ -86,7 +114,7 @@ AAPL          200     28996.00
 DELL          100      9589.00
 ```
 
-## Example 3
+## Example Report 3
 ```bash
 $ sp_report --show-groupby --stocks example_stocks.csv --orderby date --desc
 
@@ -111,7 +139,7 @@ DELL          100      9589.00
 AAPL          200     28996.00
 ```
 
-## Example 4
+## Example Report 4
 ```bash
 $ sp_report --stocks example_stocks.csv --include DELL
 
