@@ -25,6 +25,7 @@ impl Application {
 
         match self.args.ds_operation().as_str() {
             "update" => self.update()?,
+            "drop" => self.drop()?,
             "check" => self.check()?,
             "create" => self.create()?,
             "delete" => self.delete()?,
@@ -76,7 +77,7 @@ impl Application {
     fn update_stock_data(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
         let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
         if !ds.exists() {
-            return Err(format!("Datastore {} does not exists", ds).into());
+            return Err(format!("Datastore {} does not exist", ds).into());
         }
 
         self.update_stock_history(&ds, stock)?;
@@ -152,10 +153,37 @@ impl Application {
         Ok(())
     }
 
+    fn drop(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.symbol().is_none() {
+            return Err("Missing symbol for drop operation".into());
+        }
+
+        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
+        if !ds.exists() {
+            return Err(format!("Datastore {} does not exist", ds).into());
+        }
+
+        let symbol = self.args.symbol().unwrap();
+        let mut count = 0;
+        count += self.drop_symbol(&ds, history::tag(), &symbol)?;
+        count += self.drop_symbol(&ds, dividends::tag(), &symbol)?;
+        println!("Dropped {} file{} for symbol {}", count, if count == 1 { "" } else { "s" }, symbol);
+        Ok(())
+    }
+
+    fn drop_symbol(self: &Self, ds: &datastore::DataStore, tag: &str, symbol: &str) -> Result<u8, Box<dyn Error>> {
+        let mut count: u8 = 0;
+        if ds.symbol_exists(tag, symbol) {
+            ds.drop_symbol(tag, &symbol)?;
+            count += 1;
+        }
+        Ok(count)
+    }
+
     fn check(self: &Self) -> Result<(), Box<dyn Error>> {
         let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
         if !ds.exists() {
-            return Err(format!("Datastore {} does not exists", ds).into());
+            return Err(format!("Datastore {} does not exist", ds).into());
         }
 
         let mut count: usize = 0;
@@ -201,7 +229,7 @@ impl Application {
     fn create(self: &Self) -> Result<(), Box<dyn Error>> {
         let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
         if ds.exists() {
-            return Err(format!("Datastore {} already exists", ds).into());
+            return Err(format!("Datastore {} already exist", ds).into());
         }
 
         ds.create()?;
@@ -213,7 +241,7 @@ impl Application {
     fn delete(self: &Self) -> Result<(), Box<dyn Error>> {
         let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
         if !ds.exists() {
-            return Err(format!("Datastore {} does not exists", ds).into());
+            return Err(format!("Datastore {} does not exist", ds).into());
         }
 
         ds.delete()?;
