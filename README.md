@@ -41,9 +41,14 @@ OPTIONS:
 ```
 
 ## Stock Portfolio Datastore Tool
-Create delete, update and check datastore and symbol price and size data.
+Manage datastore and symbol price and size data. Data includes open, high, low, and close prices, trading volumes, and dividends.
 
-Maintain a datastore of stock open, high, low, and close prices, stock trading volumes, and stock dividends.
+The following operations are supported:
+- **Create**: Create datastore
+- **Delete**: Delete datastore
+- **Update**: Update price and size data
+- **Drop**: Drop symbol
+- **Check**: Check price and size data
 
 ```bash
 USAGE:
@@ -55,10 +60,11 @@ FLAGS:
 
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
-    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, check
+    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, check
     -r, --root <ds_root>          Datastore root path
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, refer to sp_report --help for more
-                                  information. File is required with update operation.
+                                  information. File is required with update operation
+    -y, --symbol <symbol>         Stock symbol, required with drop symbol operation
 ```
 
 ## Example Stocks File
