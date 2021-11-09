@@ -94,6 +94,7 @@ mod tests {
         assert_eq!(stock.base_price, 120.25);
         assert_eq!(stock.latest_price, 0.0);
         assert_eq!(stock.latest_date, datetime::earliest_date());
+        assert_eq!(stock.days_held, 0);
     }
 
     #[test]
@@ -101,6 +102,7 @@ mod tests {
         let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
         assert_eq!(stock.latest_price, 0.0);
         assert_eq!(stock.latest_date, datetime::earliest_date());
+        assert_eq!(stock.days_held, 0);
 
         stock.set_latest_price(125.50, datetime::today());
         assert_eq!(stock.latest_price, 125.50);
