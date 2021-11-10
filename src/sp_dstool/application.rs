@@ -7,28 +7,42 @@ use sp_lib::yfinance::{types, query};
 use sp_lib::datastore::{datastore, history, dividends};
 use crate::arguments::Arguments;
 
+const UPDATE: &str = "update";
+const DROP: &str = "drop";
+const CHECK: &str = "check";
+const CREATE: &str = "create";
+const DELETE: &str = "delete";
+
 pub struct Application {
     args: Arguments,
-    stocks: stock::StockList
+    stocks: stock::StockList,
+    ds: datastore::DataStore
 }
 
 impl Application {
     pub fn new() -> Self {
+        let args = Arguments::new();
+        let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
         Application {
-            args: Arguments::new(),
-            stocks: stock::StockList::new()
+            args: args,
+            stocks: stock::StockList::new(),
+            ds: ds
         }
     }
 
     pub fn run(self: &mut Self) -> Result<(), Box<dyn Error>> {
+        if !self.ds.exists() && self.args.ds_operation() != CREATE {
+            return Err(format!("Datastore {} does not exist", self.ds).into());
+        }
+
         self.read_stocks()?;
 
         match self.args.ds_operation().as_str() {
-            "update" => self.update()?,
-            "drop" => self.drop()?,
-            "check" => self.check()?,
-            "create" => self.create()?,
-            "delete" => self.delete()?,
+            UPDATE => self.update()?,
+            DROP => self.drop()?,
+            CHECK => self.check()?,
+            CREATE => self.create()?,
+            DELETE => self.delete()?,
             _ => return Err(format!("Invalid ds_operation - '{}'", self.args.ds_operation()).into())
         };
 
@@ -75,20 +89,15 @@ impl Application {
     }
 
     fn update_stock_data(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
-        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
-        if !ds.exists() {
-            return Err(format!("Datastore {} does not exist", ds).into());
-        }
-
-        self.update_stock_history(&ds, stock)?;
-        self.update_stock_dividends(&ds, stock)?;
+        self.update_stock_history(stock)?;
+        self.update_stock_dividends(stock)?;
         Ok(())
     }
 
-    fn update_stock_history(self: &Self, ds: &datastore::DataStore, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
+    fn update_stock_history(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
         let hist =
-            if ds.symbol_exists(history::tag(), &stock.symbol) {
-                history::History::ds_select_last(&ds, &stock.symbol)?
+            if self.ds.symbol_exists(history::tag(), &stock.symbol) {
+                history::History::ds_select_last(&self.ds, &stock.symbol)?
             } else {
                 history::History::new(&stock.symbol)
             };
@@ -114,15 +123,15 @@ impl Application {
                 types::Events::History);
 
             query.execute()?;
-            ds.insert_symbol(history::tag(), &stock.symbol, &query.result)?;
+            self.ds.insert_symbol(history::tag(), &stock.symbol, &query.result)?;
         }
         Ok(())
     }
 
-    fn update_stock_dividends(self: &Self, ds: &datastore::DataStore, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
+    fn update_stock_dividends(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
         let div =
-            if ds.symbol_exists(dividends::tag(), &stock.symbol) {
-                dividends::Dividends::ds_select_last(&ds, &stock.symbol)?
+            if self.ds.symbol_exists(dividends::tag(), &stock.symbol) {
+                dividends::Dividends::ds_select_last(&self.ds, &stock.symbol)?
             } else {
                 dividends::Dividends::new(&stock.symbol)
             };
@@ -148,7 +157,7 @@ impl Application {
                 types::Events::Dividend);
 
             query.execute()?;
-            ds.insert_symbol(dividends::tag(), &stock.symbol, &query.result)?;
+            self.ds.insert_symbol(dividends::tag(), &stock.symbol, &query.result)?;
         }
         Ok(())
     }
@@ -158,41 +167,31 @@ impl Application {
             return Err("Missing symbol for drop operation".into());
         }
 
-        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
-        if !ds.exists() {
-            return Err(format!("Datastore {} does not exist", ds).into());
-        }
-
         let symbol = self.args.symbol().unwrap();
         let mut count = 0;
-        count += self.drop_symbol(&ds, history::tag(), &symbol)?;
-        count += self.drop_symbol(&ds, dividends::tag(), &symbol)?;
+        count += self.drop_symbol(history::tag(), &symbol)?;
+        count += self.drop_symbol(dividends::tag(), &symbol)?;
         println!("Dropped {} file{} for symbol {}", count, if count == 1 { "" } else { "s" }, symbol);
         Ok(())
     }
 
-    fn drop_symbol(self: &Self, ds: &datastore::DataStore, tag: &str, symbol: &str) -> Result<u8, Box<dyn Error>> {
+    fn drop_symbol(self: &Self, tag: &str, symbol: &str) -> Result<u8, Box<dyn Error>> {
         let mut count: u8 = 0;
-        if ds.symbol_exists(tag, symbol) {
-            ds.drop_symbol(tag, &symbol)?;
+        if self.ds.symbol_exists(tag, symbol) {
+            self.ds.drop_symbol(tag, &symbol)?;
             count += 1;
         }
         Ok(count)
     }
 
     fn check(self: &Self) -> Result<(), Box<dyn Error>> {
-        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
-        if !ds.exists() {
-            return Err(format!("Datastore {} does not exist", ds).into());
-        }
-
         let mut count: usize = 0;
 
-        for entry in fs::read_dir(ds.base_path())? {
+        for entry in fs::read_dir(self.ds.base_path())? {
             let entry = entry?;
             let entry_path = entry.path();
             if entry_path.is_file() {
-                if let Err(err) = self.check_entry(&ds, &entry_path) {
+                if let Err(err) = self.check_entry(&entry_path) {
                     count += 1;
                     eprintln!("{}: {}", entry.file_name().to_str().unwrap(), err);
                 }
@@ -203,8 +202,8 @@ impl Application {
         Ok(())
     }
 
-    fn check_entry(self: &Self, ds: &datastore::DataStore, entry_path: &Path) -> Result<(), Box<dyn Error>> {
-        let content = ds.read_file(&entry_path)?;
+    fn check_entry(self: &Self, entry_path: &Path) -> Result<(), Box<dyn Error>> {
+        let content = self.ds.read_file(&entry_path)?;
 
         let content_ref = match content.find('\n') {
             Some(pos) => &content[0..pos],
@@ -227,26 +226,16 @@ impl Application {
     }
 
     fn create(self: &Self) -> Result<(), Box<dyn Error>> {
-        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
-        if ds.exists() {
-            return Err(format!("Datastore {} already exist", ds).into());
-        }
+        self.ds.create()?;
 
-        ds.create()?;
-
-        println!("Datastore {} created", ds);
+        println!("Datastore {} created", self.ds);
         Ok(())
     }
 
     fn delete(self: &Self) -> Result<(), Box<dyn Error>> {
-        let ds = datastore::DataStore::new(self.args.ds_root(), self.args.ds_name());
-        if !ds.exists() {
-            return Err(format!("Datastore {} does not exist", ds).into());
-        }
+        self.ds.delete()?;
 
-        ds.delete()?;
-
-        println!("Datastore {} deleted", ds);
+        println!("Datastore {} deleted", self.ds);
         Ok(())
     }
 }
