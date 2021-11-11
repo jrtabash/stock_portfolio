@@ -35,6 +35,12 @@ impl Application {
             return Err(format!("Datastore {} does not exist", self.ds).into());
         }
 
+        if self.args.is_verbose() {
+            println!("Running {} operation on datastore {}", self.args.ds_operation(), self.ds);
+            println!("stocks: {}", if let Some(file) = self.args.stocks_file() { file } else { "" });
+            println!("symbol: {}", if let Some(symbol) = self.args.symbol() { symbol } else { "" });
+        }
+
         self.read_stocks()?;
 
         match self.args.ds_operation().as_str() {
@@ -53,6 +59,8 @@ impl Application {
     // Private
 
     fn read_stocks(self: &mut Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Read stocks file"); }
+
         if let Some(file) = self.args.stocks_file() {
             let reader = stocks_reader::StocksReader::new(String::from(file));
             self.stocks = reader.read()?;
@@ -61,6 +69,8 @@ impl Application {
     }
 
     fn update(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Update stocks"); }
+
         if self.args.stocks_file().is_none() {
             return Err("Missing stocks file for update operation".into());
         }
@@ -70,6 +80,8 @@ impl Application {
         let mut err_count: usize = 0;
 
         for stock in self.stocks.iter() {
+            if self.args.is_verbose() { println!("Update {}", stock.symbol); }
+
             match self.update_stock_data(&stock) {
                 Ok(_) => upd_count += 1,
                 Err(err) => {
@@ -163,6 +175,8 @@ impl Application {
     }
 
     fn drop(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Drop symbol"); }
+
         if self.args.symbol().is_none() {
             return Err("Missing symbol for drop operation".into());
         }
@@ -185,15 +199,19 @@ impl Application {
     }
 
     fn check(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Check datastore"); }
+
         let mut count: usize = 0;
 
         for entry in fs::read_dir(self.ds.base_path())? {
             let entry = entry?;
             let entry_path = entry.path();
             if entry_path.is_file() {
+                if self.args.is_verbose() { println!("Check entry {}", if let Some(fname) = entry.file_name().to_str() { fname } else { "?" }); }
+
                 if let Err(err) = self.check_entry(&entry_path) {
                     count += 1;
-                    eprintln!("{}: {}", entry.file_name().to_str().unwrap(), err);
+                    eprintln!("{}: {}", if let Some(fname) = entry.file_name().to_str() { fname } else { "?" }, err);
                 }
             }
         }
@@ -226,6 +244,8 @@ impl Application {
     }
 
     fn create(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Create datastore"); }
+
         self.ds.create()?;
 
         println!("Datastore {} created", self.ds);
@@ -233,6 +253,8 @@ impl Application {
     }
 
     fn delete(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Delete datastore"); }
+
         self.ds.delete()?;
 
         println!("Datastore {} deleted", self.ds);

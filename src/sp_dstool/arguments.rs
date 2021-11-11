@@ -7,7 +7,8 @@ pub struct Arguments {
     ds_root: String,
     ds_name: String,
     stocks_file: Option<String>,
-    symbol: Option<String>
+    symbol: Option<String>,
+    verbose: bool
 }
 
 impl Arguments {
@@ -45,6 +46,13 @@ impl Arguments {
                  .long("symbol")
                  .help("Stock symbol, required with drop symbol operation")
                  .takes_value(true))
+
+            // Flags
+            .arg(Arg::with_name("verbose")
+                 .short("v")
+                 .long("verbose")
+                 .help("Verbose mode"))
+
             .get_matches();
 
         Arguments {
@@ -62,7 +70,8 @@ impl Arguments {
             symbol: match parsed_args.value_of("symbol") {
                 Some(value) => Some(String::from(value)),
                 None => None
-            }
+            },
+            verbose: parsed_args.is_present("verbose")
         }
     }
 
@@ -84,5 +93,9 @@ impl Arguments {
 
     pub fn symbol(self: &Self) -> Option<&String> {
         self.symbol.as_ref()
+    }
+
+    pub fn is_verbose(self: &Self) -> bool {
+        self.verbose
     }
 }

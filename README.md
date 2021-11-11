@@ -57,6 +57,7 @@ USAGE:
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
+    -v, --verbose    Verbose mode
 
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
