@@ -44,6 +44,21 @@ fn test_stock_groupby() {
 }
 
 #[test]
+fn test_stock_groupby_ftn() {
+    let mut list = StockList::new();
+    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21,  79.71));
+    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    list.push(make_stock("ICLN", StockType::ETF,   today_plus_days(0),  400, 24.10,  24.12));
+    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(0),  100, 125.50, 125.75));
+
+    let sym_sizes = stock_groupby_ftn(&list, |_| 0, |s, q| s.quantity + q);
+    assert_eq!(sym_sizes.len(), 3);
+    assert_eq!(*sym_sizes.get("AAPL").unwrap(), 300);
+    assert_eq!(*sym_sizes.get("DELL").unwrap(), 100);
+    assert_eq!(*sym_sizes.get("ICLN").unwrap(), 400);
+}
+
+#[test]
 fn test_stock_update_from_csv() {
     let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
                2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
@@ -170,6 +185,31 @@ fn test_filter_stocks() {
     test_filter("AAPL,DELL", remove, &vec!["ICLN"]);
     test_filter("MSFT", keep, &vec![]);
     test_filter("MSFT", remove, &vec!["DELL", "AAPL", "ICLN"]);
+}
+
+#[test]
+fn test_stock_base_dates() {
+    fn test_dates(list: &StockList) {
+        let sym_dates = stock_base_dates(&list);
+        assert_eq!(sym_dates.len(), 3);
+        assert_eq!(*sym_dates.get("AAPL").unwrap(), today_plus_days(-3));
+        assert_eq!(*sym_dates.get("DELL").unwrap(), today_plus_days(-2));
+        assert_eq!(*sym_dates.get("ICLN").unwrap(), today_plus_days(0));
+    }
+
+    let mut list = StockList::new();
+    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21,  79.71));
+    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    list.push(make_stock("ICLN", StockType::ETF,   today_plus_days(0),  300, 24.10,  24.12));
+    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(0),  100, 125.50, 125.75));
+    test_dates(&list);
+
+    let mut list = StockList::new();
+    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21,  79.71));
+    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(0),  100, 125.50, 125.75));
+    list.push(make_stock("ICLN", StockType::ETF,   today_plus_days(0),  300, 24.10,  24.12));
+    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    test_dates(&list);
 }
 
 #[test]

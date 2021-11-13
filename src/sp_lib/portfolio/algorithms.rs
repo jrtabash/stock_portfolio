@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use crate::portfolio::stock::{Price, StockList};
-use crate::util::price_type;
+use crate::portfolio::stock::{Price, Stock, StockList};
+use crate::util::{price_type, datetime};
 use crate::portfolio::stock_type;
 
 pub fn latest_notional(stocks: &StockList) -> Price {
@@ -29,6 +29,17 @@ pub fn stock_groupby(stocks: &StockList) -> HashMap<String, (u32, Price)> {
         let size_price = groupby.entry(stock.symbol.to_string()).or_insert((0, 0.0));
         (*size_price).0 += stock.quantity;
         (*size_price).1 += stock.latest_notional();
+    }
+    groupby
+}
+
+pub fn stock_groupby_ftn<T>(stocks: &StockList,
+                            init: fn (&Stock) -> T,
+                            ftn: fn(&Stock, &T) -> T) -> HashMap<String, T> {
+    let mut groupby: HashMap<String, T> = HashMap::new();
+    for stock in stocks.iter() {
+        let entry = groupby.entry(stock.symbol.to_string()).or_insert(init(stock));
+        *entry = ftn(stock, entry);
     }
     groupby
 }
@@ -75,4 +86,11 @@ pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) {
         let symbol_set: HashSet<&str> = filter_expr.split(',').map(|name| name.trim()).collect();
         stocks.retain(|stock| symbol_set.contains(stock.symbol.as_str()) == keep);
     }
+}
+
+pub fn stock_base_dates(stocks: &StockList) -> HashMap<String, datetime::LocalDate> {
+    stock_groupby_ftn(
+        stocks,
+        |stock| stock.date.clone(),
+        |stock, cur_date| if stock.date < *cur_date { stock.date.clone() } else { *cur_date })
 }
