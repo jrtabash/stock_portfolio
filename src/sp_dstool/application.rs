@@ -1,8 +1,9 @@
 use std::error::Error;
 use std::path::Path;
 use std::fs;
+use std::collections::HashMap;
 use sp_lib::util::datetime;
-use sp_lib::portfolio::{stock, stocks_reader};
+use sp_lib::portfolio::{stocks_reader, algorithms};
 use sp_lib::yfinance::{types, query};
 use sp_lib::datastore::{datastore, history, dividends};
 use crate::arguments::Arguments;
@@ -15,7 +16,7 @@ const DELETE: &str = "delete";
 
 pub struct Application {
     args: Arguments,
-    stocks: stock::StockList,
+    sym_dates: HashMap<String, datetime::LocalDate>,
     ds: datastore::DataStore
 }
 
@@ -25,7 +26,7 @@ impl Application {
         let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
         Application {
             args: args,
-            stocks: stock::StockList::new(),
+            sym_dates: HashMap::new(),
             ds: ds
         }
     }
@@ -63,7 +64,7 @@ impl Application {
 
         if let Some(file) = self.args.stocks_file() {
             let reader = stocks_reader::StocksReader::new(String::from(file));
-            self.stocks = reader.read()?;
+            self.sym_dates = algorithms::stock_base_dates(&reader.read()?);
         }
         Ok(())
     }
@@ -75,23 +76,23 @@ impl Application {
             return Err("Missing stocks file for update operation".into());
         }
 
-        let stck_count = self.stocks.len();
+        let sym_count = self.sym_dates.len();
         let mut upd_count: usize = 0;
         let mut err_count: usize = 0;
 
-        for stock in self.stocks.iter() {
-            if self.args.is_verbose() { println!("Update {}", stock.symbol); }
+        for (symbol, base_date) in self.sym_dates.iter() {
+            if self.args.is_verbose() { println!("Update {}", symbol); }
 
-            match self.update_stock_data(&stock) {
+            match self.update_stock_data(symbol, base_date) {
                 Ok(_) => upd_count += 1,
                 Err(err) => {
-                    eprintln!("{}: {}", stock.symbol, err);
+                    eprintln!("{}: {}", symbol, err);
                     err_count += 1;
                 }
             };
         }
 
-        println!("Updated {} out of {} stock{}", upd_count, stck_count, if stck_count == 1 { "" } else { "s" });
+        println!("Updated {} out of {} symbol{}", upd_count, sym_count, if sym_count == 1 { "" } else { "s" });
         if err_count == 0 {
             Ok(())
         }
@@ -100,18 +101,18 @@ impl Application {
         }
     }
 
-    fn update_stock_data(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
-        self.update_stock_history(stock)?;
-        self.update_stock_dividends(stock)?;
+    fn update_stock_data(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
+        self.update_stock_history(symbol, base_date)?;
+        self.update_stock_dividends(symbol, base_date)?;
         Ok(())
     }
 
-    fn update_stock_history(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
+    fn update_stock_history(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
         let hist =
-            if self.ds.symbol_exists(history::tag(), &stock.symbol) {
-                history::History::ds_select_last(&self.ds, &stock.symbol)?
+            if self.ds.symbol_exists(history::tag(), symbol) {
+                history::History::ds_select_last(&self.ds, symbol)?
             } else {
-                history::History::new(&stock.symbol)
+                history::History::new(symbol)
             };
 
         if hist.count() > 1 {
@@ -122,30 +123,30 @@ impl Application {
             if hist.count() == 1 {
                 datetime::date_plus_days(&hist.entries()[0].date, 1)
             } else {
-                stock.date.clone()
+                base_date.clone()
             };
 
         let today = datetime::today();
         if begin_date <= today {
             let mut query = query::HistoryQuery::new(
-                stock.symbol.to_string(),
+                symbol.to_string(),
                 begin_date,
                 datetime::date_plus_days(&today, 1),
                 types::Interval::Daily,
                 types::Events::History);
 
             query.execute()?;
-            self.ds.insert_symbol(history::tag(), &stock.symbol, &query.result)?;
+            self.ds.insert_symbol(history::tag(), symbol, &query.result)?;
         }
         Ok(())
     }
 
-    fn update_stock_dividends(self: &Self, stock: &stock::Stock) -> Result<(), Box<dyn Error>> {
+    fn update_stock_dividends(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
         let div =
-            if self.ds.symbol_exists(dividends::tag(), &stock.symbol) {
-                dividends::Dividends::ds_select_last(&self.ds, &stock.symbol)?
+            if self.ds.symbol_exists(dividends::tag(), symbol) {
+                dividends::Dividends::ds_select_last(&self.ds, symbol)?
             } else {
-                dividends::Dividends::new(&stock.symbol)
+                dividends::Dividends::new(symbol)
             };
 
         if div.count() > 1 {
@@ -156,20 +157,20 @@ impl Application {
             if div.count() == 1 {
                 datetime::date_plus_days(&div.entries()[0].date, 1)
             } else {
-                stock.date.clone()
+                base_date.clone()
             };
 
         let today = datetime::today();
         if begin_date <= today {
             let mut query = query::HistoryQuery::new(
-                stock.symbol.to_string(),
+                symbol.to_string(),
                 begin_date,
                 datetime::date_plus_days(&today, 1),
                 types::Interval::Daily,
                 types::Events::Dividend);
 
             query.execute()?;
-            self.ds.insert_symbol(dividends::tag(), &stock.symbol, &query.result)?;
+            self.ds.insert_symbol(dividends::tag(), symbol, &query.result)?;
         }
         Ok(())
     }
