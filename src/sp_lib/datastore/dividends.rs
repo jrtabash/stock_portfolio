@@ -53,8 +53,6 @@ impl DividendEntry {
 // --------------------------------------------------------------------------------
 // Dividends
 
-pub type DividendPred = fn(&DividendEntry) -> bool;
-
 pub struct Dividends {
     symbol: String,
     entries: Vec<DividendEntry>
@@ -79,7 +77,7 @@ impl Dividends {
         Ok(div)
     }
 
-    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: DividendPred) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: impl Fn(&DividendEntry) -> bool) -> Result<Self, Box<dyn Error>> {
         let mut div = Dividends::new(symbol);
         for line in csv.split('\n') {
             if line.is_empty() || line.starts_with(char::is_alphabetic) {
@@ -98,7 +96,7 @@ impl Dividends {
         Dividends::parse_csv(symbol, &content)
     }
 
-    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: DividendPred) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: impl Fn(&DividendEntry) -> bool) -> Result<Self, Box<dyn Error>> {
         let content = ds.select_symbol(tag(), symbol)?;
         Dividends::parse_filter_csv(symbol, &content, pred)
     }

@@ -74,8 +74,6 @@ impl HistoryEntry {
 // --------------------------------------------------------------------------------
 // History
 
-pub type HistoryPred = fn(&HistoryEntry) -> bool;
-
 pub struct History {
     symbol: String,
     entries: Vec<HistoryEntry>
@@ -100,7 +98,7 @@ impl History {
         Ok(hist)
     }
 
-    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: HistoryPred) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: impl Fn(&HistoryEntry) -> bool) -> Result<Self, Box<dyn Error>> {
         let mut hist = History::new(symbol);
         for line in csv.split('\n') {
             if line.is_empty() || line.starts_with(char::is_alphabetic) {
@@ -119,7 +117,7 @@ impl History {
         History::parse_csv(symbol, &content)
     }
 
-    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: HistoryPred) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: impl Fn(&HistoryEntry) -> bool) -> Result<Self, Box<dyn Error>> {
         let content = ds.select_symbol(tag(), symbol)?;
         History::parse_filter_csv(symbol, &content, pred)
     }
