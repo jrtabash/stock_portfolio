@@ -32,7 +32,7 @@ impl CacheEntry {
 
     #[inline(always)]
     pub fn is_updated(self: &CacheEntry, today: &LocalDate) -> bool {
-        self.latest_date.eq(today) || (datetime::is_friday(&self.latest_date) && datetime::is_weekend(&today))
+        self.latest_date.eq(today) || (datetime::is_friday(&self.latest_date) && datetime::count_days(&self.latest_date, &today) <= 2)
     }
 }
 
