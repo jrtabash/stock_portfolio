@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::error::Error;
 use crate::util::datetime;
-use crate::portfolio::stock::{Price, Stock, StockList};
+use crate::portfolio::stock::{Stock, StockList};
 use crate::portfolio::stocks_cache::{CacheEntry, StocksCache};
 use crate::yfinance::query::HistoryQuery;
 use crate::yfinance::types::{Interval, Events};
@@ -9,26 +9,11 @@ use crate::datastore::datastore::DataStore;
 use crate::datastore::history::History;
 
 pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<dyn Error>> {
-    // Function assumes multi-line csv data.
-    //
-    // Example
-    // -------
-    // Date,Open,High,Low,Close,Adj Close,Volume\n
-    // 2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n
-    // 2021-02-25,26.1,31.0,22.0,24.0,24.0,9000\n
-    // 2021-02-26,24.9,32.0,24.0,28.0,28.0,11000
-
-    if let Some(last_newline) = csv.rfind('\n') {
-        let last_line = &csv[last_newline..];
-        let latest: Vec<&str> = last_line.split(',').collect();
-        if latest.len() != 7 {
-            return Err(format!("Incomplete data len={} expected=7", latest.len()).into())
-        }
-
-        let latest_date = datetime::parse_date(&latest[0])?;
-        let latest_price = latest[5].parse::<Price>()?;
-        if latest_price > 0.0 {
-            stock.set_latest_price(latest_price, latest_date);
+    let hist = History::parse_csv(&stock.symbol, csv)?;
+    if hist.count() > 0 {
+        let latest = &hist.entries()[hist.count() - 1];
+        if latest.adj_close > 0.0 {
+            stock.set_latest_price(latest.adj_close, latest.date.clone());
             return Ok(true)
         }
     }
