@@ -21,10 +21,19 @@ pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<d
 }
 
 pub fn update_stock(stock: &mut Stock) -> Result<bool, Box<dyn Error>> {
+    let today = datetime::today();
+    let back_delta =
+        if datetime::is_monday(&today) {
+            -3
+        } else if datetime::is_weekend(&today) {
+            -2
+        } else {
+            -1
+        };
     let mut query = HistoryQuery::new(
         stock.symbol.to_string(),
-        datetime::today_plus_days(-4),
-        datetime::today_plus_days(1),
+        datetime::date_plus_days(&today, back_delta),
+        datetime::date_plus_days(&today, 1),
         Interval::Daily,
         Events::History);
 

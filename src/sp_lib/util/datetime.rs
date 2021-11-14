@@ -41,6 +41,11 @@ pub fn parse_date(date_str: &str) -> Result<LocalDate, Box<dyn Error>> {
 }
 
 #[inline(always)]
+pub fn is_monday(date: &LocalDate) -> bool {
+    date.weekday() == Weekday::Mon
+}
+
+#[inline(always)]
 pub fn is_friday(date: &LocalDate) -> bool {
     date.weekday() == Weekday::Fri
 }
@@ -139,6 +144,17 @@ mod tests {
             Ok(_) => assert!(false),
             Err(error) => assert!(format!("{}", error).starts_with("parse_date: "))
         }
+    }
+
+    #[test]
+    fn test_is_monday() {
+        let sun = make_date(2021, 3, 21);
+        let mon = make_date(2021, 3, 22);
+        let tue = make_date(2021, 3, 23);
+
+        assert!(!is_monday(&sun));
+        assert!(is_monday(&mon));
+        assert!(!is_monday(&tue));
     }
 
     #[test]
