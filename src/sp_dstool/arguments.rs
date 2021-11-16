@@ -44,7 +44,7 @@ impl Arguments {
             .arg(Arg::with_name("symbol")
                  .short("y")
                  .long("symbol")
-                 .help("Stock symbol, required with drop symbol operation")
+                 .help("Stock symbol. Optional with update and check operations. Required with drop symbol operation")
                  .takes_value(true))
 
             // Flags

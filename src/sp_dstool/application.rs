@@ -59,6 +59,13 @@ impl Application {
     // --------------------------------------------------------------------------------
     // Private
 
+    fn is_symbol_match(self: &Self, expr: &str) -> bool {
+        match self.args.symbol() {
+            Some(symbol) => expr.contains(symbol),
+            None => true
+        }
+    }
+
     fn read_stocks(self: &mut Self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() { println!("Read stocks file"); }
 
@@ -81,6 +88,10 @@ impl Application {
         let mut err_count: usize = 0;
 
         for (symbol, base_date) in self.sym_dates.iter() {
+            if !self.is_symbol_match(symbol) {
+                continue;
+            }
+
             if self.args.is_verbose() { println!("Update {}", symbol); }
 
             match self.update_stock_data(symbol, base_date) {
@@ -202,22 +213,33 @@ impl Application {
     fn check(self: &Self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() { println!("Check datastore"); }
 
-        let mut count: usize = 0;
+        let mut itm_count: usize = 0;
+        let mut err_count: usize = 0;
 
         for entry in fs::read_dir(self.ds.base_path())? {
             let entry = entry?;
             let entry_path = entry.path();
+
             if entry_path.is_file() {
+                if let Some(entry_str) = entry_path.to_str() {
+                    if !self.is_symbol_match(entry_str) {
+                        continue;
+                    }
+                }
+
                 if self.args.is_verbose() { println!("Check entry {}", if let Some(fname) = entry.file_name().to_str() { fname } else { "?" }); }
 
+                itm_count += 1;
                 if let Err(err) = self.check_entry(&entry_path) {
-                    count += 1;
+                    err_count += 1;
                     eprintln!("{}: {}", if let Some(fname) = entry.file_name().to_str() { fname } else { "?" }, err);
                 }
             }
         }
 
-        println!("Check found {} error{}", count, if count == 1 { "" } else { "s" });
+        println!("Checked {} item{} found {} error{}",
+                 itm_count, if itm_count == 1 { "" } else { "s" },
+                 err_count, if err_count == 1 { "" } else { "s" });
         Ok(())
     }
 
