@@ -2,7 +2,7 @@ use std::error::Error;
 use std::path::Path;
 use std::fs;
 use std::collections::HashMap;
-use sp_lib::util::datetime;
+use sp_lib::util::{datetime, misc};
 use sp_lib::portfolio::{stocks_reader, algorithms};
 use sp_lib::yfinance::{types, query};
 use sp_lib::datastore::{datastore, history, dividends};
@@ -103,12 +103,12 @@ impl Application {
             };
         }
 
-        println!("Updated {} out of {} symbol{}", upd_count, sym_count, if sym_count == 1 { "" } else { "s" });
+        println!("Updated {} out of {}", upd_count, misc::count_format(sym_count, "symbol"));
         if err_count == 0 {
             Ok(())
         }
         else {
-            Err(format!("Failed to update {} stock{}", err_count, if err_count == 1 { "" } else { "s" }).into())
+            Err(format!("Failed to update {}", misc::count_format(err_count, "stock")).into())
         }
     }
 
@@ -197,12 +197,12 @@ impl Application {
         let mut count = 0;
         count += self.drop_symbol(history::tag(), &symbol)?;
         count += self.drop_symbol(dividends::tag(), &symbol)?;
-        println!("Dropped {} file{} for symbol {}", count, if count == 1 { "" } else { "s" }, symbol);
+        println!("Dropped {} for symbol {}", misc::count_format(count, "file"), symbol);
         Ok(())
     }
 
-    fn drop_symbol(self: &Self, tag: &str, symbol: &str) -> Result<u8, Box<dyn Error>> {
-        let mut count: u8 = 0;
+    fn drop_symbol(self: &Self, tag: &str, symbol: &str) -> Result<usize, Box<dyn Error>> {
+        let mut count: usize = 0;
         if self.ds.symbol_exists(tag, symbol) {
             self.ds.drop_symbol(tag, &symbol)?;
             count += 1;
@@ -237,9 +237,7 @@ impl Application {
             }
         }
 
-        println!("Checked {} item{} found {} error{}",
-                 itm_count, if itm_count == 1 { "" } else { "s" },
-                 err_count, if err_count == 1 { "" } else { "s" });
+        println!("Checked {} found {}", misc::count_format(itm_count, "item"), misc::count_format(err_count, "error"));
         Ok(())
     }
 
