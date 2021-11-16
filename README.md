@@ -65,7 +65,7 @@ OPTIONS:
     -r, --root <ds_root>          Datastore root path
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, refer to sp_report --help for more
                                   information. File is required with update operation
-    -y, --symbol <symbol>         Stock symbol, required with drop symbol operation
+    -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop symbol operation
 ```
 
 ## Example Stocks File
