@@ -19,7 +19,7 @@ The following features are supported:
 
 ```bash
 USAGE:
-    sp_report [FLAGS] [OPTIONS] --stocks <stocks_file>
+    sp_report [FLAGS] [OPTIONS] --root <ds_root> --stocks <stocks_file>
 
 FLAGS:
     -d, --desc            Used with order by option to sort in descending order
@@ -28,10 +28,8 @@ FLAGS:
     -V, --version         Prints version information
 
 OPTIONS:
-    -c, --cache <cache_file>      Local cache file to store latest stock prices. Ignored when datastore root is specified
     -n, --name <ds_name>          Datastore name, used with datastore root (default: sp_datastore)
-    -r, --root <ds_root>          Datastore root path, use to update portfolio latest prices. When specified,
-                                  local cache file will be ignored
+    -r, --root <ds_root>          Datastore root path, use to update portfolio latest prices
     -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of symbols
     -e, --export <export_file>    Export gains and losses table to a csv file
     -i, --include <include>       Include stocks by type or symbols; one of stock, etf or a comma separated list of symbols

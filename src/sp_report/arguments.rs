@@ -8,8 +8,7 @@ pub struct Arguments {
     include: Option<String>,
     exclude: Option<String>,
     export_file: Option<String>,
-    cache_file: Option<String>,
-    ds_root: Option<String>,
+    ds_root: String,
     ds_name: String,
     show_groupby: bool,
     desc: bool
@@ -49,15 +48,11 @@ impl Arguments {
                  .long("export")
                  .help("Export gains and losses table to a csv file")
                  .takes_value(true))
-            .arg(Arg::with_name("cache_file")
-                 .short("c")
-                 .long("cache")
-                 .help("Local cache file to store latest stock prices. Ignored when datastore root is specified")
-                 .takes_value(true))
             .arg(Arg::with_name("ds_root")
                  .short("r")
                  .long("root")
-                 .help("Datastore root path, use to update portfolio latest prices. When specified, local cache file will be ignored")
+                 .help("Datastore root path, use to update portfolio latest prices")
+                 .required(true)
                  .takes_value(true))
             .arg(Arg::with_name("ds_name")
                  .short("n")
@@ -93,14 +88,7 @@ impl Arguments {
             Some(value) => Some(String::from(value)),
             None => None
         };
-        let cache_file = match parsed_args.value_of("cache_file") {
-            Some(value) => Some(String::from(value)),
-            None => None
-        };
-        let ds_root = match parsed_args.value_of("ds_root") {
-            Some(value) => Some(String::from(value)),
-            None => None
-        };
+        let ds_root = String::from(parsed_args.value_of("ds_root").unwrap());
         let ds_name = String::from(
             match parsed_args.value_of("ds_name") {
                 Some(value) => value,
@@ -115,7 +103,6 @@ impl Arguments {
             include,
             exclude,
             export_file,
-            cache_file,
             ds_root,
             ds_name,
             show_groupby,
@@ -143,12 +130,8 @@ impl Arguments {
         self.export_file.as_ref()
     }
 
-    pub fn cache_file(self: &Arguments) -> Option<&String> {
-        self.cache_file.as_ref()
-    }
-
-    pub fn ds_root(self: &Self) -> Option<&String> {
-        self.ds_root.as_ref()
+    pub fn ds_root(self: &Self) -> &String {
+        &self.ds_root
     }
 
     pub fn ds_name(self: &Self) -> &String {

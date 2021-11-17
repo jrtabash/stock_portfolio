@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use std::error::Error;
 use sp_lib::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
 use sp_lib::datastore::datastore;
@@ -6,18 +5,26 @@ use crate::arguments::Arguments;
 
 pub struct Application {
     args: Arguments,
-    stocks: stock::StockList
+    stocks: stock::StockList,
+    ds: datastore::DataStore
 }
 
 impl Application {
     pub fn new() -> Application {
+        let args = Arguments::new();
+        let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
         Application {
-            args: Arguments::new(),
-            stocks: stock::StockList::new()
+            args: args,
+            stocks: stock::StockList::new(),
+            ds: ds
         }
     }
 
     pub fn run(self: &mut Application) -> Result<(), Box<dyn Error>> {
+        if !self.ds.exists() {
+            return Err(format!("Datastore {} does not exist", self.ds).into());
+        }
+
         self.read()?;
         self.include();
         self.exclude();
@@ -50,20 +57,10 @@ impl Application {
     }
 
     fn update(self: &mut Application) -> Result<(), Box<dyn Error>> {
-        let count;
-        if let Some(ds_root) = self.args.ds_root() {
-            let ds = datastore::DataStore::new(ds_root, self.args.ds_name());
-            count = stocks_update::update_stocks_from_ds(&mut self.stocks, &ds)?;
-        }
-        else if let Some(cache_file) = self.args.cache_file() {
-            count = stocks_update::update_stocks_with_cache(&mut self.stocks, PathBuf::from(cache_file).as_path())?;
-        }
-        else {
-            count = stocks_update::update_stocks(&mut self.stocks)?;
-        }
+        let count = stocks_update::update_stocks_from_ds(&mut self.stocks, &self.ds)?;
 
         if count != self.stocks.len() {
-            return Err(format!("update_stocks failed; updated={} expected={}", count, self.stocks.len()).into())
+            return Err(format!("update stocks failed; updated={} expected={}", count, self.stocks.len()).into())
         }
 
         Ok(())
