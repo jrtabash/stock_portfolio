@@ -19,9 +19,10 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
     println!("    Latest Value: {:.2}", algorithms::latest_notional(&stocks));
     println!("       Net Value: {:.2}", algorithms::net_notional(&stocks));
     println!("  Percent Change: {:.2}", algorithms::pct_change(&stocks));
+    println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(&stocks));
     println!("");
 
-    println!("{:8} {:10} {:10} {:6} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10}",
+    println!("{:8} {:10} {:10} {:6} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10} {:8}",
              "Symbol",
              "Buy Date",
              "Upd Date",
@@ -33,8 +34,9 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
              "Pct",
              "Base Value",
              "Cur Value",
-             "Net Value");
-    println!("{:8} {:10} {:10} {:6} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10}",
+             "Net Value",
+             "Cum Div");
+    println!("{:8} {:10} {:10} {:6} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10} {:8}",
              "------",
              "--------",
              "--------",
@@ -46,9 +48,10 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
              "---",
              "----------",
              "---------",
-             "---------");
+             "---------",
+             "-------");
     for stock in stocks.iter() {
-        println!("{:8} {:10} {:10} {:6} {:8} {:8.2} {:8.2} {:8.2} {:8.2} {:12.2} {:12.2} {:10.2}",
+        println!("{:8} {:10} {:10} {:6} {:8} {:8.2} {:8.2} {:8.2} {:8.2} {:12.2} {:12.2} {:10.2} {:8.2}",
                  stock.symbol,
                  stock.date.format("%Y-%m-%d"),
                  stock.latest_date.format("%Y-%m-%d"),
@@ -60,7 +63,8 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
                  stock.pct_change(),
                  stock.base_notional(),
                  stock.latest_notional(),
-                 stock.net_notional());
+                 stock.net_notional(),
+                 stock.cum_dividend);
     }
 
     if groupby {
@@ -83,9 +87,9 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
 
 pub fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
     let mut file = File::create(&filename)?;
-    write!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value\n")?;
+    write!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value,Cum Div\n")?;
     for stock in stocks.iter() {
-        write!(file, "{},{},{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2}\n",
+        write!(file, "{},{},{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2}\n",
                stock.symbol,
                stock.date.format("%Y-%m-%d"),
                stock.latest_date.format("%Y-%m-%d"),
@@ -97,7 +101,8 @@ pub fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Er
                stock.pct_change(),
                stock.base_notional(),
                stock.latest_notional(),
-               stock.net_notional())?;
+               stock.net_notional(),
+               stock.cum_dividend)?;
     }
     Ok(())
 }

@@ -16,6 +16,10 @@ pub fn base_notional(stocks: &StockList) -> Price {
     stocks.iter().map(|stock| stock.base_notional()).sum()
 }
 
+pub fn cumulative_dividend(stocks: &StockList) -> Price {
+    stocks.iter().map(|stock| stock.cum_dividend).sum()
+}
+
 pub fn pct_change(stocks: &StockList) -> f64 {
     let base: Price = stocks.iter().map(|stock| stock.base_price).sum();
     let net: Price = stocks.iter().map(|stock| stock.net_price()).sum();

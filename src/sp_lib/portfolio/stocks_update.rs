@@ -1,12 +1,13 @@
 use std::path::Path;
 use std::error::Error;
 use crate::util::datetime;
-use crate::portfolio::stock::{Stock, StockList};
+use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::portfolio::stocks_cache::{CacheEntry, StocksCache};
 use crate::yfinance::query::HistoryQuery;
 use crate::yfinance::types::{Interval, Events};
 use crate::datastore::datastore::DataStore;
 use crate::datastore::history::History;
+use crate::datastore::dividends;
 
 pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<dyn Error>> {
     let hist = History::parse_csv(&stock.symbol, csv)?;
@@ -48,6 +49,11 @@ pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, B
     let hist = History::ds_select_last(ds, &stock.symbol)?;
     if hist.count() != 1 {
         return Err(format!("Failed to find last history for {} in datastore {}", stock.symbol, ds).into())
+    }
+
+    if ds.symbol_exists(dividends::tag(), &stock.symbol) {
+        let div = dividends::Dividends::ds_select_if(ds, &stock.symbol, |entry| entry.date > stock.date)?;
+        stock.cum_dividend = stock.quantity as Price * div.entries().iter().fold(0.0, |cum, d| cum + d.price);
     }
 
     let entry = &hist.entries()[0];

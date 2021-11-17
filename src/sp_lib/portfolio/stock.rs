@@ -13,6 +13,7 @@ pub struct Stock {
     pub date: LocalDate,         // Buy Date
     pub quantity: u32,           // Buy Quantity
     pub base_price: Price,       // Buy Price
+    pub cum_dividend: Price,     // Cumulative Dividend
     pub latest_price: Price,     // Latest Price
     pub latest_date: LocalDate,  // Latest Date
     pub days_held: i64           // Days Held
@@ -32,6 +33,7 @@ impl Stock {
             date,
             quantity,
             base_price,
+            cum_dividend: 0.0,
             latest_price: 0.0,
             latest_date: datetime::earliest_date(),
             days_held: 0
@@ -92,6 +94,7 @@ mod tests {
         assert_eq!(stock.date, datetime::today());
         assert_eq!(stock.quantity, 100);
         assert_eq!(stock.base_price, 120.25);
+        assert_eq!(stock.cum_dividend, 0.0);
         assert_eq!(stock.latest_price, 0.0);
         assert_eq!(stock.latest_date, datetime::earliest_date());
         assert_eq!(stock.days_held, 0);
