@@ -3,11 +3,11 @@
 - sp_dstool: Stock Portfolio Datastore Tool
 
 ## Stock Portfolio Report
-Get latest close prices and report the gains and losses of stocks in portfolio.
+Get latest close prices and dividends and report the gains and losses of stocks in portfolio.
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
-get the latest close prices from yahoo finance and generate a stocks value report, showing base, current and net prices
-and notional values, as well as percent change.
+get the latest close prices and dividends from the datastore and generate a stocks value report, showing base,
+current and net prices and notional values, percent change, cumulative dividend, as well as cumulative dividends.
 
 The following features are supported:
 - **Group by**: Report quantities and current notional values grouped by symbol
@@ -66,7 +66,7 @@ OPTIONS:
     -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop symbol operation
 ```
 
-## Example Stocks File
+## Sample Stocks File
 ```csv
 symbol,type,date,quantity,base_price
 AAPL,stock,2020-09-20,100,115.00
@@ -76,88 +76,93 @@ DELL,stock,2021-02-10,100,75.50
 
 ## Example Report 1
 ```bash
-$ sp_report --stocks example_stocks.csv
+$ sp_report --root ~/ --name sp_sample --stocks sample.csv
 
 Stocks Value Report
 -------------------
-            Date: 2021-07-28
+            Date: 2021-11-16
 Number of Stocks: 3
       Base Value: 30900.00
-    Latest Value: 38585.00
-       Net Value: 7685.00
-  Percent Change: 24.87
+    Latest Value: 35870.00
+       Net Value: 4970.00
+  Percent Change: 16.08
+    Cum Dividend: 193.50
 
-Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
-------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
-AAPL     2020-09-20 2021-07-28    311      100   115.00   144.98    29.98    26.07     11500.00     14498.00    2998.00
-AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
-DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value  Cum Div 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    ---------  ------- 
+AAPL     2020-09-20 2021-11-16    422      100   115.00   151.00    36.00    31.30     11500.00     15100.00    3600.00   107.00
+AAPL     2020-11-12 2021-11-16    369      100   118.50   151.00    32.50    27.43     11850.00     15100.00    3250.00    86.50
+DELL     2021-02-10 2021-11-16    279      100    75.50    56.70   -18.80   -24.90      7550.00      5670.00   -1880.00     0.00
 ```
 
 ## Example Report 2
 ```bash
-$ sp_report --show-groupby --stocks example_stocks.csv
+$ sp_report --root ~/ --name sp_sample --stocks sample.csv --show-groupby
 
 Stocks Value Report
 -------------------
-            Date: 2021-07-28
+            Date: 2021-11-16
 Number of Stocks: 3
       Base Value: 30900.00
-    Latest Value: 38585.00
-       Net Value: 7685.00
-  Percent Change: 24.87
+    Latest Value: 35870.00
+       Net Value: 4970.00
+  Percent Change: 16.08
+    Cum Dividend: 193.50
 
-Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
-------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
-AAPL     2020-09-20 2021-07-28    311      100   115.00   144.98    29.98    26.07     11500.00     14498.00    2998.00
-AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
-DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value  Cum Div 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    ---------  ------- 
+AAPL     2020-09-20 2021-11-16    422      100   115.00   151.00    36.00    31.30     11500.00     15100.00    3600.00   107.00
+AAPL     2020-11-12 2021-11-16    369      100   118.50   151.00    32.50    27.43     11850.00     15100.00    3250.00    86.50
+DELL     2021-02-10 2021-11-16    279      100    75.50    56.70   -18.80   -24.90      7550.00      5670.00   -1880.00     0.00
 
 GroupBy  Size     Cur Value   
 -------  ----     ---------   
-AAPL          200     28996.00
-DELL          100      9589.00
+AAPL          200     30200.00
+DELL          100      5670.00
 ```
 
 ## Example Report 3
 ```bash
-$ sp_report --show-groupby --stocks example_stocks.csv --orderby date --desc
+$ sp_report --root ~/ --name sp_sample --stocks sample.csv --show-groupby --orderby date --desc
 
 Stocks Value Report
 -------------------
-            Date: 2021-07-28
+            Date: 2021-11-16
 Number of Stocks: 3
       Base Value: 30900.00
-    Latest Value: 38585.00
-       Net Value: 7685.00
-  Percent Change: 24.87
+    Latest Value: 35870.00
+       Net Value: 4970.00
+  Percent Change: 16.08
+    Cum Dividend: 193.50
 
-Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
-------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
-DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
-AAPL     2020-11-12 2021-07-28    258      100   118.50   144.98    26.48    22.35     11850.00     14498.00    2648.00
-AAPL     2020-09-20 2021-07-28    311      100   115.00   144.98    29.98    26.07     11500.00     14498.00    2998.00
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value  Cum Div 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    ---------  ------- 
+DELL     2021-02-10 2021-11-16    279      100    75.50    56.70   -18.80   -24.90      7550.00      5670.00   -1880.00     0.00
+AAPL     2020-11-12 2021-11-16    369      100   118.50   151.00    32.50    27.43     11850.00     15100.00    3250.00    86.50
+AAPL     2020-09-20 2021-11-16    422      100   115.00   151.00    36.00    31.30     11500.00     15100.00    3600.00   107.00
 
 GroupBy  Size     Cur Value   
 -------  ----     ---------   
-DELL          100      9589.00
-AAPL          200     28996.00
+DELL          100      5670.00
+AAPL          200     30200.00
 ```
 
 ## Example Report 4
 ```bash
-$ sp_report --stocks example_stocks.csv --include DELL
+$ sp_report --root ~/ --name sp_sample --stocks sample.csv --include AAPL
 
 Stocks Value Report
 -------------------
-            Date: 2021-07-28
-Number of Stocks: 1
-      Base Value: 7550.00
-    Latest Value: 9589.00
-       Net Value: 2039.00
-  Percent Change: 27.01
+            Date: 2021-11-16
+Number of Stocks: 2
+      Base Value: 23350.00
+    Latest Value: 30200.00
+       Net Value: 6850.00
+  Percent Change: 29.34
+    Cum Dividend: 193.50
 
-Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value 
-------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    --------- 
-DELL     2021-02-10 2021-07-28    168      100    75.50    95.89    20.39    27.01      7550.00      9589.00    2039.00
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value  Cum Div 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    ---------  ------- 
+AAPL     2020-09-20 2021-11-16    422      100   115.00   151.00    36.00    31.30     11500.00     15100.00    3600.00   107.00
+AAPL     2020-11-12 2021-11-16    369      100   118.50   151.00    32.50    27.43     11850.00     15100.00    3250.00    86.50
 ```
