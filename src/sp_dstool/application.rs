@@ -230,12 +230,12 @@ impl Application {
                     }
                 }
 
-                if self.args.is_verbose() { println!("Check entry {}", if let Some(fname) = entry.file_name().to_str() { fname } else { "?" }); }
+                if self.args.is_verbose() { println!("Check entry {}", misc::direntry_filename(&entry)); }
 
                 itm_count += 1;
                 if let Err(err) = self.check_entry(&entry_path) {
                     err_count += 1;
-                    eprintln!("{}: {}", if let Some(fname) = entry.file_name().to_str() { fname } else { "?" }, err);
+                    eprintln!("{}: {}", misc::direntry_filename(&entry), err);
                 }
             }
         }
@@ -308,14 +308,14 @@ impl Application {
                     Ok(mdata) => mdata.len(),
                     Err(err) => {
                         err_count += 1;
-                        eprintln!("{}: {}", if let Some(fname) = entry.file_name().to_str() { fname } else { "?" }, err);
+                        eprintln!("{}: {}", misc::direntry_filename(&entry), err);
                         0
                     }
                 };
                 tot_size += size;
 
                 if self.args.is_verbose() {
-                    println!("{}\t{}", size, if let Some(fname) = entry.file_name().to_str() { fname } else { "?" });
+                    println!("{}\t{}", size, misc::direntry_filename(&entry));
                 }
             }
         }
