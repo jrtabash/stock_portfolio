@@ -15,7 +15,7 @@ impl Arguments {
     pub fn new() -> Self {
         let parsed_args = App::new("Stock Portfolio Datastore Tool")
             .version("0.1.0")
-            .about("Datastore tool - create, delete, update, drop or check.")
+            .about("Datastore tool - create, delete, update, drop, check or stat.")
 
             // Options
             .arg(Arg::with_name("ds_root")
@@ -32,7 +32,7 @@ impl Arguments {
             .arg(Arg::with_name("ds_operation")
                  .short("o")
                  .long("dsop")
-                 .help("Datastore tool operation, one of create, delete, update, drop, check")
+                 .help("Datastore tool operation, one of create, delete, update, drop, check, stat")
                  .required(true)
                  .takes_value(true))
             .arg(Arg::with_name("stocks_file")

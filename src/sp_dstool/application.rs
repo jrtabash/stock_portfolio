@@ -13,6 +13,7 @@ const DROP: &str = "drop";
 const CHECK: &str = "check";
 const CREATE: &str = "create";
 const DELETE: &str = "delete";
+const STAT: &str = "stat";
 
 pub struct Application {
     args: Arguments,
@@ -40,6 +41,7 @@ impl Application {
             println!("Running {} operation on datastore {}", self.args.ds_operation(), self.ds);
             println!("stocks: {}", if let Some(file) = self.args.stocks_file() { file } else { "" });
             println!("symbol: {}", if let Some(symbol) = self.args.symbol() { symbol } else { "" });
+            println!("----------");
         }
 
         self.read_stocks()?;
@@ -50,6 +52,7 @@ impl Application {
             CHECK => self.check()?,
             CREATE => self.create()?,
             DELETE => self.delete()?,
+            STAT => self.stat()?,
             _ => return Err(format!("Invalid ds_operation - '{}'", self.args.ds_operation()).into())
         };
 
@@ -279,6 +282,49 @@ impl Application {
         self.ds.delete()?;
 
         println!("Datastore {} deleted", self.ds);
+        Ok(())
+    }
+
+    fn stat(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Stat datastore"); }
+
+        let mut itm_count: usize = 0;
+        let mut err_count: usize = 0;
+        let mut tot_size: u64 = 0;
+
+        for entry in fs::read_dir(self.ds.base_path())? {
+            let entry = entry?;
+            let entry_path = entry.path();
+
+            if entry_path.is_file() {
+                if let Some(entry_str) = entry_path.to_str() {
+                    if !self.is_symbol_match(entry_str) {
+                        continue;
+                    }
+                }
+
+                itm_count += 1;
+                let size = match fs::metadata(&entry_path) {
+                    Ok(mdata) => mdata.len(),
+                    Err(err) => {
+                        err_count += 1;
+                        eprintln!("{}: {}", if let Some(fname) = entry.file_name().to_str() { fname } else { "?" }, err);
+                        0
+                    }
+                };
+                tot_size += size;
+
+                if self.args.is_verbose() {
+                    println!("{}\t{}", size, if let Some(fname) = entry.file_name().to_str() { fname } else { "?" });
+                }
+            }
+        }
+
+        println!("Count: {}", misc::count_format(itm_count, "file"));
+        println!(" Size: {}", misc::count_format(tot_size as usize, "byte"));
+        if err_count > 0 {
+            println!("Error: {}", misc::count_format(err_count, "error"));
+        }
         Ok(())
     }
 }
