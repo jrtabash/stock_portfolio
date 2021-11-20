@@ -6,6 +6,8 @@ use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::error::Error;
 
+type FtnResult = Result<(), Box<dyn Error>>;
+
 pub struct DataStore {
     root: PathBuf,
     name: String,
@@ -155,6 +157,35 @@ impl DataStore {
         let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         fs::remove_file(sym_file.as_path())?;
         Ok(())
+    }
+
+    pub fn foreach_entry<T>(self: &Self,
+                            init: T,
+                            ftn: impl Fn(&fs::DirEntry, &mut T) -> FtnResult,
+                            filter: impl Fn(&str) -> bool,
+                            on_error: impl Fn(&fs::DirEntry, Box<dyn Error>) -> FtnResult) -> Result<(T, usize, usize), Box<dyn Error>> {
+        let mut aggregate: T = init;
+        let mut itm_count: usize = 0;
+        let mut err_count: usize = 0;
+        for entry in fs::read_dir(self.base_path())? {
+            let entry = entry?;
+            let entry_path = entry.path();
+
+            if entry_path.is_file() {
+                if let Some(entry_str) = entry_path.to_str() {
+                    if !filter(entry_str) {
+                        continue;
+                    }
+                }
+
+                itm_count += 1;
+                if let Err(err) = ftn(&entry, &mut aggregate) {
+                    err_count += 1;
+                    on_error(&entry, err)?;
+                }
+            }
+        }
+        Ok((aggregate, itm_count, err_count))
     }
 
     fn make_base_path(root: &str, name: &str) -> PathBuf {
@@ -524,6 +555,67 @@ mod tests {
 
         ds.drop_symbol(&tag, &symbol).unwrap();
         assert!(!test_file.exists());
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
+    fn test_datastore_foreach_entry() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_foreach");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_foreach");
+
+        let tag = "tst";
+        let symbol1 = "TEST";
+        let symbol2 = "FOOO";
+        let symbol3 = "BARR";
+        let csv = "1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15\n";
+
+        ds.create().unwrap();
+        ds.insert_symbol(&tag, &symbol1, &csv).unwrap();
+        ds.insert_symbol(&tag, &symbol2, &csv).unwrap();
+        ds.insert_symbol(&tag, &symbol3, &csv).unwrap();
+
+        let (sum, items, errors) = ds.foreach_entry(
+            0,
+            |_, tot| { *tot += 1; Ok(()) },
+            |_|      { true },
+            |_, err| { Err(err) }
+        ).unwrap();
+        assert_eq!(sum, 3);
+        assert_eq!(items, 3);
+        assert_eq!(errors, 0);
+
+        let (sum, items, errors) = ds.foreach_entry(
+            0,
+            |_, tot|    { *tot += 1; Ok(()) },
+            |entry_str| { !entry_str.contains(symbol2) },
+            |_, err|    { Err(err) }
+        ).unwrap();
+        assert_eq!(sum, 2);
+        assert_eq!(items, 2);
+        assert_eq!(errors, 0);
+
+        let (dummy, items, errors) = ds.foreach_entry(
+            0,
+            |_, _| { Err("error".into()) },
+            |_|    { true },
+            |_, _| { Ok(()) }
+        ).unwrap();
+        assert_eq!(dummy, 0);
+        assert_eq!(items, 3);
+        assert_eq!(errors, 3);
+
+        let err = ds.foreach_entry(
+            0,
+            |_, _| { Err("error".into()) },
+            |_|    { true },
+            |_, e| { Err(e) }
+        ).unwrap_err();
+        assert_eq!(&format!("{}", err), "error");
 
         ds.delete().unwrap();
         assert!(!base_path.exists());

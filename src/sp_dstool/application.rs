@@ -216,29 +216,23 @@ impl Application {
     fn check(self: &Self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() { println!("Check datastore"); }
 
-        let mut itm_count: usize = 0;
-        let mut err_count: usize = 0;
-
-        for entry in fs::read_dir(self.ds.base_path())? {
-            let entry = entry?;
-            let entry_path = entry.path();
-
-            if entry_path.is_file() {
-                if let Some(entry_str) = entry_path.to_str() {
-                    if !self.is_symbol_match(entry_str) {
-                        continue;
+        let (_, itm_count, err_count) =
+            self.ds.foreach_entry(
+                (),
+                |entry, _| {
+                    if self.args.is_verbose() {
+                        println!("Check entry {}", misc::direntry_filename(entry));
                     }
-                }
-
-                if self.args.is_verbose() { println!("Check entry {}", misc::direntry_filename(&entry)); }
-
-                itm_count += 1;
-                if let Err(err) = self.check_entry(&entry_path) {
-                    err_count += 1;
-                    eprintln!("{}: {}", misc::direntry_filename(&entry), err);
-                }
-            }
-        }
+                    self.check_entry(&entry.path())?;
+                    Ok(())
+                },
+                |entry_str| {
+                    return self.is_symbol_match(entry_str)
+                },
+                |entry, err| {
+                    eprintln!("{}: {}", misc::direntry_filename(entry), err);
+                    Ok(())
+                })?;
 
         println!("Checked {} found {}", misc::count_format(itm_count, "item"), misc::count_format(err_count, "error"));
         Ok(())
@@ -288,37 +282,24 @@ impl Application {
     fn stat(self: &Self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() { println!("Stat datastore"); }
 
-        let mut itm_count: usize = 0;
-        let mut err_count: usize = 0;
-        let mut tot_size: u64 = 0;
-
-        for entry in fs::read_dir(self.ds.base_path())? {
-            let entry = entry?;
-            let entry_path = entry.path();
-
-            if entry_path.is_file() {
-                if let Some(entry_str) = entry_path.to_str() {
-                    if !self.is_symbol_match(entry_str) {
-                        continue;
+        let (tot_size, itm_count, err_count) =
+            self.ds.foreach_entry(
+                0,
+                |entry, tot| {
+                    let size = fs::metadata(entry.path())?.len();
+                    *tot += size;
+                    if self.args.is_verbose() {
+                        println!("{}\t{}", size, misc::direntry_filename(entry));
                     }
-                }
-
-                itm_count += 1;
-                let size = match fs::metadata(&entry_path) {
-                    Ok(mdata) => mdata.len(),
-                    Err(err) => {
-                        err_count += 1;
-                        eprintln!("{}: {}", misc::direntry_filename(&entry), err);
-                        0
-                    }
-                };
-                tot_size += size;
-
-                if self.args.is_verbose() {
-                    println!("{}\t{}", size, misc::direntry_filename(&entry));
-                }
-            }
-        }
+                    Ok(())
+                },
+                |entry_str| {
+                    return self.is_symbol_match(entry_str)
+                },
+                |entry, err| {
+                    eprintln!("{}: {}", misc::direntry_filename(entry), err);
+                    Ok(())
+                })?;
 
         println!("Count: {}", misc::count_format(itm_count, "file"));
         println!(" Size: {}", misc::count_format(tot_size as usize, "byte"));
