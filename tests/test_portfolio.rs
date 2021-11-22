@@ -128,6 +128,9 @@ fn test_sort_stocks() {
     list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
     list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
     list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
+    list[0].cum_dividend = 0.0;
+    list[1].cum_dividend = 20.15;
+    list[2].cum_dividend = 15.25;
 
     let asc = false;
     let desc = true;
@@ -158,6 +161,9 @@ fn test_sort_stocks() {
 
     test_sort(&mut list, "days", desc, "AAPL", "DELL", "ICLN");
     test_sort(&mut list, "days", asc, "ICLN", "DELL", "AAPL");
+
+    test_sort(&mut list, "div", desc, "AAPL", "ICLN", "DELL");
+    test_sort(&mut list, "div", asc, "DELL", "ICLN", "AAPL");
 }
 
 #[test]

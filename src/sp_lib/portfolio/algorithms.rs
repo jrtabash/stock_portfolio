@@ -77,6 +77,9 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("days", false) => stocks.sort_by(|lhs, rhs| lhs.days_held.cmp(&rhs.days_held)),
         ("days", true) => stocks.sort_by(|lhs, rhs| rhs.days_held.cmp(&lhs.days_held)),
 
+        ("div", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.cum_dividend, rhs.cum_dividend)),
+        ("div", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.cum_dividend, lhs.cum_dividend)),
+
         _ => return Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }
     Ok(())

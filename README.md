@@ -33,7 +33,7 @@ OPTIONS:
     -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of symbols
     -e, --export <export_file>    Export gains and losses table to a csv file
     -i, --include <include>       Include stocks by type or symbols; one of stock, etf or a comma separated list of symbols
-    -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, size or value
+    -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, div, size or value
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price'
                                   including a header line. Supported type values include stock and etf
 ```
