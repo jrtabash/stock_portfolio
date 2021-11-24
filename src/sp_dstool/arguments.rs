@@ -8,6 +8,7 @@ pub struct Arguments {
     ds_name: String,
     stocks_file: Option<String>,
     symbol: Option<String>,
+    export_file: Option<String>,
     verbose: bool
 }
 
@@ -15,7 +16,7 @@ impl Arguments {
     pub fn new() -> Self {
         let parsed_args = App::new("Stock Portfolio Datastore Tool")
             .version("0.1.0")
-            .about("Datastore tool - create, delete, update, drop, check or stat.")
+            .about("Datastore tool - create, delete, update, drop, export, check or stat.")
 
             // Options
             .arg(Arg::with_name("ds_root")
@@ -32,7 +33,7 @@ impl Arguments {
             .arg(Arg::with_name("ds_operation")
                  .short("o")
                  .long("dsop")
-                 .help("Datastore tool operation, one of create, delete, update, drop, check, stat")
+                 .help("Datastore tool operation, one of create, delete, update, drop, export, check, stat")
                  .required(true)
                  .takes_value(true))
             .arg(Arg::with_name("stocks_file")
@@ -44,7 +45,12 @@ impl Arguments {
             .arg(Arg::with_name("symbol")
                  .short("y")
                  .long("symbol")
-                 .help("Stock symbol. Optional with update and check operations. Required with drop symbol operation")
+                 .help("Stock symbol. Optional with update and check operations. Required with drop and export symbol operation")
+                 .takes_value(true))
+            .arg(Arg::with_name("export_file")
+                 .short("e")
+                 .long("export")
+                 .help("Export symbol history and dividends to csv file. Required with export operation")
                  .takes_value(true))
 
             // Flags
@@ -71,6 +77,10 @@ impl Arguments {
                 Some(value) => Some(String::from(value)),
                 None => None
             },
+            export_file: match parsed_args.value_of("export_file") {
+                Some(value) => Some(String::from(value)),
+                None => None
+            },
             verbose: parsed_args.is_present("verbose")
         }
     }
@@ -93,6 +103,10 @@ impl Arguments {
 
     pub fn symbol(self: &Self) -> Option<&String> {
         self.symbol.as_ref()
+    }
+
+    pub fn export_file(self: &Arguments) -> Option<&String> {
+        self.export_file.as_ref()
     }
 
     pub fn is_verbose(self: &Self) -> bool {

@@ -1,6 +1,6 @@
-use std::env;
-use sp_lib::util::datetime;
-use sp_lib::datastore::{datastore, history, dividends};
+use std::{env, fs};
+use sp_lib::util::{datetime, temp_file};
+use sp_lib::datastore::{datastore, history, dividends, export};
 
 type Price = history::Price;
 
@@ -15,6 +15,8 @@ fn test_datastore() {
 
     sp_ds_select_history();
     sp_ds_select_dividends();
+
+    sp_ds_export_symbol();
 
     sp_ds_drop(dividends::tag());
     sp_ds_drop(history::tag());
@@ -177,6 +179,29 @@ fn sp_ds_select_dividends() {
         },
         Err(_) => assert!(false)
     };
+}
+
+fn sp_ds_export_symbol() {
+    let ds = datastore::DataStore::new(&sp_ds_root(), sp_ds_name());
+    assert!(ds.exists());
+
+    let csv_name = "sp_ds_export_symbol.csv";
+    let csv_filename = temp_file::make_path(&csv_name);
+
+    temp_file::remove_file(&csv_name);
+
+    assert!(export::export_symbol(&ds, sp_ds_symbol(), &csv_filename.to_str().unwrap()).is_ok());
+
+    let expect = "date,open,high,low,close,volume,dividend\n\
+                  2021-02-22,10.00,12.00,8.00,11.00,10000,0.00\n\
+                  2021-02-23,11.00,12.50,8.50,11.50,9000,1.20\n\
+                  2021-02-24,11.50,14.00,11.00,12.50,11000,0.00\n\
+                  2021-02-25,12.50,13.50,10.50,12.00,10000,0.00\n\
+                  2021-02-26,12.00,14.00,11.00,14.00,12000,0.00\n";
+    let actual = fs::read_to_string(&csv_filename).unwrap();
+    assert_eq!(actual, expect);
+
+    assert!(temp_file::remove_file(&csv_name));
 }
 
 fn sp_ds_drop(which: &str) {

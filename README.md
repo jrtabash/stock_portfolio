@@ -46,12 +46,11 @@ The following operations are supported:
 - **Delete**: Delete datastore
 - **Update**: Update price and size data
 - **Drop**: Drop symbol
+- **Export**: Export symbol history and dividends
 - **Check**: Check price and size data
 - **Stat**: Calculate files count and size
 
 ```bash
-Datastore tool - create, delete, update, drop, check or stat.
-
 USAGE:
     sp_dstool [FLAGS] [OPTIONS] --dsop <ds_operation> --root <ds_root>
 
@@ -62,12 +61,13 @@ FLAGS:
 
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
-    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, check, stat
+    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, export, check, stat
     -r, --root <ds_root>          Datastore root path
+    -e, --export <export_file>    Export symbol history and dividends to csv file. Required with export operation
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, refer to sp_report --help for more
                                   information. File is required with update operation
-    -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop symbol
-                                  operation
+    -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop and export
+                                  symbol operation
 ```
 
 ## Sample Stocks File

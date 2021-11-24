@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use sp_lib::util::{datetime, misc};
 use sp_lib::portfolio::{stocks_reader, algorithms};
 use sp_lib::yfinance::{types, query};
-use sp_lib::datastore::{datastore, history, dividends};
+use sp_lib::datastore::{datastore, history, dividends, export};
 use crate::arguments::Arguments;
 
 const UPDATE: &str = "update";
@@ -14,6 +14,7 @@ const CHECK: &str = "check";
 const CREATE: &str = "create";
 const DELETE: &str = "delete";
 const STAT: &str = "stat";
+const EXPORT: &str = "export";
 
 pub struct Application {
     args: Arguments,
@@ -41,6 +42,7 @@ impl Application {
             println!("Running {} operation on datastore {}", self.args.ds_operation(), self.ds);
             println!("stocks: {}", if let Some(file) = self.args.stocks_file() { file } else { "" });
             println!("symbol: {}", if let Some(symbol) = self.args.symbol() { symbol } else { "" });
+            println!("export: {}", if let Some(export) = self.args.export_file() { export } else { "" });
             println!("----------");
         }
 
@@ -53,6 +55,7 @@ impl Application {
             CREATE => self.create()?,
             DELETE => self.delete()?,
             STAT => self.stat()?,
+            EXPORT => self.export()?,
             _ => return Err(format!("Invalid ds_operation - '{}'", self.args.ds_operation()).into())
         };
 
@@ -211,6 +214,25 @@ impl Application {
             count += 1;
         }
         Ok(count)
+    }
+
+    fn export(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Export datastore"); }
+
+        if self.args.symbol().is_none() {
+            return Err("Missing symbol for export operation".into());
+        }
+
+        if self.args.export_file().is_none() {
+            return Err("Missing export file for export operation".into());
+        }
+
+        let symbol = self.args.symbol().unwrap();
+        let export_file = self.args.export_file().unwrap();
+        let count = export::export_symbol(&self.ds, &symbol, &export_file)?;
+
+        println!("Exported {} for symbol {}", misc::count_format(count, "row"), symbol);
+        Ok(())
     }
 
     fn check(self: &Self) -> Result<(), Box<dyn Error>> {
