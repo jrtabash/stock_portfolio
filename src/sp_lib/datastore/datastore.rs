@@ -203,10 +203,7 @@ impl DataStore {
 
 impl fmt::Display for DataStore {
     fn fmt(self: &DataStore, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.base_path().to_str() {
-            Some(ds_path) => write!(f, "{}", ds_path),
-            None => write!(f, "{}", self.name())
-        }
+        write!(f, "{}", self.base_path().display())
     }
 }
 

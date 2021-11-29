@@ -25,7 +25,7 @@ fn test_datastore() {
 }
 
 fn sp_ds_root() -> String {
-    String::from(env::temp_dir().to_str().unwrap())
+    format!("{}", env::temp_dir().display())
 }
 
 fn sp_ds_name() -> &'static str {

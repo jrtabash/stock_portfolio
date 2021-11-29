@@ -44,7 +44,7 @@ mod tests {
     #[test]
     fn test_direntry_filename() {
         let name = "direntry.txt";
-        let path = String::from(temp_file::make_path(&name).to_str().unwrap());
+        let path = format!("{}", temp_file::make_path(&name).display());
         let data = "";
         let mut found = false;
 
