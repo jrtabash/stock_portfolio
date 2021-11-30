@@ -1,5 +1,6 @@
 extern crate clap;
 
+use sp_lib::util::common_args;
 use clap::{Arg, App};
 
 pub struct Arguments {
@@ -15,33 +16,19 @@ pub struct Arguments {
 impl Arguments {
     pub fn new() -> Self {
         let parsed_args = App::new("Stock Portfolio Datastore Tool")
-            .version("0.1.0")
+            .version(common_args::app_version())
             .about("Datastore tool - create, delete, update, drop, export, check or stat.")
 
             // Options
-            .arg(Arg::with_name("ds_root")
-                 .short("r")
-                 .long("root")
-                 .help("Datastore root path")
-                 .required(true)
-                 .takes_value(true))
-            .arg(Arg::with_name("ds_name")
-                 .short("n")
-                 .long("name")
-                 .help("Datastore name (default: sp_datastore)")
-                 .takes_value(true))
+            .arg(common_args::ds_root(""))
+            .arg(common_args::ds_name(""))
             .arg(Arg::with_name("ds_operation")
                  .short("o")
                  .long("dsop")
                  .help("Datastore tool operation, one of create, delete, update, drop, export, check, stat")
                  .required(true)
                  .takes_value(true))
-            .arg(Arg::with_name("stocks_file")
-                 .short("s")
-                 .long("stocks")
-                 .help("CSV file containing stocks in portfolio, refer to sp_report --help for more information. \
-                        File is required with update operation")
-                 .takes_value(true))
+            .arg(common_args::stocks_file(false))
             .arg(Arg::with_name("symbol")
                  .short("y")
                  .long("symbol")
@@ -63,16 +50,9 @@ impl Arguments {
 
         Arguments {
             ds_operation: String::from(parsed_args.value_of("ds_operation").unwrap()),
-            ds_root: String::from(parsed_args.value_of("ds_root").unwrap()),
-            ds_name: String::from(
-                match parsed_args.value_of("ds_name") {
-                    Some(value) => value,
-                    None => "sp_datastore"
-                }),
-            stocks_file: match parsed_args.value_of("stocks_file") {
-                Some(value) => Some(String::from(value)),
-                None => None
-            },
+            ds_root: common_args::parsed_ds_root(&parsed_args),
+            ds_name: common_args::parsed_ds_name(&parsed_args),
+            stocks_file: common_args::parsed_stocks_file(&parsed_args),
             symbol: match parsed_args.value_of("symbol") {
                 Some(value) => Some(String::from(value)),
                 None => None

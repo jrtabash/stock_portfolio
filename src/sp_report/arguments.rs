@@ -1,5 +1,6 @@
 extern crate clap;
 
+use sp_lib::util::common_args;
 use clap::{Arg, App};
 
 pub struct Arguments {
@@ -17,17 +18,11 @@ pub struct Arguments {
 impl Arguments {
     pub fn new() -> Arguments {
         let parsed_args = App::new("Stock Portfolio Report")
-            .version("0.2.0")
+            .version(common_args::app_version())
             .about("Get latest close prices and report the gains and losses of stocks in portfolio.")
 
             // Options
-            .arg(Arg::with_name("stocks_file")
-                 .short("s")
-                 .long("stocks")
-                 .help("CSV file containing stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price' including a header line. \
-                        Supported type values include stock and etf")
-                 .required(true)
-                 .takes_value(true))
+            .arg(common_args::stocks_file(true))
             .arg(Arg::with_name("order_by")
                  .short("o")
                  .long("orderby")
@@ -48,17 +43,8 @@ impl Arguments {
                  .long("export")
                  .help("Export gains and losses table to a csv file")
                  .takes_value(true))
-            .arg(Arg::with_name("ds_root")
-                 .short("r")
-                 .long("root")
-                 .help("Datastore root path, use to update portfolio latest prices")
-                 .required(true)
-                 .takes_value(true))
-            .arg(Arg::with_name("ds_name")
-                 .short("n")
-                 .long("name")
-                 .help("Datastore name, used with datastore root (default: sp_datastore)")
-                 .takes_value(true))
+            .arg(common_args::ds_root("Datastore root path, use to update portfolio latest prices"))
+            .arg(common_args::ds_name("Datastore name, used with datastore root (default: sp_datastore)"))
 
             // Flags
             .arg(Arg::with_name("show_groupby")
@@ -71,7 +57,7 @@ impl Arguments {
                  .help("Used with order by option to sort in descending order"))
             .get_matches();
 
-        let stocks_file = String::from(parsed_args.value_of("stocks_file").unwrap());
+        let stocks_file = common_args::parsed_stocks_file(&parsed_args).unwrap();
         let order_by = match parsed_args.value_of("order_by") {
             Some(value) => Some(String::from(value)),
             None => None
@@ -88,12 +74,8 @@ impl Arguments {
             Some(value) => Some(String::from(value)),
             None => None
         };
-        let ds_root = String::from(parsed_args.value_of("ds_root").unwrap());
-        let ds_name = String::from(
-            match parsed_args.value_of("ds_name") {
-                Some(value) => value,
-                None => "sp_datastore"
-            });
+        let ds_root = common_args::parsed_ds_root(&parsed_args);
+        let ds_name = common_args::parsed_ds_name(&parsed_args);
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");
 

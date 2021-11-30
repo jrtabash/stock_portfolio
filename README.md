@@ -30,12 +30,15 @@ FLAGS:
 OPTIONS:
     -n, --name <ds_name>          Datastore name, used with datastore root (default: sp_datastore)
     -r, --root <ds_root>          Datastore root path, use to update portfolio latest prices
-    -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of symbols
+    -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of
+                                  symbols
     -e, --export <export_file>    Export gains and losses table to a csv file
-    -i, --include <include>       Include stocks by type or symbols; one of stock, etf or a comma separated list of symbols
+    -i, --include <include>       Include stocks by type or symbols; one of stock, etf or a comma separated list of
+                                  symbols
     -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, div, size or value
-    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price'
-                                  including a header line. Supported type values include stock and etf
+    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
+                                  'symbol,type,date,quantity,base_price' including a header line. Supported type values
+                                  include stock and etf
 ```
 
 ## Stock Portfolio Datastore Tool
@@ -64,8 +67,9 @@ OPTIONS:
     -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, export, check, stat
     -r, --root <ds_root>          Datastore root path
     -e, --export <export_file>    Export symbol history and dividends to csv file. Required with export operation
-    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, refer to sp_report --help for more
-                                  information. File is required with update operation
+    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
+                                  'symbol,type,date,quantity,base_price' including a header line. Supported type values
+                                  include stock and etf
     -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop and export
                                   symbol operation
 ```
