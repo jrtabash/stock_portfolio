@@ -14,7 +14,7 @@ pub fn export_symbol(ds: &datastore::DataStore, symbol: &str, filename: &str) ->
         };
 
     let mut file = File::create(&filename)?;
-    write!(file, "date,open,high,low,close,volume,dividend\n")?;
+    write!(file, "date,open,high,low,close,adj_close,volume,dividend\n")?;
 
     let div_entries = div_data.entries();
     let div_size = div_entries.len();
@@ -25,11 +25,12 @@ pub fn export_symbol(ds: &datastore::DataStore, symbol: &str, filename: &str) ->
     for hist_entry in hist_data.entries() {
         count += 1;
 
-        write!(file, "{},{:.2},{:.2},{:.2},{:.2},{},",
+        write!(file, "{},{:.2},{:.2},{:.2},{:.2},{:.2},{},",
                hist_entry.date.format("%Y-%m-%d"),
                hist_entry.open,
                hist_entry.high,
                hist_entry.low,
+               hist_entry.close,
                hist_entry.adj_close,
                hist_entry.volume)?;
         if idx < div_size && div_entries[idx].date == hist_entry.date {
