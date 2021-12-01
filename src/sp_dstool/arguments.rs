@@ -20,8 +20,8 @@ impl Arguments {
             .about("Datastore tool - create, delete, update, drop, export, check or stat.")
 
             // Options
-            .arg(common_args::ds_root(""))
-            .arg(common_args::ds_name(""))
+            .arg(common_args::ds_root())
+            .arg(common_args::ds_name())
             .arg(Arg::with_name("ds_operation")
                  .short("o")
                  .long("dsop")
@@ -50,7 +50,7 @@ impl Arguments {
 
         Arguments {
             ds_operation: String::from(parsed_args.value_of("ds_operation").unwrap()),
-            ds_root: common_args::parsed_ds_root(&parsed_args),
+            ds_root: common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root"),
             ds_name: common_args::parsed_ds_name(&parsed_args),
             stocks_file: common_args::parsed_stocks_file(&parsed_args),
             symbol: match parsed_args.value_of("symbol") {

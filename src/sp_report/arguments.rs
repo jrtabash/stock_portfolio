@@ -43,8 +43,8 @@ impl Arguments {
                  .long("export")
                  .help("Export gains and losses table to a csv file")
                  .takes_value(true))
-            .arg(common_args::ds_root("Datastore root path, use to update portfolio latest prices"))
-            .arg(common_args::ds_name("Datastore name, used with datastore root (default: sp_datastore)"))
+            .arg(common_args::ds_root())
+            .arg(common_args::ds_name())
 
             // Flags
             .arg(Arg::with_name("show_groupby")
@@ -74,7 +74,7 @@ impl Arguments {
             Some(value) => Some(String::from(value)),
             None => None
         };
-        let ds_root = common_args::parsed_ds_root(&parsed_args);
+        let ds_root = common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root");
         let ds_name = common_args::parsed_ds_name(&parsed_args);
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");

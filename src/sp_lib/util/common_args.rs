@@ -1,5 +1,7 @@
 extern crate clap;
 
+use std::env;
+use std::error::Error;
 use clap::{Arg, ArgMatches};
 
 // --------------------------------------------------------------------------------
@@ -13,7 +15,7 @@ pub fn app_version() -> &'static str {
 // Common Help Text
 
 pub fn ds_root_help() -> &'static str {
-    "Datastore root path"
+    "Datastore root path (default: value of HOME environment variable)"
 }
 
 pub fn ds_name_help() -> &'static str {
@@ -28,20 +30,19 @@ pub fn stocks_file_help() -> &'static str {
 // --------------------------------------------------------------------------------
 // Common Arguments
 
-pub fn ds_root(help: &str) -> Arg {
+pub fn ds_root() -> Arg<'static, 'static> {
     Arg::with_name("ds_root")
         .short("r")
         .long("root")
-        .help(if help.is_empty() { ds_root_help() } else { help })
-        .required(true)
+        .help(ds_root_help())
         .takes_value(true)
 }
 
-pub fn ds_name(help: &str) -> Arg {
+pub fn ds_name() -> Arg<'static, 'static> {
     Arg::with_name("ds_name")
         .short("n")
         .long("name")
-        .help(if help.is_empty() { ds_name_help() } else { help })
+        .help(ds_name_help())
         .takes_value(true)
 }
 
@@ -57,8 +58,11 @@ pub fn stocks_file(required: bool) -> Arg<'static, 'static> {
 // --------------------------------------------------------------------------------
 // Common Parsed Matches
 
-pub fn parsed_ds_root(parsed_args: &ArgMatches) -> String {
-    String::from(parsed_args.value_of("ds_root").unwrap())
+pub fn parsed_ds_root(parsed_args: &ArgMatches) -> Result<String, Box<dyn Error>> {
+    match parsed_args.value_of("ds_root") {
+        Some(value) => Ok(String::from(value)),
+        None => Ok(env::var("HOME")?)
+    }
 }
 
 pub fn parsed_ds_name(parsed_args: &ArgMatches) -> String {

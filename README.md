@@ -19,7 +19,7 @@ The following features are supported:
 
 ```bash
 USAGE:
-    sp_report [FLAGS] [OPTIONS] --root <ds_root> --stocks <stocks_file>
+    sp_report [FLAGS] [OPTIONS] --stocks <stocks_file>
 
 FLAGS:
     -d, --desc            Used with order by option to sort in descending order
@@ -28,8 +28,8 @@ FLAGS:
     -V, --version         Prints version information
 
 OPTIONS:
-    -n, --name <ds_name>          Datastore name, used with datastore root (default: sp_datastore)
-    -r, --root <ds_root>          Datastore root path, use to update portfolio latest prices
+    -n, --name <ds_name>          Datastore name (default: sp_datastore)
+    -r, --root <ds_root>          Datastore root path (default: value of HOME environment variable)
     -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of
                                   symbols
     -e, --export <export_file>    Export gains and losses table to a csv file
@@ -55,7 +55,7 @@ The following operations are supported:
 
 ```bash
 USAGE:
-    sp_dstool [FLAGS] [OPTIONS] --dsop <ds_operation> --root <ds_root>
+    sp_dstool [FLAGS] [OPTIONS] --dsop <ds_operation>
 
 FLAGS:
     -h, --help       Prints help information
@@ -65,7 +65,7 @@ FLAGS:
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
     -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, export, check, stat
-    -r, --root <ds_root>          Datastore root path
+    -r, --root <ds_root>          Datastore root path (default: value of HOME environment variable)
     -e, --export <export_file>    Export symbol history and dividends to csv file. Required with export operation
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
