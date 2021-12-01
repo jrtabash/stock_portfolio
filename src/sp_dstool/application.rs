@@ -16,6 +16,14 @@ const DELETE: &str = "delete";
 const STAT: &str = "stat";
 const EXPORT: &str = "export";
 
+struct StatAgg {
+    tot_size: u64,
+    hist_size: u64,
+    div_size: u64,
+    hist_count: usize,
+    div_count: usize
+}
+
 pub struct Application {
     args: Arguments,
     sym_dates: HashMap<String, datetime::LocalDate>,
@@ -304,14 +312,26 @@ impl Application {
     fn stat(self: &Self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() { println!("Stat datastore"); }
 
-        let (tot_size, itm_count, err_count) =
+        let (stat_agg, itm_count, err_count) =
             self.ds.foreach_entry(
-                0,
-                |entry, tot| {
+                StatAgg { tot_size: 0, hist_size: 0, div_size: 0, hist_count: 0, div_count: 0 },
+                |entry, agg| {
+                    let mut agg_ref = &mut *agg;
                     let size = fs::metadata(entry.path())?.len();
-                    *tot += size;
+                    agg_ref.tot_size += size;
+
+                    let filename = misc::direntry_filename(entry);
+                    if filename.starts_with(history::tag()) {
+                        agg_ref.hist_count += 1;
+                        agg_ref.hist_size += size;
+                    }
+                    else if filename.starts_with(dividends::tag()) {
+                        agg_ref.div_count += 1;
+                        agg_ref.div_size += size;
+                    }
+
                     if self.args.is_verbose() {
-                        println!("{}\t{}", size, misc::direntry_filename(entry));
+                        println!("{}\t{}", size, filename);
                     }
                     Ok(())
                 },
@@ -323,10 +343,14 @@ impl Application {
                     Ok(())
                 })?;
 
-        println!("Count: {}", misc::count_format(itm_count, "file"));
-        println!(" Size: {}", misc::count_format(tot_size as usize, "byte"));
+        println!("Total Cnt: {}", misc::count_format(itm_count, "file"));
+        println!(" Hist Cnt: {}", misc::count_format(stat_agg.hist_count, "file"));
+        println!("  Div Cnt: {}", misc::count_format(stat_agg.div_count, "file"));
+        println!("Total Siz: {}", misc::count_format(stat_agg.tot_size as usize, "byte"));
+        println!(" Hist Siz: {}", misc::count_format(stat_agg.hist_size as usize, "byte"));
+        println!("  Div Siz: {}", misc::count_format(stat_agg.div_size as usize, "byte"));
         if err_count > 0 {
-            println!("Error: {}", misc::count_format(err_count, "error"));
+            println!("Error Cnt: {}", misc::count_format(err_count, "error"));
         }
         Ok(())
     }
