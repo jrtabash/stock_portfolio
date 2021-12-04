@@ -14,8 +14,7 @@ The following features are supported:
 - **Order by**: Sort by pre-defined attributes in ascending or descending order
 - **Filter**: Include and/or exclude by type or list of symbols
 - **Export**: Export gains and losses table to a csv file
-- **Cache**: Cache latest close prices. Cache stored in temporary folder
-- **Datastore**: Get latest close price from given datastore. When enabled, disables cache
+- **Datastore**: Get latest close price from given datastore
 
 ```bash
 USAGE:
