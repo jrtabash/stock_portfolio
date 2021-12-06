@@ -60,6 +60,32 @@ pub fn hist_mvwap(hist: &History, days: usize) -> Result<Vec<Price>, Box<dyn Err
     entries_mvwap(hist.entries(), days)
 }
 
+pub fn entries_rate_of_change(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
+    if days < 1 {
+        return Err(format!("entries_rate_of_change: days < 1").into())
+    }
+    if days > entries.len() {
+        return Err(format!("entries_rate_of_change: days > len").into())
+    }
+
+    let size = entries.len();
+    let mut rocs: Vec<Price> = Vec::with_capacity(size - days);
+    for i in days..size {
+        let p0 = entries[i - days].adj_close;
+        if p0 < 0.0001 {
+            return Err(format!("entries_rate_of_change: Cannot divide by zero price").into())
+        }
+        rocs.push((entries[i].adj_close - p0) / p0);
+    }
+
+    Ok(rocs)
+}
+
+#[inline(always)]
+pub fn hist_rate_of_change(hist: &History, days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
+    entries_rate_of_change(hist.entries(), days)
+}
+
 // --------------------------------------------------------------------------------
 // Unit Tests
 
@@ -86,18 +112,11 @@ mod tests {
         let hist = hist_data();
         let entries = hist.entries();
         let expect = expect_mvwap();
-
         let actual = entries_mvwap(&entries, 5).unwrap();
-        assert_eq!(actual.len(), expect.len());
-
-        let count: usize = actual.iter().zip(expect.iter()).map(|ae| price_eql(*ae.0, *ae.1) as usize).sum();
-        assert_eq!(count, expect.len());
+        assert!(prices_eql(&actual, &expect));
 
         let actual = entries_mvwap(&entries[3..10], 5).unwrap();
-        assert_eq!(actual.len(), 3);
-
-        let count: usize = actual.iter().zip(expect[3..6].iter()).map(|ae| price_eql(*ae.0, *ae.1) as usize).sum();
-        assert_eq!(count, 3);
+        assert!(prices_eql(&actual, &expect[3..6]));
     }
 
     #[test]
@@ -105,10 +124,39 @@ mod tests {
         let hist = hist_data();
         let expect = expect_mvwap();
         let actual = hist_mvwap(&hist, 5).unwrap();
-        assert_eq!(actual.len(), expect.len());
+        assert!(prices_eql(&actual, &expect));
+    }
 
-        let count: usize = actual.iter().zip(expect.iter()).map(|ae| price_eql(*ae.0, *ae.1) as usize).sum();
-        assert_eq!(count, expect.len());
+    #[test]
+    fn test_entries_rate_of_change() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_roc1();
+        let actual = entries_rate_of_change(&entries, 1).unwrap();
+        assert!(prices_eql(&actual, &expect));
+
+        let actual = entries_rate_of_change(&entries[3..10], 1).unwrap();
+        assert!(prices_eql(&actual, &expect[3..9]));
+    }
+
+    #[test]
+    fn test_entries_rate_of_change3() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_roc3();
+        let actual = entries_rate_of_change(&entries, 3).unwrap();
+        assert!(prices_eql(&actual, &expect));
+
+        let actual = entries_rate_of_change(&entries[3..10], 3).unwrap();
+        assert!(prices_eql(&actual, &expect[3..7]));
+    }
+
+    #[test]
+    fn test_hist_rate_of_change() {
+        let hist = hist_data();
+        let expect = expect_roc1();
+        let actual = hist_rate_of_change(&hist, 1).unwrap();
+        assert!(prices_eql(&actual, &expect));
     }
 
     fn hist_data() -> History {
@@ -144,7 +192,29 @@ mod tests {
              149.797197, 149.927214]
     }
 
+    fn expect_roc1() -> Vec<Price> {
+        vec![-0.024605,  0.014158,  0.006307,  0.009084, -0.002721, -0.000629,
+             -0.009103, -0.004239,  0.020225,  0.007512,  0.011806,  0.015080,
+              0.003361,  0.001473, -0.005284, -0.000336,  0.004574, -0.003147,
+              0.024991, -0.018155]
+    }
+
+    fn expect_roc3() -> Vec<Price> {
+        vec![-0.004556,  0.029826,  0.012685, 0.005704, -0.012422, -0.013925,
+              0.006652,  0.023531,  0.040025, 0.034780,  0.030516,  0.019993,
+             -0.000470, -0.004153, -0.001070, 0.001076,  0.026439,  0.003214]
+    }
+
     fn price_eql(lhs: Price, rhs: Price) -> bool {
         (lhs - rhs).abs() < 0.000001
+    }
+
+    fn prices_eql(lhs: &[Price], rhs: &[Price]) -> bool {
+        if lhs.len() != rhs.len() {
+            return false
+        }
+
+        let count: usize = lhs.iter().zip(rhs.iter()).map(|lr| price_eql(*lr.0, *lr.1) as usize).sum();
+        return count == rhs.len()
     }
 }
