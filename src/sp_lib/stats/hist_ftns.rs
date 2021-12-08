@@ -1,6 +1,7 @@
 use std::error::Error;
 use crate::datastore::history::{History, HistoryEntry, Price};
 
+// Volume Weighted Average Price
 pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
     let mut notional: Price = 0.0;
     let mut volume: u64 = 0;
@@ -19,6 +20,7 @@ pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
     entries_vwap(hist.entries())
 }
 
+// Moving Volume Weighted Average Price
 pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
     if days < 1 {
         return Err(format!("entries_mvwap: days < 1").into())
@@ -60,12 +62,13 @@ pub fn hist_mvwap(hist: &History, days: usize) -> Result<Vec<Price>, Box<dyn Err
     entries_mvwap(hist.entries(), days)
 }
 
-pub fn entries_rate_of_change(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
+// Rate of Change
+pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
     if days < 1 {
-        return Err(format!("entries_rate_of_change: days < 1").into())
+        return Err(format!("entries_roc: days < 1").into())
     }
     if days > entries.len() {
-        return Err(format!("entries_rate_of_change: days > len").into())
+        return Err(format!("entries_roc: days > len").into())
     }
 
     let size = entries.len();
@@ -73,7 +76,7 @@ pub fn entries_rate_of_change(entries: &[HistoryEntry], days: usize) -> Result<V
     for i in days..size {
         let p0 = entries[i - days].adj_close;
         if p0 < 0.0001 {
-            return Err(format!("entries_rate_of_change: Cannot divide by zero price").into())
+            return Err(format!("entries_roc: Cannot divide by zero price").into())
         }
         rocs.push((entries[i].adj_close - p0) / p0);
     }
@@ -82,8 +85,8 @@ pub fn entries_rate_of_change(entries: &[HistoryEntry], days: usize) -> Result<V
 }
 
 #[inline(always)]
-pub fn hist_rate_of_change(hist: &History, days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
-    entries_rate_of_change(hist.entries(), days)
+pub fn hist_roc(hist: &History, days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
+    entries_roc(hist.entries(), days)
 }
 
 // --------------------------------------------------------------------------------
@@ -129,34 +132,34 @@ mod tests {
     }
 
     #[test]
-    fn test_entries_rate_of_change() {
+    fn test_entries_roc() {
         let hist = hist_data();
         let entries = hist.entries();
         let expect = expect_roc1();
-        let actual = entries_rate_of_change(&entries, 1).unwrap();
+        let actual = entries_roc(&entries, 1).unwrap();
         assert!(prices_eql(&actual, &expect));
 
-        let actual = entries_rate_of_change(&entries[3..10], 1).unwrap();
+        let actual = entries_roc(&entries[3..10], 1).unwrap();
         assert!(prices_eql(&actual, &expect[3..9]));
     }
 
     #[test]
-    fn test_entries_rate_of_change3() {
+    fn test_entries_roc3() {
         let hist = hist_data();
         let entries = hist.entries();
         let expect = expect_roc3();
-        let actual = entries_rate_of_change(&entries, 3).unwrap();
+        let actual = entries_roc(&entries, 3).unwrap();
         assert!(prices_eql(&actual, &expect));
 
-        let actual = entries_rate_of_change(&entries[3..10], 3).unwrap();
+        let actual = entries_roc(&entries[3..10], 3).unwrap();
         assert!(prices_eql(&actual, &expect[3..7]));
     }
 
     #[test]
-    fn test_hist_rate_of_change() {
+    fn test_hist_roc() {
         let hist = hist_data();
         let expect = expect_roc1();
-        let actual = hist_rate_of_change(&hist, 1).unwrap();
+        let actual = hist_roc(&hist, 1).unwrap();
         assert!(prices_eql(&actual, &expect));
     }
 
