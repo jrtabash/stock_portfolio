@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use sp_lib::util::datetime::*;
 use sp_lib::util::temp_file;
+use sp_lib::util::price_type::price_eql;
 use sp_lib::portfolio::stock_type::*;
 use sp_lib::portfolio::stock::*;
 use sp_lib::portfolio::algorithms::*;
@@ -15,14 +16,14 @@ fn test_stock_list() {
     list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
     list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
     assert_eq!(list.len(), 2);
-    assert!(price_equal(net_notional(&list), 550.0));
-    assert!(price_equal(latest_notional(&list), 20496.0));
-    assert!(price_equal(base_notional(&list), 19946.0));
-    assert!(price_equal(pct_change(&list), 2.76));
+    assert!(price_eql(net_notional(&list), 550.0));
+    assert!(price_eql(latest_notional(&list), 20496.0));
+    assert!(price_eql(base_notional(&list), 19946.0));
+    assert!(price_eql(pct_change(&list), 2.757445));
 
     list[0].cum_dividend = 100.25;
     list[1].cum_dividend = 10.50;
-    assert!(price_equal(cumulative_dividend(&list), 110.75));
+    assert!(price_eql(cumulative_dividend(&list), 110.75));
 
     let total_size: u32 = list.iter().map(|stock| stock.quantity).sum();
     assert_eq!(total_size, 200);
@@ -33,7 +34,7 @@ fn test_stock_groupby() {
     fn test(groupby: &HashMap<String, (u32, Price)>, symbol: &str, size: u32, price: Price) {
         let size_price = groupby.get(symbol).unwrap();
         assert_eq!(size_price.0, size);
-        assert!(price_equal(size_price.1, price));
+        assert!(price_eql(size_price.1, price));
     }
 
     let mut list = StockList::new();
@@ -68,7 +69,7 @@ fn test_stock_update_from_csv() {
                2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
     let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
     assert!(update_stock_from_csv(&mut stock, &csv).unwrap());
-    assert!(price_equal(stock.latest_price, 28.25));
+    assert!(price_eql(stock.latest_price, 28.25));
     assert_eq!(stock.latest_date, make_date(2021, 2, 26));
 }
 
@@ -80,7 +81,7 @@ fn test_stock_update_from_csv2() {
                2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
     let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
     assert!(update_stock_from_csv(&mut stock, &csv).unwrap());
-    assert!(price_equal(stock.latest_price, 28.25));
+    assert!(price_eql(stock.latest_price, 28.25));
     assert_eq!(stock.latest_date, make_date(2021, 2, 26));
 }
 
@@ -92,7 +93,7 @@ fn test_stock_update_from_csv_zero_price() {
                2021-02-26,24.90,32.0,24.0,28.0,0.00,11000";
     let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
     assert!(!update_stock_from_csv(&mut stock, &csv).unwrap());
-    assert!(price_equal(stock.latest_price, 0.00));
+    assert!(price_eql(stock.latest_price, 0.00));
     assert_eq!(stock.latest_date, earliest_date());
 }
 
@@ -101,7 +102,7 @@ fn test_stock_update_from_csv_no_data() {
     let csv = "Date,Open,High,Low,Close,Adj Close,Volume";
     let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
     assert!(!update_stock_from_csv(&mut stock, &csv).unwrap());
-    assert!(price_equal(stock.latest_price, 0.00));
+    assert!(price_eql(stock.latest_price, 0.00));
     assert_eq!(stock.latest_date, earliest_date());
 }
 
@@ -111,7 +112,7 @@ fn test_stock_update_from_csv_incomplete_data() {
                2021-02-24,25.0,30.0";
     let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
     assert!(update_stock_from_csv(&mut stock, &csv).is_err());
-    assert!(price_equal(stock.latest_price, 0.00));
+    assert!(price_eql(stock.latest_price, 0.00));
     assert_eq!(stock.latest_date, earliest_date());
 }
 
@@ -285,8 +286,4 @@ fn make_stock(sym: &str, stype: StockType, date: LocalDate, qty: u32, base: Pric
     let mut stock = Stock::new(symbol, stype, date, qty, base);
     stock.set_latest_price(latest, today_plus_days(0));
     stock
-}
-
-fn price_equal(lhs: Price, rhs: Price) -> bool {
-    format!("{:.2}", lhs) == format!("{:.2}", rhs)
 }

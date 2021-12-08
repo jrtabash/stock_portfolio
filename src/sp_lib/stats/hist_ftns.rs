@@ -92,6 +92,7 @@ pub fn hist_rate_of_change(hist: &History, days: usize) -> Result<Vec<Price>, Bo
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::util::price_type::{price_eql, prices_eql};
 
     #[test]
     fn test_entries_vwap() {
@@ -203,18 +204,5 @@ mod tests {
         vec![-0.004556,  0.029826,  0.012685, 0.005704, -0.012422, -0.013925,
               0.006652,  0.023531,  0.040025, 0.034780,  0.030516,  0.019993,
              -0.000470, -0.004153, -0.001070, 0.001076,  0.026439,  0.003214]
-    }
-
-    fn price_eql(lhs: Price, rhs: Price) -> bool {
-        (lhs - rhs).abs() < 0.000001
-    }
-
-    fn prices_eql(lhs: &[Price], rhs: &[Price]) -> bool {
-        if lhs.len() != rhs.len() {
-            return false
-        }
-
-        let count: usize = lhs.iter().zip(rhs.iter()).map(|lr| price_eql(*lr.0, *lr.1) as usize).sum();
-        return count == rhs.len()
     }
 }
