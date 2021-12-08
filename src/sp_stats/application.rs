@@ -70,19 +70,24 @@ impl Application {
 
     fn describe(self: &Self) -> Result<(), Box<dyn Error>> {
         let desc =
-            match self.args.field().as_str() {
-                FIELD_OPEN => description::Description::from_vec(&self.hist.entries(), |entry| entry.open),
-                FIELD_HIGH => description::Description::from_vec(&self.hist.entries(), |entry| entry.high),
-                FIELD_LOW => description::Description::from_vec(&self.hist.entries(), |entry| entry.low),
-                FIELD_CLOSE => description::Description::from_vec(&self.hist.entries(), |entry| entry.close),
-                FIELD_ADJ_CLOSE => description::Description::from_vec(&self.hist.entries(), |entry| entry.adj_close),
-                FIELD_DIVIDEND => description::Description::from_vec(&self.div.entries(), |entry| entry.price),
-                _ => return Err(format!("Unknown field {}", self.args.field()).into())
+            if self.args.field() == FIELD_DIVIDEND {
+                description::Description::from_vec(&self.div.entries(), |entry| entry.price)
+            } else {
+                description::Description::from_vec(
+                    &self.hist.entries(),
+                    match self.args.field().as_str() {
+                        FIELD_OPEN      => |entry: &history::HistoryEntry| entry.open,
+                        FIELD_HIGH      => |entry: &history::HistoryEntry| entry.high,
+                        FIELD_LOW       => |entry: &history::HistoryEntry| entry.low,
+                        FIELD_CLOSE     => |entry: &history::HistoryEntry| entry.close,
+                        FIELD_ADJ_CLOSE => |entry: &history::HistoryEntry| entry.adj_close,
+                        _               => return Err(format!("Unknown field {}", self.args.field()).into())
+                    })
             };
+
         println!("Symbol: {}", self.args.symbol());
         println!(" Field: {}", self.args.field());
         println!(" Count: {}", desc.count());
-        println!("   Sum: {:.4}", desc.sum());
         println!("   Min: {:.4}", desc.min());
         println!("   Max: {:.4}", desc.max());
         println!("  Mean: {:.4}", desc.mean());
