@@ -13,6 +13,7 @@ const FIELD_HIGH: &str = "high";
 const FIELD_LOW: &str = "low";
 const FIELD_CLOSE: &str = "close";
 const FIELD_ADJ_CLOSE: &str = "adj_close";
+const FIELD_VOLUME: &str = "volume";
 const FIELD_DIVIDEND: &str = "dividend";
 
 pub struct Application {
@@ -55,9 +56,13 @@ impl Application {
     // --------------------------------------------------------------------------------
     // Private
 
-    fn load_data(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn is_dividend_field(&self) -> bool {
+        self.args.field() == FIELD_DIVIDEND
+    }
+
+    fn load_data(&mut self) -> Result<(), Box<dyn Error>> {
         let symbol = self.args.symbol();
-        if self.args.field() == FIELD_DIVIDEND {
+        if self.is_dividend_field() {
             if self.ds.symbol_exists(dividends::tag(), symbol) {
                 self.div = dividends::Dividends::ds_select_all(&self.ds, symbol)?;
             }
@@ -70,7 +75,7 @@ impl Application {
 
     fn describe(self: &Self) -> Result<(), Box<dyn Error>> {
         let desc =
-            if self.args.field() == FIELD_DIVIDEND {
+            if self.is_dividend_field() {
                 description::Description::from_vec(&self.div.entries(), |entry| entry.price)
             } else {
                 description::Description::from_vec(
@@ -81,31 +86,32 @@ impl Application {
                         FIELD_LOW       => |entry: &history::HistoryEntry| entry.low,
                         FIELD_CLOSE     => |entry: &history::HistoryEntry| entry.close,
                         FIELD_ADJ_CLOSE => |entry: &history::HistoryEntry| entry.adj_close,
+                        FIELD_VOLUME    => |entry: &history::HistoryEntry| entry.volume as f64,
                         _               => return Err(format!("Unknown field {}", self.args.field()).into())
                     })
             };
 
-        println!("Symbol: {}", self.args.symbol());
-        println!(" Field: {}", self.args.field());
-        println!(" Count: {}", desc.count());
-        println!("   Min: {:.4}", desc.min());
-        println!("   Max: {:.4}", desc.max());
-        println!("  Mean: {:.4}", desc.mean());
-        println!("   Std: {:.4}", desc.stddev());
+        println!("symbol: {}", self.args.symbol());
+        println!(" field: {}", self.args.field());
+        println!(" count: {}", desc.count());
+        println!("   min: {:.4}", desc.min());
+        println!("   max: {:.4}", desc.max());
+        println!("  mean: {:.4}", desc.mean());
+        println!("   std: {:.4}", desc.stddev());
         Ok(())
     }
 
-    fn calc_vwap(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn calc_vwap(&self) -> Result<(), Box<dyn Error>> {
         // TODO
         Ok(())
     }
 
-    fn calc_mvwap(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
         // TODO
         Ok(())
     }
 
-    fn calc_roc(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
         // TODO
         Ok(())
     }
