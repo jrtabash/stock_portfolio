@@ -1,6 +1,6 @@
 extern crate clap;
 
-use sp_lib::util::common_args;
+use sp_lib::util::{common_args, datetime};
 use clap::{Arg, App};
 
 pub struct Arguments {
@@ -8,7 +8,8 @@ pub struct Arguments {
     ds_root: String,
     ds_name: String,
     symbol: String,
-    window: usize
+    window: usize,
+    from: Option<datetime::LocalDate>
 }
 
 impl Arguments {
@@ -37,6 +38,11 @@ impl Arguments {
                  .long("window")
                  .help("Number of days window, required with mvwap and roc calculations")
                  .takes_value(true))
+            .arg(Arg::with_name("from_date")
+                 .short("f")
+                 .long("from")
+                 .help("Describe and calculate starting from date YYYY-MM-DD")
+                 .takes_value(true))
             .get_matches();
 
         Arguments {
@@ -47,6 +53,10 @@ impl Arguments {
             window: match parsed_args.value_of("window") {
                 Some(win) => win.parse::<usize>().expect("Invalid calculation window"),
                 None => 0
+            },
+            from: match parsed_args.value_of("from_date") {
+                Some(date) => Some(datetime::parse_date(date).expect("Invalid from date")),
+                None => None
             }
         }
     }
@@ -69,5 +79,9 @@ impl Arguments {
 
     pub fn window(&self) -> usize {
         self.window
+    }
+
+    pub fn from(&self) -> Option<datetime::LocalDate> {
+        self.from
     }
 }

@@ -34,6 +34,7 @@ impl Application {
         }
 
         self.load_data()?;
+        self.print_first_date();
 
         match self.args.calculate().as_str() {
             DESC => self.describe()?,
@@ -50,15 +51,31 @@ impl Application {
     // --------------------------------------------------------------------------------
     // Private
 
+    fn print_first_date(&self) {
+        let first_date =
+            if self.args.calculate() == DIVDESC {
+                &self.div.entries()[0].date
+            } else {
+                &self.hist.entries()[0].date
+            };
+        println!("  from: {}", first_date.format("%Y-%m-%d"));
+    }
+
     fn load_data(&mut self) -> Result<(), Box<dyn Error>> {
         let symbol = self.args.symbol();
         if self.args.calculate() == DIVDESC {
             if self.ds.symbol_exists(dividends::tag(), symbol) {
-                self.div = dividends::Dividends::ds_select_all(&self.ds, symbol)?;
+                self.div = match self.args.from() {
+                    Some(from) => dividends::Dividends::ds_select_if(&self.ds, symbol, |entry| entry.date >= from)?,
+                    None => dividends::Dividends::ds_select_all(&self.ds, symbol)?
+                };
             }
         }
         else if self.ds.symbol_exists(history::tag(), symbol) {
-            self.hist = history::History::ds_select_all(&self.ds, self.args.symbol())?;
+            self.hist = match self.args.from() {
+                Some(from) => history::History::ds_select_if(&self.ds, symbol, |entry| entry.date >= from)?,
+                None => history::History::ds_select_all(&self.ds, symbol)?
+            };
         }
         Ok(())
     }

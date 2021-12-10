@@ -78,11 +78,11 @@ OPTIONS:
 Describe and calculate symbol stats.
 
 The following calculations are supported:
-- **DESC**: Describe symbol history
-- **DIVDESC**: Describe symbol dividends
-- **VWAP**: Calculate symbol adjusted close volume weighted average price
-- **MVWAP**: Calculate symbol adjusted close moving volume weighted average price
-- **ROC**: Calculate symbol adjusted close rate of change
+- **desc**: Describe symbol history
+- **divdesc**: Describe symbol dividends
+- **vwap**: Calculate symbol adjusted close volume weighted average price
+- **mvwap**: Calculate symbol adjusted close moving volume weighted average price
+- **roc**: Calculate symbol adjusted close rate of change
 
 ```bash
 USAGE:
@@ -96,6 +96,7 @@ OPTIONS:
     -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, mvwap, roc
     -n, --name <ds_name>      Datastore name (default: sp_datastore)
     -r, --root <ds_root>      Datastore root path (default: value of HOME environment variable)
+    -f, --from <from_date>    Describe and calculate starting from date YYYY-MM-DD
     -y, --symbol <symbol>     Stock symbol
     -w, --window <window>     Number of days window, required with mvwap and roc calculations
 ```
