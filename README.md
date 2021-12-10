@@ -1,6 +1,7 @@
 # Stock Portfolio Tools
 - sp_report: Stock Portfolio Report
 - sp_dstool: Stock Portfolio Datastore Tool
+- sp_stats: Stock Portfolio Stats Tool
 
 ## Stock Portfolio Report
 Get latest close prices and dividends and report the gains and losses of stocks in portfolio.
@@ -71,6 +72,32 @@ OPTIONS:
                                   include stock and etf
     -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop and export
                                   symbol operation
+```
+
+## Stock Portfolio Stats
+Describe and calculate symbol stats.
+
+The following calculations are supported:
+- **Describe**: Describe symbol history
+- **Dividend Describe**: Describe symbol dividends
+- **VWAP**: Calculate symbol adjusted close volume weighted average price
+- **MVWAP**: Calculate symbol adjusted close moving volume weighted average price
+- **ROC**: Calculate symbol adjusted close rate of change
+
+```bash
+USAGE:
+    sp_stats [OPTIONS] --calc <calculate> --symbol <symbol>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, mvwap, roc
+    -n, --name <ds_name>      Datastore name (default: sp_datastore)
+    -r, --root <ds_root>      Datastore root path (default: value of HOME environment variable)
+    -y, --symbol <symbol>     Stock symbol
+    -w, --window <window>     Number of days window, required with mvwap and roc calculations
 ```
 
 ## Sample Stocks File
