@@ -78,8 +78,8 @@ OPTIONS:
 Describe and calculate symbol stats.
 
 The following calculations are supported:
-- **Describe**: Describe symbol history
-- **Dividend Describe**: Describe symbol dividends
+- **DESC**: Describe symbol history
+- **DIVDESC**: Describe symbol dividends
 - **VWAP**: Calculate symbol adjusted close volume weighted average price
 - **MVWAP**: Calculate symbol adjusted close moving volume weighted average price
 - **ROC**: Calculate symbol adjusted close rate of change
