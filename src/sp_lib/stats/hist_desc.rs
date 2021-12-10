@@ -53,7 +53,7 @@ impl HistDesc {
         &self.volume
     }
 
-    pub fn print(&self, symbol: &str) {
+    pub fn print(&self) {
         fn print_field(name: &str, hd: &HistDesc, extract: impl Fn(&Description) -> f64) {
             println!("{}: {:12.4} {:12.4} {:12.4} {:12.4} {:12.4} {:16.4}",
                      name,
@@ -65,7 +65,6 @@ impl HistDesc {
                      extract(hd.volume()));
         }
 
-        println!("symbol: {}", symbol);
         println!(" field: {:>12} {:>12} {:>12} {:>12} {:>12} {:>16}", "open", "high", "low", "close", "adj_close", "volume");
         println!(" count: {:>12} {:>12} {:>12} {:>12} {:>12} {:>16}",
                  self.open().count(),

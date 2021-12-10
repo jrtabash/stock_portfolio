@@ -96,8 +96,7 @@ impl Description {
         self.stddev
     }
 
-    pub fn print(&self, symbol: &str, field: &str) {
-        println!("symbol: {}", symbol);
+    pub fn print(&self, field: &str) {
         println!(" field: {}", field);
         println!(" count: {}", self.count());
         println!("   min: {:.4}", self.min());

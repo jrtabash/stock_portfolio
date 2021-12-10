@@ -34,7 +34,7 @@ impl Application {
         }
 
         self.load_data()?;
-        self.print_first_date();
+        self.print_date_and_symbol();
 
         match self.args.calculate().as_str() {
             DESC => self.describe()?,
@@ -51,14 +51,19 @@ impl Application {
     // --------------------------------------------------------------------------------
     // Private
 
-    fn print_first_date(&self) {
-        let first_date =
-            if self.args.calculate() == DIVDESC {
-                &self.div.entries()[0].date
-            } else {
-                &self.hist.entries()[0].date
-            };
-        println!("  from: {}", first_date.format("%Y-%m-%d"));
+    fn print_date_and_symbol(&self) {
+        let mut first_date = String::from("NA");
+        if self.args.calculate() == DIVDESC {
+            if self.div.count() > 0 {
+                first_date = format!("{}", self.div.entries()[0].date.format("%Y-%m-%d"));
+            }
+        }
+        else if self.hist.count() > 0 {
+            first_date = format!("{}", self.hist.entries()[0].date.format("%Y-%m-%d"));
+        }
+
+        println!("  from: {}", first_date);
+        println!("symbol: {}", self.args.symbol());
     }
 
     fn load_data(&mut self) -> Result<(), Box<dyn Error>> {
@@ -82,19 +87,18 @@ impl Application {
 
     fn describe(self: &Self) -> Result<(), Box<dyn Error>> {
         let desc = hist_desc::HistDesc::from_hist(&self.hist);
-        desc.print(self.args.symbol());
+        desc.print();
         Ok(())
     }
 
     fn div_describe(&self) -> Result<(), Box<dyn Error>> {
         let desc = description::Description::from_vec(&self.div.entries(), |entry| entry.price);
-        desc.print(self.args.symbol(), "dividend");
+        desc.print("dividend");
         Ok(())
     }
 
     fn calc_vwap(&self) -> Result<(), Box<dyn Error>> {
         let vwap = hist_ftns::hist_vwap(&self.hist)?;
-        println!("symbol: {}", self.args.symbol());
         println!(" field: adj_close");
         println!("  vwap: {:.4}", vwap);
         Ok(())
@@ -102,7 +106,6 @@ impl Application {
 
     fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
         let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
-        println!("symbol: {}", self.args.symbol());
         println!(" field: adj_close");
         println!(" mvwap: ");
         for p in mvwap.iter() {
@@ -113,7 +116,6 @@ impl Application {
 
     fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
         let roc = hist_ftns::hist_roc(&self.hist, self.args.window())?;
-        println!("symbol: {}", self.args.symbol());
         println!(" field: adj_close");
         println!("   roc: ");
         for p in roc.iter() {
