@@ -35,7 +35,7 @@ impl Arguments {
             .arg(Arg::with_name("window")
                  .short("w")
                  .long("window")
-                 .help("Number of days window, required for mvwap and roc calculations")
+                 .help("Number of days window, required with mvwap and roc calculations")
                  .takes_value(true))
             .get_matches();
 
