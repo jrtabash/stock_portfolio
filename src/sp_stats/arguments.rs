@@ -7,8 +7,7 @@ pub struct Arguments {
     calculate: String,
     ds_root: String,
     ds_name: String,
-    symbol: String,
-    field: Option<String>
+    symbol: String
 }
 
 impl Arguments {
@@ -23,7 +22,7 @@ impl Arguments {
             .arg(Arg::with_name("calculate")
                  .short("c")
                  .long("calc")
-                 .help("Calculate stats, one of desc, vwap, mvwap, roc")
+                 .help("Calculate stats, one of desc, divdesc, vwap, mvwap, roc")
                  .required(true)
                  .takes_value(true))
             .arg(Arg::with_name("symbol")
@@ -32,11 +31,6 @@ impl Arguments {
                  .help("Stock symbol")
                  .required(true)
                  .takes_value(true))
-            .arg(Arg::with_name("field")
-                 .short("f")
-                 .long("field")
-                 .help("Field name, one of open, high, low, close, adj_close, volume, dividend")
-                 .takes_value(true))
             .get_matches();
 
         Arguments {
@@ -44,10 +38,6 @@ impl Arguments {
             ds_root: common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root"),
             ds_name: common_args::parsed_ds_name(&parsed_args),
             symbol: String::from(parsed_args.value_of("symbol").unwrap()),
-            field: match parsed_args.value_of("field") {
-                Some(value) => Some(String::from(value)),
-                None => None
-            }
         }
     }
 
@@ -65,9 +55,5 @@ impl Arguments {
 
     pub fn symbol(self: &Self) -> &String {
         &self.symbol
-    }
-
-    pub fn field(self: &Self) -> Option<&String> {
-        self.field.as_ref()
     }
 }
