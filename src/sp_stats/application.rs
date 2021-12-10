@@ -84,12 +84,24 @@ impl Application {
     }
 
     fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
-        // TODO
+        let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
+        println!("symbol: {}", self.args.symbol());
+        println!(" field: adj_close");
+        println!(" mvwap: ");
+        for p in mvwap.iter() {
+            println!("{:.4}", p);
+        }
         Ok(())
     }
 
     fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
-        // TODO
+        let roc = hist_ftns::hist_roc(&self.hist, self.args.window())?;
+        println!("symbol: {}", self.args.symbol());
+        println!(" field: adj_close");
+        println!("   roc: ");
+        for p in roc.iter() {
+            println!("{:.4}", p);
+        }
         Ok(())
     }
 }

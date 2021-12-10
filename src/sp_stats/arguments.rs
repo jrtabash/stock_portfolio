@@ -7,7 +7,8 @@ pub struct Arguments {
     calculate: String,
     ds_root: String,
     ds_name: String,
-    symbol: String
+    symbol: String,
+    window: usize
 }
 
 impl Arguments {
@@ -31,6 +32,11 @@ impl Arguments {
                  .help("Stock symbol")
                  .required(true)
                  .takes_value(true))
+            .arg(Arg::with_name("window")
+                 .short("w")
+                 .long("window")
+                 .help("Number of days window, required for mvwap and roc calculations")
+                 .takes_value(true))
             .get_matches();
 
         Arguments {
@@ -38,22 +44,30 @@ impl Arguments {
             ds_root: common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root"),
             ds_name: common_args::parsed_ds_name(&parsed_args),
             symbol: String::from(parsed_args.value_of("symbol").unwrap()),
+            window: match parsed_args.value_of("window") {
+                Some(win) => win.parse::<usize>().expect("Invalid calculation window"),
+                None => 0
+            }
         }
     }
 
-    pub fn calculate(self: &Self) -> &String {
+    pub fn calculate(&self) -> &String {
         &self.calculate
     }
 
-    pub fn ds_root(self: &Self) -> &String {
+    pub fn ds_root(&self) -> &String {
         &self.ds_root
     }
 
-    pub fn ds_name(self: &Self) -> &String {
+    pub fn ds_name(&self) -> &String {
         &self.ds_name
     }
 
-    pub fn symbol(self: &Self) -> &String {
+    pub fn symbol(&self) -> &String {
         &self.symbol
+    }
+
+    pub fn window(&self) -> usize {
+        self.window
     }
 }
