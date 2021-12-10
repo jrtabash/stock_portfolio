@@ -1,6 +1,6 @@
 use std::error::Error;
 use sp_lib::datastore::{datastore, history, dividends};
-use sp_lib::stats::{description};
+use sp_lib::stats::{description, hist_desc};
 use crate::arguments::Arguments;
 
 const DESC: &str = "desc";
@@ -20,18 +20,30 @@ pub struct Application {
     args: Arguments,
     ds: datastore::DataStore,
     hist: history::History,
-    div: dividends::Dividends
+    div: dividends::Dividends,
+    single_field: bool,
+    div_field: bool
 }
 
 impl Application {
     pub fn new() -> Self {
         let args = Arguments::new();
         let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
+
+        let mut single_field = false;
+        let mut div_field = false;
+        if let Some(field) = args.field() {
+            single_field = true;
+            div_field = field == FIELD_DIVIDEND;
+        }
+
         Application {
             args: args,
             ds: ds,
             hist: history::History::new(""),
-            div: dividends::Dividends::new("")
+            div: dividends::Dividends::new(""),
+            single_field: single_field,
+            div_field: div_field
         }
     }
 
@@ -56,8 +68,14 @@ impl Application {
     // --------------------------------------------------------------------------------
     // Private
 
+    #[inline(always)]
+    fn is_single_field(&self) -> bool {
+        self.single_field
+    }
+
+    #[inline(always)]
     fn is_dividend_field(&self) -> bool {
-        self.args.field() == FIELD_DIVIDEND
+        self.div_field
     }
 
     fn load_data(&mut self) -> Result<(), Box<dyn Error>> {
@@ -74,30 +92,30 @@ impl Application {
     }
 
     fn describe(self: &Self) -> Result<(), Box<dyn Error>> {
-        let desc =
-            if self.is_dividend_field() {
-                description::Description::from_vec(&self.div.entries(), |entry| entry.price)
-            } else {
-                description::Description::from_vec(
-                    &self.hist.entries(),
-                    match self.args.field().as_str() {
-                        FIELD_OPEN      => |entry: &history::HistoryEntry| entry.open,
-                        FIELD_HIGH      => |entry: &history::HistoryEntry| entry.high,
-                        FIELD_LOW       => |entry: &history::HistoryEntry| entry.low,
-                        FIELD_CLOSE     => |entry: &history::HistoryEntry| entry.close,
-                        FIELD_ADJ_CLOSE => |entry: &history::HistoryEntry| entry.adj_close,
-                        FIELD_VOLUME    => |entry: &history::HistoryEntry| entry.volume as f64,
-                        _               => return Err(format!("Unknown field {}", self.args.field()).into())
-                    })
-            };
-
-        println!("symbol: {}", self.args.symbol());
-        println!(" field: {}", self.args.field());
-        println!(" count: {}", desc.count());
-        println!("   min: {:.4}", desc.min());
-        println!("   max: {:.4}", desc.max());
-        println!("  mean: {:.4}", desc.mean());
-        println!("   std: {:.4}", desc.stddev());
+        if self.is_single_field() {
+            let field = self.args.field().unwrap();
+            let desc =
+                if self.is_dividend_field() {
+                    description::Description::from_vec(&self.div.entries(), |entry| entry.price)
+                } else {
+                    description::Description::from_vec(
+                        &self.hist.entries(),
+                        match field.as_str() {
+                            FIELD_OPEN      => |entry: &history::HistoryEntry| entry.open,
+                            FIELD_HIGH      => |entry: &history::HistoryEntry| entry.high,
+                            FIELD_LOW       => |entry: &history::HistoryEntry| entry.low,
+                            FIELD_CLOSE     => |entry: &history::HistoryEntry| entry.close,
+                            FIELD_ADJ_CLOSE => |entry: &history::HistoryEntry| entry.adj_close,
+                            FIELD_VOLUME    => |entry: &history::HistoryEntry| entry.volume as f64,
+                            _               => return Err(format!("Unknown field {}", field).into())
+                        })
+                };
+            desc.print(self.args.symbol(), field);
+        }
+        else {
+            let desc = hist_desc::HistDesc::from_hist(&self.hist);
+            desc.print(self.args.symbol());
+        }
         Ok(())
     }
 

@@ -8,7 +8,7 @@ pub struct Arguments {
     ds_root: String,
     ds_name: String,
     symbol: String,
-    field: String
+    field: Option<String>
 }
 
 impl Arguments {
@@ -36,7 +36,6 @@ impl Arguments {
                  .short("f")
                  .long("field")
                  .help("Field name, one of open, high, low, close, adj_close, volume, dividend")
-                 .required(true)
                  .takes_value(true))
             .get_matches();
 
@@ -45,7 +44,10 @@ impl Arguments {
             ds_root: common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root"),
             ds_name: common_args::parsed_ds_name(&parsed_args),
             symbol: String::from(parsed_args.value_of("symbol").unwrap()),
-            field: String::from(parsed_args.value_of("field").unwrap())
+            field: match parsed_args.value_of("field") {
+                Some(value) => Some(String::from(value)),
+                None => None
+            }
         }
     }
 
@@ -65,7 +67,7 @@ impl Arguments {
         &self.symbol
     }
 
-    pub fn field(self: &Self) -> &String {
-        &self.field
+    pub fn field(self: &Self) -> Option<&String> {
+        self.field.as_ref()
     }
 }
