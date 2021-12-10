@@ -1,6 +1,6 @@
 use std::error::Error;
 use sp_lib::datastore::{datastore, history, dividends};
-use sp_lib::stats::{description, hist_desc};
+use sp_lib::stats::{description, hist_desc, hist_ftns};
 use crate::arguments::Arguments;
 
 const DESC: &str = "desc";
@@ -76,7 +76,10 @@ impl Application {
     }
 
     fn calc_vwap(&self) -> Result<(), Box<dyn Error>> {
-        // TODO
+        let vwap = hist_ftns::hist_vwap(&self.hist)?;
+        println!("symbol: {}", self.args.symbol());
+        println!(" field: adj_close");
+        println!("  vwap: {:.4}", vwap);
         Ok(())
     }
 
