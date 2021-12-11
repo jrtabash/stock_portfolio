@@ -1,5 +1,6 @@
 use std::error::Error;
 use crate::datastore::history::{History, HistoryEntry, Price};
+use crate::util::price_type::price_zero;
 
 // Volume Weighted Average Price
 pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
@@ -75,7 +76,7 @@ pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>, 
     let mut rocs: Vec<Price> = Vec::with_capacity(size - days);
     for i in days..size {
         let p0 = entries[i - days].adj_close;
-        if p0 < 0.0001 {
+        if price_zero(p0) {
             return Err(format!("entries_roc: Cannot divide by zero price").into())
         }
         rocs.push((entries[i].adj_close - p0) / p0);
