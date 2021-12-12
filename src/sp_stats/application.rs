@@ -1,6 +1,7 @@
 use std::error::Error;
 use sp_lib::datastore::{datastore, history, dividends};
 use sp_lib::stats::{description, hist_desc, hist_ftns};
+use sp_lib::util::datetime;
 use crate::arguments::Arguments;
 
 const DESC: &str = "desc";
@@ -51,18 +52,25 @@ impl Application {
     // --------------------------------------------------------------------------------
     // Private
 
-    fn print_date_and_symbol(&self) {
-        let mut first_date = String::from("NA");
-        if self.args.calculate() == DIVDESC {
-            if self.div.count() > 0 {
-                first_date = format!("{}", self.div.entries()[0].date.format("%Y-%m-%d"));
-            }
+    fn date_range<Entry>(entries: &Vec<Entry>, extract_date: impl Fn (&Entry) -> datetime::LocalDate) -> (datetime::LocalDate, datetime::LocalDate) {
+        if entries.len() > 0 {
+            (extract_date(&entries[0]), extract_date(&entries[entries.len() - 1]))
         }
-        else if self.hist.count() > 0 {
-            first_date = format!("{}", self.hist.entries()[0].date.format("%Y-%m-%d"));
+        else {
+            (datetime::earliest_date(), datetime::earliest_date())
         }
+    }
 
-        println!("  from: {}", first_date);
+    fn print_date_and_symbol(&self) {
+        let (first_date, last_date) =
+            if self.args.calculate() == DIVDESC {
+                Application::date_range(&self.div.entries(), |entry| entry.date)
+            } else {
+                Application::date_range(&self.hist.entries(), |entry| entry.date)
+            };
+
+        println!("  from: {}", first_date.format("%Y-%m-%d"));
+        println!("    to: {}", last_date.format("%Y-%m-%d"));
         println!("symbol: {}", self.args.symbol());
     }
 
