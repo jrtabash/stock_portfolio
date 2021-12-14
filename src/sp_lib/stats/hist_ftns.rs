@@ -1,5 +1,6 @@
 use std::error::Error;
 use crate::datastore::history::{History, HistoryEntry, Price};
+use crate::util::datetime::LocalDate;
 use crate::util::price_type::price_zero;
 
 // Volume Weighted Average Price
@@ -22,7 +23,7 @@ pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
 }
 
 // Moving Volume Weighted Average Price
-pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
+pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<(LocalDate, Price)>, Box<dyn Error>> {
     if days < 1 {
         return Err(format!("entries_mvwap: days < 1").into())
     }
@@ -40,7 +41,7 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>
         volume += entries[i].volume;
     }
 
-    let mut prices: Vec<Price> = Vec::with_capacity(size - base);
+    let mut prices: Vec<(LocalDate, Price)> = Vec::with_capacity(size - base);
     for i in base..size {
         notional += entries[i].adj_close * entries[i].volume as Price;
         volume += entries[i].volume;
@@ -48,7 +49,7 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>
             return Err(format!("entries_mvwap: Cannot divide by zero total volume").into())
         }
 
-        prices.push(notional / volume as Price);
+        prices.push((entries[i].date.clone(), notional / volume as Price));
 
         let i0 = i - base;
         notional -= entries[i0].adj_close * entries[i0].volume as Price;
@@ -59,12 +60,12 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>
 }
 
 #[inline(always)]
-pub fn hist_mvwap(hist: &History, days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
+pub fn hist_mvwap(hist: &History, days: usize) -> Result<Vec<(LocalDate, Price)>, Box<dyn Error>> {
     entries_mvwap(hist.entries(), days)
 }
 
 // Rate of Change
-pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
+pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<Vec<(LocalDate, Price)>, Box<dyn Error>> {
     if days < 1 {
         return Err(format!("entries_roc: days < 1").into())
     }
@@ -73,20 +74,20 @@ pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<Vec<Price>, 
     }
 
     let size = entries.len();
-    let mut rocs: Vec<Price> = Vec::with_capacity(size - days);
+    let mut rocs: Vec<(LocalDate, Price)> = Vec::with_capacity(size - days);
     for i in days..size {
         let p0 = entries[i - days].adj_close;
         if price_zero(p0) {
             return Err(format!("entries_roc: Cannot divide by zero price").into())
         }
-        rocs.push(100.0 * (entries[i].adj_close - p0) / p0);
+        rocs.push((entries[i].date.clone(), 100.0 * (entries[i].adj_close - p0) / p0));
     }
 
     Ok(rocs)
 }
 
 #[inline(always)]
-pub fn hist_roc(hist: &History, days: usize) -> Result<Vec<Price>, Box<dyn Error>> {
+pub fn hist_roc(hist: &History, days: usize) -> Result<Vec<(LocalDate, Price)>, Box<dyn Error>> {
     entries_roc(hist.entries(), days)
 }
 
@@ -96,7 +97,8 @@ pub fn hist_roc(hist: &History, days: usize) -> Result<Vec<Price>, Box<dyn Error
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::util::price_type::{price_eql, prices_eql};
+    use crate::util::price_type::price_eql;
+    use crate::util::datetime::{make_date, date_plus_days, is_weekend};
 
     #[test]
     fn test_entries_vwap() {
@@ -118,10 +120,10 @@ mod tests {
         let entries = hist.entries();
         let expect = expect_mvwap();
         let actual = entries_mvwap(&entries, 5).unwrap();
-        assert!(prices_eql(&actual, &expect));
+        assert!(date_prices_eql(&actual, &expect));
 
         let actual = entries_mvwap(&entries[3..10], 5).unwrap();
-        assert!(prices_eql(&actual, &expect[3..6]));
+        assert!(date_prices_eql(&actual, &expect[3..6]));
     }
 
     #[test]
@@ -129,7 +131,7 @@ mod tests {
         let hist = hist_data();
         let expect = expect_mvwap();
         let actual = hist_mvwap(&hist, 5).unwrap();
-        assert!(prices_eql(&actual, &expect));
+        assert!(date_prices_eql(&actual, &expect));
     }
 
     #[test]
@@ -138,10 +140,10 @@ mod tests {
         let entries = hist.entries();
         let expect = expect_roc1();
         let actual = entries_roc(&entries, 1).unwrap();
-        assert!(prices_eql(&actual, &expect));
+        assert!(date_prices_eql(&actual, &expect));
 
         let actual = entries_roc(&entries[3..10], 1).unwrap();
-        assert!(prices_eql(&actual, &expect[3..9]));
+        assert!(date_prices_eql(&actual, &expect[3..9]));
     }
 
     #[test]
@@ -150,10 +152,10 @@ mod tests {
         let entries = hist.entries();
         let expect = expect_roc3();
         let actual = entries_roc(&entries, 3).unwrap();
-        assert!(prices_eql(&actual, &expect));
+        assert!(date_prices_eql(&actual, &expect));
 
         let actual = entries_roc(&entries[3..10], 3).unwrap();
-        assert!(prices_eql(&actual, &expect[3..7]));
+        assert!(date_prices_eql(&actual, &expect[3..7]));
     }
 
     #[test]
@@ -161,7 +163,7 @@ mod tests {
         let hist = hist_data();
         let expect = expect_roc1();
         let actual = hist_roc(&hist, 1).unwrap();
-        assert!(prices_eql(&actual, &expect));
+        assert!(date_prices_eql(&actual, &expect));
     }
 
     fn hist_data() -> History {
@@ -190,24 +192,60 @@ mod tests {
              2021-10-29,147.220001,149.940002,146.410004,149.800003,149.581696,124850400").unwrap()
     }
 
-    fn expect_mvwap() -> Vec<Price> {
-        vec![141.287520, 141.217479, 142.115587, 142.228876, 141.980042,
-             142.101272, 142.488000, 143.346371, 144.789113, 146.380997,
-             147.452895, 148.191956, 148.749638, 148.877932, 148.796869,
-             149.797197, 149.927214]
+    fn expect_mvwap() -> Vec<(LocalDate, Price)> {
+        let date0 = make_date(2021, 10, 07);
+        let prices = vec![141.287520, 141.217479, 142.115587, 142.228876, 141.980042,
+                          142.101272, 142.488000, 143.346371, 144.789113, 146.380997,
+                          147.452895, 148.191956, 148.749638, 148.877932, 148.796869,
+                          149.797197, 149.927214];
+        make_date_prices(&prices, date0)
     }
 
-    fn expect_roc1() -> Vec<Price> {
-        vec![-2.460566,  1.415843,  0.630712, 0.908448, -0.272177,
-             -0.062974, -0.910304, -0.423995, 2.022562,  0.751255,
-              1.180610,  1.508012,  0.336119, 0.147384, -0.528488,
-             -0.033626,  0.457485, -0.314760, 2.499153, -1.815557]
+    fn expect_roc1() -> Vec<(LocalDate, Price)> {
+        let date0 = make_date(2021, 10, 04);
+        let prices = vec![-2.460566,  1.415843,  0.630712, 0.908448, -0.272177,
+                          -0.062974, -0.910304, -0.423995, 2.022562,  0.751255,
+                          1.180610,  1.508012,  0.336119, 0.147384, -0.528488,
+                          -0.033626,  0.457485, -0.314760, 2.499153, -1.815557];
+        make_date_prices(&prices, date0)
     }
 
-    fn expect_roc3() -> Vec<Price> {
-        vec![-0.455657, 2.982607,  1.268508,  0.570424, -1.242235,
-             -1.392576, 0.665214,  2.353192,  4.002550,  3.478014,
-              3.051642, 1.999310, -0.047047, -0.415380, -0.107022,
-              0.107611, 2.643970,  0.321452]
+    fn expect_roc3() -> Vec<(LocalDate, Price)> {
+        let date0 = make_date(2021, 10, 06);
+        let prices = vec![-0.455657, 2.982607,  1.268508,  0.570424, -1.242235,
+                          -1.392576, 0.665214,  2.353192,  4.002550,  3.478014,
+                          3.051642, 1.999310, -0.047047, -0.415380, -0.107022,
+                          0.107611, 2.643970,  0.321452];
+        make_date_prices(&prices, date0)
+    }
+
+    fn make_date_prices(prices: &Vec<Price>, date0: LocalDate) -> Vec<(LocalDate, Price)> {
+        let mut days: i64 = 0;
+        prices
+            .iter()
+            .map(|p| {
+                let mut date = date_plus_days(&date0, days);
+                while is_weekend(&date) {
+                    days += 1;
+                    date = date_plus_days(&date0, days);
+                }
+                days += 1;
+                (date, *p)
+            })
+            .collect()
+    }
+
+    fn date_prices_eql(actual: &[(LocalDate, Price)], expect: &[(LocalDate, Price)]) -> bool {
+        if actual.len() != expect.len() {
+            return false
+        }
+
+        let true_cnt: usize = actual
+            .iter()
+            .zip(expect.iter())
+            .map(|(dp1, dp2)| dp1.0 == dp2.0 && price_eql(dp1.1, dp2.1))
+            .filter(|b| *b)
+            .count();
+        return true_cnt == expect.len()
     }
 }

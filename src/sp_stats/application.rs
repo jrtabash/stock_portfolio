@@ -116,8 +116,8 @@ impl Application {
         let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
         println!(" field: adj_close");
         println!(" mvwap: ");
-        for p in mvwap.iter() {
-            println!("{:.4}", p);
+        for (date, price) in mvwap.iter() {
+            println!("{} {:.4}", date.format("%Y-%m-%d"), price);
         }
         Ok(())
     }
@@ -126,8 +126,8 @@ impl Application {
         let roc = hist_ftns::hist_roc(&self.hist, self.args.window())?;
         println!(" field: adj_close");
         println!("   roc: ");
-        for p in roc.iter() {
-            println!("{:.4}", p);
+        for (date, price) in roc.iter() {
+            println!("{} {:.4}", date.format("%Y-%m-%d"), price);
         }
         Ok(())
     }
