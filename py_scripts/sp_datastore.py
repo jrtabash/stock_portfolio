@@ -20,7 +20,7 @@ class DataStore:
         if not os.path.exists(self.path):
             raise DSException(f"Datastore {self.path} does not exist")
 
-    def read_data(self, tag :str, symbol: str) -> pd.DataFrame:
+    def read_data(self, tag: str, symbol: str) -> pd.DataFrame:
         if tag == self.history_tag():
             names = ["date", "open", "high", "low", "close", "adj_close", "volume"]
         else:
