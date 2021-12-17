@@ -113,7 +113,7 @@ impl DataStore {
         self.read_last(&sym_file)
     }
 
-    pub fn insert_symbol(&self, tag: &str, symbol: &str, csv: &str) -> Result<(), Box<dyn Error>> {
+    pub fn insert_symbol(&self, tag: &str, symbol: &str, csv: &str) -> Result<usize, Box<dyn Error>> {
         // Skip non-numeric header if one exists.
         let csv_ref =
             match csv.find(char::is_numeric) {
@@ -123,6 +123,7 @@ impl DataStore {
                 None => &""
             };
 
+        let mut count: usize = 0;
         if !csv_ref.is_empty() {
             let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
             let exists = sym_file.exists();
@@ -148,9 +149,10 @@ impl DataStore {
                 }
                 write!(file, "{}\n", line)?;
                 last_line = Some(line);
+                count += 1;
             }
         }
-        Ok(())
+        Ok(count)
     }
 
     pub fn drop_symbol(&self, tag: &str, symbol: &str) -> Result<(), Box<dyn Error>> {
@@ -263,7 +265,7 @@ mod tests {
         assert!(base_path.exists());
 
         assert!(!test_file.exists());
-        assert!(ds.insert_symbol(&tag, &symbol, &csv).is_ok());
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
         assert!(test_file.exists());
 
         assert!(ds.delete().is_ok());
@@ -288,7 +290,7 @@ mod tests {
         ds.create().unwrap();
         assert!(!ds.symbol_exists(&tag, &symbol));
 
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
         assert!(ds.symbol_exists(&tag, &symbol));
         assert!(test_file.exists());
 
@@ -323,7 +325,7 @@ mod tests {
         ds.create().unwrap();
         assert!(!ds.symbol_exists(&tag, &symbol));
 
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
         assert!(ds.symbol_exists(&tag, &symbol));
         assert!(test_file.exists());
 
@@ -354,7 +356,7 @@ mod tests {
         ds.create().unwrap();
         assert!(!ds.symbol_exists(&tag, &symbol));
 
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
         assert!(ds.symbol_exists(&tag, &symbol));
 
         let data = ds.select_last(&tag, &symbol).unwrap();
@@ -381,7 +383,7 @@ mod tests {
         let test_file = temp_file::make_path("test_insert_with_header/tst_TEST.csv");
 
         ds.create().unwrap();
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
         assert!(test_file.exists());
 
         let data = ds.select_symbol(&tag, &symbol).unwrap();
@@ -414,7 +416,7 @@ mod tests {
         let test_file = temp_file::make_path("test_insert_dup_with_header/tst_TEST.csv");
 
         ds.create().unwrap();
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
         assert!(test_file.exists());
 
         let data = ds.select_symbol(&tag, &symbol).unwrap();
@@ -444,8 +446,8 @@ mod tests {
                          21,22,23,24,25\n";
 
         ds.create().unwrap();
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
-        ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap(), 2);
 
         let data = ds.select_symbol(&tag, &symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
@@ -482,8 +484,8 @@ mod tests {
                         21,22,23,24,25\n";
 
         ds.create().unwrap();
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
-        ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 2);
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap(), 3);
 
         let data = ds.select_symbol(&tag, &symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
@@ -516,8 +518,8 @@ mod tests {
                          21,22,23,24,25\n";
 
         ds.create().unwrap();
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
-        ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &extra_csv).unwrap(), 2);
 
         let data = ds.select_symbol(&tag, &symbol).unwrap();
         let dvec: Vec<&str> = data.split('\n').collect();
@@ -547,7 +549,7 @@ mod tests {
         let test_file = temp_file::make_path("test_drop/tst_TEST.csv");
 
         ds.create().unwrap();
-        ds.insert_symbol(&tag, &symbol, &csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 3);
         assert!(test_file.exists());
 
         ds.drop_symbol(&tag, &symbol).unwrap();
@@ -572,9 +574,9 @@ mod tests {
                    11,12,13,14,15\n";
 
         ds.create().unwrap();
-        ds.insert_symbol(&tag, &symbol1, &csv).unwrap();
-        ds.insert_symbol(&tag, &symbol2, &csv).unwrap();
-        ds.insert_symbol(&tag, &symbol3, &csv).unwrap();
+        assert_eq!(ds.insert_symbol(&tag, &symbol1, &csv).unwrap(), 3);
+        assert_eq!(ds.insert_symbol(&tag, &symbol2, &csv).unwrap(), 3);
+        assert_eq!(ds.insert_symbol(&tag, &symbol3, &csv).unwrap(), 3);
 
         let (sum, items, errors) = ds.foreach_entry(
             0,
