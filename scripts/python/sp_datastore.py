@@ -1,17 +1,15 @@
 import os
 import pandas as pd
 import sp_util
-from typing import Optional
-
-OptionalStr = Optional[str]
+from sp_util import OptionalStr
 
 class DSException (Exception):
     pass
 
 class DataStore:
     def __init__(self, root: OptionalStr = None, name: OptionalStr = None):
-        self.root: str = self.root_or_default(root)
-        self.name: str = self.name_or_default(name)
+        self.root: str = sp_util.root_or_default(root)
+        self.name: str = sp_util.name_or_default(name)
         self.path: str = os.path.join(self.root, self.name)
         self.validate()
 
@@ -50,15 +48,3 @@ class DataStore:
 
     def make_symbol_path(self, tag: str, symbol: str) -> str:
         return os.path.join(self.path, f"{tag}_{symbol}.csv")
-
-    @staticmethod
-    def root_or_default(root: OptionalStr) -> str:
-        if root is None:
-            return sp_util.home_path()
-        return root
-
-    @staticmethod
-    def name_or_default(name: OptionalStr) -> str:
-        if name is None:
-            return "sp_datastore"
-        return name
