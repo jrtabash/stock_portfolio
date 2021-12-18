@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import sp_util
 from typing import Optional
 
 OptionalStr = Optional[str]
@@ -14,6 +15,12 @@ class DataStore:
         self.path: str = os.path.join(self.root, self.name)
         self.validate()
 
+    def __str__(self) -> str:
+        return f"DataStore[{self.path}]"
+
+    def __repr__(self) -> str:
+        return str(self)
+
     def validate(self):
         if len(self.root) == 0:
             raise DSException("Missing datastore root")
@@ -21,21 +28,25 @@ class DataStore:
             raise DSException(f"Datastore {self.path} does not exist")
 
     def read_data(self, tag: str, symbol: str) -> pd.DataFrame:
-        if tag == self.history_tag():
+        if tag == sp_util.history_tag():
             names = ["date", "open", "high", "low", "close", "adj_close", "volume"]
         else:
             names = ["date", "dividend"]
-        return pd.read_csv(self.make_symbol_path(tag, symbol),
-                           names=names,
-                           header=None,
-                           converters={"date": pd.Timestamp},
-                           index_col="date")
+        symbol_path = self.make_symbol_path(tag, symbol)
+        if os.path.exists(symbol_path):
+            return pd.read_csv(symbol_path,
+                               names=names,
+                               header=None,
+                               converters={"date": pd.Timestamp},
+                               index_col="date")
+        else:
+            return pd.DataFrame({f: [] for f in names})
 
     def read_history(self, symbol: str) -> pd.DataFrame:
-        return self.read_data(self.history_tag(), symbol)
+        return self.read_data(sp_util.history_tag(), symbol)
 
     def read_dividends(self, symbol: str) -> pd.DataFrame:
-        return self.read_data(self.dividends_tag(), symbol)
+        return self.read_data(sp_util.dividends_tag(), symbol)
 
     def make_symbol_path(self, tag: str, symbol: str) -> str:
         return os.path.join(self.path, f"{tag}_{symbol}.csv")
@@ -43,12 +54,7 @@ class DataStore:
     @staticmethod
     def root_or_default(root: OptionalStr) -> str:
         if root is None:
-            if "USERPROFILE" in os.environ:
-                return os.environ["USERPROFILE"]
-            elif "HOME" in os.environ:
-                return os.environ["HOME"]
-            else:
-                return ""
+            return sp_util.home_path()
         return root
 
     @staticmethod
@@ -56,11 +62,3 @@ class DataStore:
         if name is None:
             return "sp_datastore"
         return name
-
-    @staticmethod
-    def history_tag() -> str:
-        return "history"
-
-    @staticmethod
-    def dividends_tag() -> str:
-        return "dividends"
