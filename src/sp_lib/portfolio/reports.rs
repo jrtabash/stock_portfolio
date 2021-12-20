@@ -72,7 +72,7 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
         println!("{:8} {:8} {:12}", "GroupBy", "Size", "Cur Value");
         println!("{:8} {:8} {:12}", "-------", "----", "---------");
 
-        let groupby = algorithms::stock_groupby(&stocks);
+        let groupby = algorithms::stock_aggregate(&stocks);
 
         let mut seen = HashSet::new();
         for stock in stocks.iter() {

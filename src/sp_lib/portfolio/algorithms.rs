@@ -26,9 +26,9 @@ pub fn pct_change(stocks: &StockList) -> f64 {
     100.0 * net / base
 }
 
-pub fn stock_groupby_ftn<T>(stocks: &StockList,
-                            init: fn (&Stock) -> T,
-                            ftn: fn(&Stock, &T) -> T) -> HashMap<String, T> {
+pub fn stock_groupby<T>(stocks: &StockList,
+                        init: fn (&Stock) -> T,
+                        ftn: fn(&Stock, &T) -> T) -> HashMap<String, T> {
     let mut groupby: HashMap<String, T> = HashMap::new();
     for stock in stocks.iter() {
         let entry = groupby.entry(stock.symbol.to_string()).or_insert(init(stock));
@@ -38,8 +38,8 @@ pub fn stock_groupby_ftn<T>(stocks: &StockList,
 }
 
 // Group by stock symbol, and calcuate aggregate quantity and current value.
-pub fn stock_groupby(stocks: &StockList) -> HashMap<String, (u32, Price)> {
-    stock_groupby_ftn(
+pub fn stock_aggregate(stocks: &StockList) -> HashMap<String, (u32, Price)> {
+    stock_groupby(
         stocks,
         |_| (0, 0.0),
         |stock, size_price| {
@@ -96,7 +96,7 @@ pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) {
 }
 
 pub fn stock_base_dates(stocks: &StockList) -> HashMap<String, datetime::LocalDate> {
-    stock_groupby_ftn(
+    stock_groupby(
         stocks,
         |stock| stock.date.clone(),
         |stock, cur_date| if stock.date < *cur_date { stock.date.clone() } else { *cur_date })

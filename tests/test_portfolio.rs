@@ -30,7 +30,7 @@ fn test_stock_list() {
 }
 
 #[test]
-fn test_stock_groupby() {
+fn test_stock_aggregate() {
     fn test(groupby: &HashMap<String, (u32, Price)>, symbol: &str, size: u32, price: Price) {
         let size_price = groupby.get(symbol).unwrap();
         assert_eq!(size_price.0, size);
@@ -42,21 +42,21 @@ fn test_stock_groupby() {
     list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
     list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-2), 100, 122.0, 125.25));
 
-    let gby = stock_groupby(&list);
+    let gby = stock_aggregate(&list);
     assert_eq!(gby.len(), 2);
     test(&gby, "AAPL", 200, 25050.0);
     test(&gby, "DELL", 100, 7971.0);
 }
 
 #[test]
-fn test_stock_groupby_ftn() {
+fn test_stock_groupby() {
     let mut list = StockList::new();
     list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21,  79.71));
     list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
     list.push(make_stock("ICLN", StockType::ETF,   today_plus_days(0),  400, 24.10,  24.12));
     list.push(make_stock("AAPL", StockType::Stock, today_plus_days(0),  100, 125.50, 125.75));
 
-    let sym_sizes = stock_groupby_ftn(&list, |_| 0, |s, q| s.quantity + q);
+    let sym_sizes = stock_groupby(&list, |_| 0, |s, q| s.quantity + q);
     assert_eq!(sym_sizes.len(), 3);
     assert_eq!(*sym_sizes.get("AAPL").unwrap(), 300);
     assert_eq!(*sym_sizes.get("DELL").unwrap(), 100);
