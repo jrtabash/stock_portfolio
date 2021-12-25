@@ -59,7 +59,7 @@ function run_command() {
 function process_nightly() {
     ds_name=sp_${NAME}
     ds_stocks=${NAME}.csv
-    if [ "${name}" == "datastore" ]; then
+    if [ "${NAME}" == "datastore" ]; then
         ds_stocks=stocks.csv
     fi
 
