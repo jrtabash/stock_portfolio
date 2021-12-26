@@ -95,15 +95,6 @@ impl Description {
     pub fn stddev(&self) -> f64 {
         self.stddev
     }
-
-    pub fn print(&self, field: &str) {
-        println!(" field: {}", field);
-        println!(" count: {}", self.count());
-        println!("   min: {:.4}", self.min());
-        println!("   max: {:.4}", self.max());
-        println!("  mean: {:.4}", self.mean());
-        println!("   std: {:.4}", self.stddev());
-    }
 }
 
 // --------------------------------------------------------------------------------

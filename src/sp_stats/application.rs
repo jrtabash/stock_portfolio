@@ -94,14 +94,42 @@ impl Application {
     }
 
     fn describe(self: &Self) -> Result<(), Box<dyn Error>> {
-        let desc = hist_desc::HistDesc::from_hist(&self.hist);
-        desc.print();
+        fn print_field(name: &str, hd: &hist_desc::HistDesc, extract: impl Fn(&description::Description) -> f64) {
+            println!("{}: {:12.4} {:12.4} {:12.4} {:12.4} {:12.4} {:16.4}",
+                     name,
+                     extract(hd.open()),
+                     extract(hd.high()),
+                     extract(hd.low()),
+                     extract(hd.close()),
+                     extract(hd.adj_close()),
+                     extract(hd.volume()));
+        }
+
+        let hdesc = hist_desc::HistDesc::from_hist(&self.hist);
+
+        println!(" field: {:>12} {:>12} {:>12} {:>12} {:>12} {:>16}", "open", "high", "low", "close", "adj_close", "volume");
+        println!(" count: {:>12} {:>12} {:>12} {:>12} {:>12} {:>16}",
+                 hdesc.open().count(),
+                 hdesc.high().count(),
+                 hdesc.low().count(),
+                 hdesc.close().count(),
+                 hdesc.adj_close().count(),
+                 hdesc.volume().count());
+        print_field("   min", &hdesc, |desc| desc.min());
+        print_field("   max", &hdesc, |desc| desc.max());
+        print_field("  mean", &hdesc, |desc| desc.mean());
+        print_field("   std", &hdesc, |desc| desc.stddev());
         Ok(())
     }
 
     fn div_describe(&self) -> Result<(), Box<dyn Error>> {
         let desc = description::Description::from_vec(&self.div.entries(), |entry| entry.price);
-        desc.print("dividend");
+        println!(" field: dividend");
+        println!(" count: {}", desc.count());
+        println!("   min: {:.4}", desc.min());
+        println!("   max: {:.4}", desc.max());
+        println!("  mean: {:.4}", desc.mean());
+        println!("   std: {:.4}", desc.stddev());
         Ok(())
     }
 

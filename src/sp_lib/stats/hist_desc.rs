@@ -52,32 +52,6 @@ impl HistDesc {
     pub fn volume(&self) -> &Description {
         &self.volume
     }
-
-    pub fn print(&self) {
-        fn print_field(name: &str, hd: &HistDesc, extract: impl Fn(&Description) -> f64) {
-            println!("{}: {:12.4} {:12.4} {:12.4} {:12.4} {:12.4} {:16.4}",
-                     name,
-                     extract(hd.open()),
-                     extract(hd.high()),
-                     extract(hd.low()),
-                     extract(hd.close()),
-                     extract(hd.adj_close()),
-                     extract(hd.volume()));
-        }
-
-        println!(" field: {:>12} {:>12} {:>12} {:>12} {:>12} {:>16}", "open", "high", "low", "close", "adj_close", "volume");
-        println!(" count: {:>12} {:>12} {:>12} {:>12} {:>12} {:>16}",
-                 self.open().count(),
-                 self.high().count(),
-                 self.low().count(),
-                 self.close().count(),
-                 self.adj_close().count(),
-                 self.volume().count());
-        print_field("   min", &self, |desc| desc.min());
-        print_field("   max", &self, |desc| desc.max());
-        print_field("  mean", &self, |desc| desc.mean());
-        print_field("   std", &self, |desc| desc.stddev());
-    }
 }
 
 // --------------------------------------------------------------------------------
