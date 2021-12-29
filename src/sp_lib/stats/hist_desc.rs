@@ -71,36 +71,54 @@ mod tests {
         assert!(value_eql(hdesc.open().max(), 149.820007));
         assert!(value_eql(hdesc.open().mean(), 144.971428));
         assert!(value_eql(hdesc.open().stddev(), 3.580718));
+        assert!(value_eql(hdesc.open().lower_quartile(), 142.110001));
+        assert!(value_eql(hdesc.open().median(), 143.770004));
+        assert!(value_eql(hdesc.open().upper_quartile(), 148.699997));
 
         assert_eq!(hdesc.high().count(), 21);
         assert!(value_eql(hdesc.high().min(), 141.399994));
         assert!(value_eql(hdesc.high().max(), 153.169998));
         assert!(value_eql(hdesc.high().mean(), 146.418570));
         assert!(value_eql(hdesc.high().stddev(), 3.623685));
+        assert!(value_eql(hdesc.high().lower_quartile(), 143.250000));
+        assert!(value_eql(hdesc.high().median(), 144.899994));
+        assert!(value_eql(hdesc.high().upper_quartile(), 149.729996));
 
         assert_eq!(hdesc.low().count(), 21);
         assert!(value_eql(hdesc.low().min(), 138.270004));
         assert!(value_eql(hdesc.low().max(), 149.720001));
         assert!(value_eql(hdesc.low().mean(), 143.954761));
         assert!(value_eql(hdesc.low().stddev(), 3.963953));
+        assert!(value_eql(hdesc.low().lower_quartile(), 141.039993));
+        assert!(value_eql(hdesc.low().median(), 143.160004));
+        assert!(value_eql(hdesc.low().upper_quartile(), 147.869995));
 
         assert_eq!(hdesc.close().count(), 21);
         assert!(value_eql(hdesc.close().min(), 139.139999));
         assert!(value_eql(hdesc.close().max(), 152.570007));
         assert!(value_eql(hdesc.close().mean(), 145.563809));
         assert!(value_eql(hdesc.close().stddev(), 3.843008));
+        assert!(value_eql(hdesc.close().lower_quartile(), 142.649994));
+        assert!(value_eql(hdesc.close().median(), 144.839996));
+        assert!(value_eql(hdesc.close().upper_quartile(), 148.850006));
 
         assert_eq!(hdesc.adj_close().count(), 21);
         assert!(value_eql(hdesc.adj_close().min(), 138.937225));
         assert!(value_eql(hdesc.adj_close().max(), 152.347656));
         assert!(value_eql(hdesc.adj_close().mean(), 145.351675));
         assert!(value_eql(hdesc.adj_close().stddev(), 3.837406));
+        assert!(value_eql(hdesc.adj_close().lower_quartile(), 142.442108));
+        assert!(value_eql(hdesc.adj_close().median(), 144.628922));
+        assert!(value_eql(hdesc.adj_close().upper_quartile(), 148.633087));
 
         assert_eq!(hdesc.volume().count(), 21);
         assert!(value_eql(hdesc.volume().min(), 50720600.0));
         assert!(value_eql(hdesc.volume().max(), 124850400.0));
         assert!(value_eql(hdesc.volume().mean(), 74517466.666666));
         assert!(value_eql(hdesc.volume().stddev(), 18393701.437620));
+        assert!(value_eql(hdesc.volume().lower_quartile(), 60893400.0));
+        assert!(value_eql(hdesc.volume().median(), 69907100.0));
+        assert!(value_eql(hdesc.volume().upper_quartile(), 83221100.0));
     }
 
     fn hist_data() -> History {

@@ -119,6 +119,9 @@ impl Application {
         print_field("   max", &hdesc, |desc| desc.max());
         print_field("  mean", &hdesc, |desc| desc.mean());
         print_field("   std", &hdesc, |desc| desc.stddev());
+        print_field("   25%", &hdesc, |desc| desc.lower_quartile());
+        print_field("   50%", &hdesc, |desc| desc.median());
+        print_field("   75%", &hdesc, |desc| desc.upper_quartile());
         Ok(())
     }
 
@@ -130,6 +133,9 @@ impl Application {
         println!("   max: {:.4}", desc.max());
         println!("  mean: {:.4}", desc.mean());
         println!("   std: {:.4}", desc.stddev());
+        println!("   25%: {:.4}", desc.lower_quartile());
+        println!("   50%: {:.4}", desc.median());
+        println!("   75%: {:.4}", desc.upper_quartile());
         Ok(())
     }
 

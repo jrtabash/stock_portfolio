@@ -1,10 +1,15 @@
+use std::cmp::Ordering;
+
 pub struct Description {
     count: usize,
     sum: f64,
     min: f64,
     max: f64,
     mean: f64,
-    stddev: f64
+    stddev: f64,
+    lowerq: f64, // Lower Quartile
+    median: f64, // Median
+    upperq: f64  // Upper Quartile
 }
 
 impl Description {
@@ -13,25 +18,38 @@ impl Description {
                min: f64,
                max: f64,
                mean: f64,
-               stddev: f64) -> Self {
+               stddev: f64,
+               lowerq: f64,
+               median: f64,
+               upperq: f64) -> Self {
         Description {
             count: count,
             sum: sum,
             min: min,
             max: max,
             mean: mean,
-            stddev: stddev
+            stddev: stddev,
+            lowerq: lowerq,
+            median: median,
+            upperq: upperq
         }
     }
 
     pub fn from_vec<Entry>(data: &Vec<Entry>, extract: impl Fn(&Entry) -> f64) -> Self {
+        let mut values: Vec<f64> = data.iter().map(&extract).collect();
+        values.sort_by(|l, r| {
+            if      l < r { Ordering::Less }
+            else if r > l { Ordering::Greater }
+            else          { Ordering::Equal }
+        });
+
         let mut count: usize = 0;
         let mut sum: f64 = 0.0;
         let mut min: f64 = 0.0;
         let mut max: f64 = 0.0;
 
-        for entry in data {
-            let value = extract(entry);
+        for value_ref in values.iter() {
+            let value = *value_ref;
             if count > 0 {
                 count += 1;
                 sum += value;
@@ -57,13 +75,18 @@ impl Description {
             variance = variance / (count - 1) as f64;
         }
 
+        let (low, med, upp) = Self::calc_quartiles(&values);
+
         Description::new(
             count,
             sum,
             min,
             max,
             mean,
-            variance.sqrt())
+            variance.sqrt(),
+            low,
+            med,
+            upp)
     }
 
     #[inline(always)]
@@ -95,6 +118,49 @@ impl Description {
     pub fn stddev(&self) -> f64 {
         self.stddev
     }
+
+    #[inline(always)]
+    pub fn lower_quartile(&self) -> f64 {
+        self.lowerq
+    }
+
+    #[inline(always)]
+    pub fn median(&self) -> f64 {
+        self.median
+    }
+
+    #[inline(always)]
+    pub fn upper_quartile(&self) -> f64 {
+        self.upperq
+    }
+
+    fn calc_median(values: &[f64]) -> f64 {
+        // Assume values are ordered
+        let size = values.len();
+        let idx = size / 2;
+        if size % 2 == 0 {
+            (values[idx] + values[idx - 1]) / 2.0
+        }
+        else {
+            values[idx]
+        }
+    }
+
+    fn calc_quartiles(values: &Vec<f64>) -> (f64, f64, f64) {
+        // Assume values are ordered
+        let size = values.len();
+        let idx = size / 2;
+
+        let med = Self::calc_median(&values);
+        let upp = Self::calc_median(&values[idx..size]);
+        let low = if size % 2 == 0 {
+            Self::calc_median(&values[0..idx])
+        } else {
+            Self::calc_median(&values[0..(idx + 1)])
+        };
+
+        (low, med, upp)
+    }
 }
 
 // --------------------------------------------------------------------------------
@@ -114,6 +180,9 @@ mod tests {
         assert!(value_eql(desc.max(), 5.0));
         assert!(value_eql(desc.mean(), 3.0));
         assert!(value_eql(desc.stddev(), 1.581139));
+        assert!(value_eql(desc.lower_quartile(), 2.0));
+        assert!(value_eql(desc.median(), 3.0));
+        assert!(value_eql(desc.upper_quartile(), 4.0));
     }
 
     #[test]
@@ -127,6 +196,9 @@ mod tests {
         assert!(value_eql(desc.max(), 0.868028));
         assert!(value_eql(desc.mean(), 0.573135));
         assert!(value_eql(desc.stddev(), 0.268068));
+        assert!(value_eql(desc.lower_quartile(), 0.3496538));
+        assert!(value_eql(desc.median(), 0.600086));
+        assert!(value_eql(desc.upper_quartile(), 0.78182178));
     }
 
     #[test]
@@ -146,6 +218,9 @@ mod tests {
         assert!(value_eql(desc.max(), 5.0));
         assert!(value_eql(desc.mean(), 3.0));
         assert!(value_eql(desc.stddev(), 1.581139));
+        assert!(value_eql(desc.lower_quartile(), 2.0));
+        assert!(value_eql(desc.median(), 3.0));
+        assert!(value_eql(desc.upper_quartile(), 4.0));
     }
 
     fn value_eql(lhs: f64, rhs: f64) -> bool {
