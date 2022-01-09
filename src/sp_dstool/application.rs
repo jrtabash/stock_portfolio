@@ -195,7 +195,9 @@ impl Application {
                 types::Events::Dividend);
 
             query.execute()?;
-            self.ds.insert_symbol(dividends::tag(), symbol, &query.result)?;
+            if self.ds.insert_symbol(dividends::tag(), symbol, &query.result)? > 0 {
+                println!("Dividends updated, check if {} data reset is needed", symbol);
+            }
         }
         Ok(())
     }
