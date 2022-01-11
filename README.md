@@ -213,6 +213,43 @@ AAPL     2020-09-20 2021-11-16    422      100   115.00   151.00    36.00    31.
 AAPL     2020-11-12 2021-11-16    369      100   118.50   151.00    32.50    27.43     11850.00     15100.00    3250.00    86.50
 ```
 
+## Example Report 5
+```bash
+$ sp_report --name sp_sample --stocks sample.csv --include '&pct > 0.0' --orderby pct --desc
+Stocks Value Report
+-------------------
+            Date: 2022-01-10
+Number of Stocks: 2
+      Base Value: 23350.00
+    Latest Value: 34438.00
+       Net Value: 11088.00
+  Percent Change: 47.49
+    Cum Dividend: 193.50
+
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value  Cum Div 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    ---------  ------- 
+AAPL     2020-09-20 2022-01-10    477      100   115.00   172.19    57.19    49.73     11500.00     17219.00    5719.00   107.00
+AAPL     2020-11-12 2022-01-10    424      100   118.50   172.19    53.69    45.31     11850.00     17219.00    5369.00    86.50
+```
+
+## Example Report 6
+```bash
+$ sp_report --name sp_sample --stocks sample.csv -i '&days < 365'
+Stocks Value Report
+-------------------
+            Date: 2022-01-10
+Number of Stocks: 1
+      Base Value: 7550.00
+    Latest Value: 5988.00
+       Net Value: -1562.00
+  Percent Change: -20.69
+    Cum Dividend: 0.00
+
+Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value  Cum Div 
+------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    ---------  ------- 
+DELL     2021-02-10 2022-01-10    334      100    75.50    59.88   -15.62   -20.69      7550.00      5988.00   -1562.00     0.00
+```
+
 ## Example Stats 1
 ```bash
 $ sp_stats -n sp_research -c desc -y MSFT -f 2021-11-22
