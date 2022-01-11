@@ -213,7 +213,7 @@ AAPL     2020-11-12 2021-11-16    369      100   118.50   151.00    32.50    27.
 
 ## Example Report 5
 ```bash
-$ sp_report --name sp_sample --stocks sample.csv --include '&pct > 0.0' --orderby pct --desc
+$ sp_report --name sp_sample --stocks sample.csv --include 'pct > 0.0' --orderby pct --desc
 Stocks Value Report
 -------------------
             Date: 2022-01-10
@@ -232,7 +232,7 @@ AAPL     2020-11-12 2022-01-10    424      100   118.50   172.19    53.69    45.
 
 ## Example Report 6
 ```bash
-$ sp_report --name sp_sample --stocks sample.csv -i '&days < 365'
+$ sp_report --name sp_sample --stocks sample.csv -i 'days < 365'
 Stocks Value Report
 -------------------
             Date: 2022-01-10
