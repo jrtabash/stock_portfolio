@@ -26,9 +26,9 @@ impl Application {
         }
 
         self.read()?;
-        self.include();
-        self.exclude();
         self.update()?;
+        self.include()?;
+        self.exclude()?;
         self.sort()?;
         self.report();
         self.export()?;
@@ -44,16 +44,28 @@ impl Application {
         Ok(())
     }
 
-    fn include(self: &mut Application) {
+    fn include(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if let Some(include_expr) = self.args.include() {
-            algorithms::filter_stocks(&mut self.stocks, &include_expr, true);
+            if include_expr.starts_with('&') {
+                algorithms::filter_stocks_by_expr(&mut self.stocks, &include_expr[1..], true)?;
+            }
+            else {
+                algorithms::filter_stocks(&mut self.stocks, &include_expr, true);
+            }
         }
+        Ok(())
     }
 
-    fn exclude(self: &mut Application) {
+    fn exclude(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if let Some(exclude_expr) = self.args.exclude() {
-            algorithms::filter_stocks(&mut self.stocks, &exclude_expr, false);
+            if exclude_expr.starts_with('&') {
+                algorithms::filter_stocks_by_expr(&mut self.stocks, &exclude_expr[1..], false)?;
+            }
+            else {
+                algorithms::filter_stocks(&mut self.stocks, &exclude_expr, false);
+            }
         }
+        Ok(())
     }
 
     fn update(self: &mut Application) -> Result<(), Box<dyn Error>> {

@@ -27,6 +27,16 @@ pub fn stocks_file_help() -> &'static str {
      Supported type values include stock and etf"
 }
 
+pub fn filter_help() -> &'static str {
+    "Filter stocks by type, symbols or expression;\n\
+     If type, must be one of 'stock' or 'etf'.\n\
+     If symbols, must be a comma separated list of symbol names.\n\
+     If expression, must start with &, and must follow the format '<field> <op> <value>', where:\n\
+     <field> : one of days, price, net, pct, div, size, value\n\
+     <op>    : one of =, !=, <, >, <=, >=\n\
+     Example : '&days > 365'"
+}
+
 // --------------------------------------------------------------------------------
 // Common Arguments
 

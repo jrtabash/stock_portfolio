@@ -199,6 +199,50 @@ fn test_filter_stocks() {
 }
 
 #[test]
+fn test_filter_stocks_by_expr() {
+    fn test_filter_by(by_expr: &str, keep: bool, sz: usize, sym1: &str, sym2: &str, sym3: &str) {
+        let mut list = StockList::new();
+        list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
+        list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+        list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
+
+        filter_stocks_by_expr(&mut list, by_expr, keep).unwrap();
+        assert_eq!(list.len(), sz);
+        if sz >= 1 { assert_eq!(&list[0].symbol, sym1); }
+        if sz >= 2 { assert_eq!(&list[1].symbol, sym2); }
+        if sz >= 3 { assert_eq!(&list[2].symbol, sym3); }
+    }
+
+    test_filter_by("days = 3",         true, 1, "AAPL", "", "");
+    test_filter_by("days != 3",        true, 2, "DELL", "ICLN", "");
+    test_filter_by("days < 3",         true, 2, "DELL", "ICLN", "");
+    test_filter_by("days > 2",         true, 1, "AAPL", "", "");
+    test_filter_by("days <= 2",        true, 2, "DELL", "ICLN", "");
+    test_filter_by("days >= 3",        true, 1, "AAPL", "", "");
+    test_filter_by("price = 79.71",    true, 1, "DELL", "", "");
+    test_filter_by("price > 90.00",    true, 1, "AAPL", "", "");
+    test_filter_by("net < 0.10",       true, 1, "ICLN", "", "");
+    test_filter_by("pct > 3.0",        true, 1, "AAPL", "", "");
+    test_filter_by("div = 0.00",       true, 3, "DELL", "AAPL", "ICLN");
+    test_filter_by("size >= 200",      true, 2, "AAPL", "ICLN", "");
+    test_filter_by("value <= 7500.00", true, 1, "ICLN", "", "");
+
+    test_filter_by("days = 3",         false, 2, "DELL", "ICLN", "");
+    test_filter_by("days != 3",        false, 1, "AAPL", "", "");
+    test_filter_by("days < 3",         false, 1, "AAPL", "", "");
+    test_filter_by("days > 2",         false, 2, "DELL", "ICLN", "");
+    test_filter_by("days <= 2",        false, 1, "AAPL", "", "");
+    test_filter_by("days >= 3",        false, 2, "DELL", "ICLN", "");
+    test_filter_by("price = 79.71",    false, 2, "AAPL", "ICLN", "");
+    test_filter_by("price > 90.00",    false, 2, "DELL", "ICLN", "");
+    test_filter_by("net < 0.10",       false, 2, "DELL", "AAPL", "");
+    test_filter_by("pct > 3.0",        false, 2, "DELL", "ICLN", "");
+    test_filter_by("div = 0.00",       false, 0, "", "", "");
+    test_filter_by("size >= 200",      false, 1, "DELL", "", "");
+    test_filter_by("value <= 7500.00", false, 2, "DELL", "AAPL", "");
+}
+
+#[test]
 fn test_stock_base_dates() {
     fn test_dates(list: &StockList) {
         let sym_dates = stock_base_dates(&list);
