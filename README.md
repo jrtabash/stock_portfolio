@@ -13,7 +13,7 @@ current and net prices and notional values, percent change, cumulative dividend,
 The following features are supported:
 - **Group by**: Report quantities and current notional values grouped by symbol
 - **Order by**: Sort by pre-defined attributes in ascending or descending order
-- **Filter**: Include and/or exclude by type or list of symbols
+- **Filter**: Include and/or exclude by type, list of symbols, or expression
 - **Export**: Export gains and losses table to a csv file
 
 ```bash
@@ -29,11 +29,23 @@ FLAGS:
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
     -r, --root <ds_root>          Datastore root path (default: value of HOME environment variable)
-    -x, --exclude <exclude>       Exclude stocks by type or symbols; one of stock, etf or a comma separated list of
-                                  symbols
+    -x, --exclude <exclude>       Filter stocks by type, symbols or expression;
+                                  If type, must be one of 'stock' or 'etf'.
+                                  If symbols, must be a comma separated list of symbol names.
+                                  If expression, must start with &, and must follow the format '<field> <op> <value>',
+                                  where:
+                                  <field> : one of days, price, net, pct, div, size, value
+                                  <op>    : one of =, !=, <, >, <=, >=
+                                  Example : '&days > 365'
     -e, --export <export_file>    Export gains and losses table to a csv file
-    -i, --include <include>       Include stocks by type or symbols; one of stock, etf or a comma separated list of
-                                  symbols
+    -i, --include <include>       Filter stocks by type, symbols or expression;
+                                  If type, must be one of 'stock' or 'etf'.
+                                  If symbols, must be a comma separated list of symbol names.
+                                  If expression, must start with &, and must follow the format '<field> <op> <value>',
+                                  where:
+                                  <field> : one of days, price, net, pct, div, size, value
+                                  <op>    : one of =, !=, <, >, <=, >=
+                                  Example : '&days > 365'
     -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, div, size or value
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
