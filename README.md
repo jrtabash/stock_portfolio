@@ -32,8 +32,7 @@ OPTIONS:
     -x, --exclude <exclude>       Filter stocks by type, symbols or expression;
                                   If type, must be one of 'stock' or 'etf'.
                                   If symbols, must be a comma separated list of symbol names.
-                                  If expression, must start with &, and must follow the format '<field> <op> <value>',
-                                  where:
+                                  If expression, must follow the format '<field> <op> <value>', where:
                                   <field> : one of days, price, net, pct, div, size, value
                                   <op>    : one of =, !=, <, >, <=, >=
                                   Example : '&days > 365'
@@ -41,8 +40,7 @@ OPTIONS:
     -i, --include <include>       Filter stocks by type, symbols or expression;
                                   If type, must be one of 'stock' or 'etf'.
                                   If symbols, must be a comma separated list of symbol names.
-                                  If expression, must start with &, and must follow the format '<field> <op> <value>',
-                                  where:
+                                  If expression, must follow the format '<field> <op> <value>', where:
                                   <field> : one of days, price, net, pct, div, size, value
                                   <op>    : one of =, !=, <, >, <=, >=
                                   Example : '&days > 365'
