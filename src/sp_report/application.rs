@@ -39,7 +39,11 @@ impl Application {
     // Private
 
     fn is_field_expression(expr: &str) -> bool {
-        let type_or_symbols = expr == "stock" || expr == "etf" || expr.contains(',');
+        let type_or_symbols =
+            expr == "stock" ||           // Is stock type?
+            expr == "etf" ||             // Is etf type?
+            expr.contains(',') ||        // Is list of symbols?
+            !expr.trim().contains(' ');  // Is a single symbol?
         !type_or_symbols
     }
 
