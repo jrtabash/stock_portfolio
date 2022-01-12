@@ -34,7 +34,7 @@ pub fn filter_help() -> &'static str {
      If expression, must follow the format '<field> <op> <value>', where:\n\
      <field> : one of days, price, net, pct, div, size, value\n\
      <op>    : one of =, !=, <, >, <=, >=\n\
-     Example : '&days > 365'"
+     Example : 'days > 365'"
 }
 
 // --------------------------------------------------------------------------------

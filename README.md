@@ -35,7 +35,7 @@ OPTIONS:
                                   If expression, must follow the format '<field> <op> <value>', where:
                                   <field> : one of days, price, net, pct, div, size, value
                                   <op>    : one of =, !=, <, >, <=, >=
-                                  Example : '&days > 365'
+                                  Example : 'days > 365'
     -e, --export <export_file>    Export gains and losses table to a csv file
     -i, --include <include>       Filter stocks by type, symbols or expression;
                                   If type, must be one of 'stock' or 'etf'.
@@ -43,7 +43,7 @@ OPTIONS:
                                   If expression, must follow the format '<field> <op> <value>', where:
                                   <field> : one of days, price, net, pct, div, size, value
                                   <op>    : one of =, !=, <, >, <=, >=
-                                  Example : '&days > 365'
+                                  Example : 'days > 365'
     -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, div, size or value
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
