@@ -8,7 +8,7 @@ use clap::{Arg, ArgMatches};
 // Common Version
 
 pub fn app_version() -> &'static str {
-    "0.3.0"
+    "0.4.0"
 }
 
 // --------------------------------------------------------------------------------
