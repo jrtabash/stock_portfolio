@@ -1,8 +1,8 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::error::Error;
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::util::{price_type, datetime};
-use crate::portfolio::stock_type;
+use crate::portfolio::stocks_filter;
 
 pub fn latest_notional(stocks: &StockList) -> Price {
     stocks.iter().map(|stock| stock.latest_notional()).sum()
@@ -85,28 +85,9 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
     Ok(())
 }
 
-pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) {
-    if let Ok(stock_type) = stock_type::str2stocktype(&filter_expr) {
-        stocks.retain(|stock| (stock.stype == stock_type) == keep);
-    }
-    else {
-        let symbol_set: HashSet<&str> = filter_expr.split(',').map(|name| name.trim()).collect();
-        stocks.retain(|stock| symbol_set.contains(stock.symbol.as_str()) == keep);
-    }
-}
-
-pub fn filter_stocks_by_expr(stocks: &mut StockList, by_expr: &str, keep: bool) -> Result<(), Box<dyn Error>> {
-    let tokens: Vec<&str> = by_expr.split_whitespace().collect();
-    if tokens.len() != 3 {
-        return Err(format!("Invalid by expression '{}'", by_expr).into())
-    }
-
-    let field_ftn = make_field_ftn(tokens[0])?;
-    let op_ftn = make_op_ftn(tokens[1])?;
-    let value = tokens[2].parse::<f64>()?;
-
-    stocks.retain(|stock| op_ftn(field_ftn(stock), value) == keep);
-
+pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) -> Result<(), Box<dyn Error>> {
+    let filter = stocks_filter::StocksFilter::from(filter_expr)?;
+    filter.filter_stocks(stocks, keep);
     Ok(())
 }
 
@@ -115,44 +96,4 @@ pub fn stock_base_dates(stocks: &StockList) -> HashMap<String, datetime::LocalDa
         stocks,
         |stock| stock.date.clone(),
         |stock, cur_date| if stock.date < *cur_date { stock.date.clone() } else { *cur_date })
-}
-
-// --------------------------------------------------------------------------------
-
-fn make_field_ftn(field: &str) -> Result<fn(&Stock) -> f64, Box<dyn Error>> {
-    if field == "days" {
-        Ok(|stock| stock.days_held as f64)
-    } else if field == "price" {
-        Ok(|stock| stock.latest_price)
-    } else if field == "net" {
-        Ok(|stock| stock.net_price())
-    } else if field == "pct" {
-        Ok(|stock| stock.pct_change())
-    } else if field == "div" {
-        Ok(|stock| stock.cum_dividend)
-    } else if field == "size" {
-        Ok(|stock| stock.quantity as f64)
-    } else if field == "value" {
-        Ok(|stock| stock.latest_notional())
-    } else {
-        Err(format!("Unsupported by_expr field '{}'", field).into())
-    }
-}
-
-fn make_op_ftn(op: &str) -> Result<fn(f64, f64) -> bool, Box<dyn Error>> {
-    if op == "=" {
-        Ok(|l, r| l == r)
-    } else if op == "!=" {
-        Ok(|l, r| l != r)
-    } else if op == "<" {
-        Ok(|l, r| l < r)
-    } else if op == ">" {
-        Ok(|l, r| l > r)
-    } else if op == "<=" {
-        Ok(|l, r| l <= r)
-    } else if op == ">=" {
-        Ok(|l, r| l >= r)
-    } else {
-        return Err(format!("Unsupported by_expr op '{}'", op).into())
-    }
 }

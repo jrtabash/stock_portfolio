@@ -175,7 +175,7 @@ fn test_filter_stocks() {
         list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
         list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
 
-        filter_stocks(&mut list, expr, keep);
+        filter_stocks(&mut list, expr, keep).unwrap();
 
         assert_eq!(list.len(), symbols.len());
         for i in 0..list.len() {
@@ -206,7 +206,7 @@ fn test_filter_stocks_by_expr() {
         list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
         list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
 
-        filter_stocks_by_expr(&mut list, by_expr, keep).unwrap();
+        filter_stocks(&mut list, by_expr, keep).unwrap();
         assert_eq!(list.len(), sz);
         if sz >= 1 { assert_eq!(&list[0].symbol, sym1); }
         if sz >= 2 { assert_eq!(&list[1].symbol, sym2); }

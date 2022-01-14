@@ -38,15 +38,6 @@ impl Application {
     // --------------------------------------------------------------------------------
     // Private
 
-    fn is_field_expression(expr: &str) -> bool {
-        let type_or_symbols =
-            expr == "stock" ||           // Is stock type?
-            expr == "etf" ||             // Is etf type?
-            expr.contains(',') ||        // Is list of symbols?
-            !expr.trim().contains(' ');  // Is a single symbol?
-        !type_or_symbols
-    }
-
     fn read(self: &mut Application) -> Result<(), Box<dyn Error>> {
         let reader = stocks_reader::StocksReader::new(String::from(self.args.stocks_file()));
         self.stocks = reader.read()?;
@@ -55,24 +46,14 @@ impl Application {
 
     fn include(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if let Some(include_expr) = self.args.include() {
-            if Self::is_field_expression(&include_expr) {
-                algorithms::filter_stocks_by_expr(&mut self.stocks, &include_expr, true)?;
-            }
-            else {
-                algorithms::filter_stocks(&mut self.stocks, &include_expr, true);
-            }
+            algorithms::filter_stocks(&mut self.stocks, &include_expr, true)?;
         }
         Ok(())
     }
 
     fn exclude(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if let Some(exclude_expr) = self.args.exclude() {
-            if Self::is_field_expression(&exclude_expr) {
-                algorithms::filter_stocks_by_expr(&mut self.stocks, &exclude_expr, false)?;
-            }
-            else {
-                algorithms::filter_stocks(&mut self.stocks, &exclude_expr, false);
-            }
+            algorithms::filter_stocks(&mut self.stocks, &exclude_expr, false)?;
         }
         Ok(())
     }
