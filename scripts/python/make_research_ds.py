@@ -19,7 +19,7 @@ class ParsedArgs:
         print("Create a research stock portfolio datastore")
         print("")
         print("Usage")
-        print("    {} [FLAGS] [OPTIONS]".format(sys.argv[0]))
+        print("    {} [FLAGS] [OPTIONS]".format(os.path.basename(sys.argv[0])))
         print("")
         print("FLAGS")
         print("       --help : Print usage and exit")
