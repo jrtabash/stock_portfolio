@@ -9,7 +9,7 @@ use crate::util::datetime;
 // Common Version
 
 pub fn app_version() -> &'static str {
-    "0.4.2"
+    "0.5.0"
 }
 
 // --------------------------------------------------------------------------------
