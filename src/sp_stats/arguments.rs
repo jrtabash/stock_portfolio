@@ -22,16 +22,11 @@ impl Arguments {
             .arg(common_args::ds_root())
             .arg(common_args::ds_name())
             .arg(common_args::from_date())
+            .arg(common_args::symbol(true, None))
             .arg(Arg::with_name("calculate")
                  .short("c")
                  .long("calc")
                  .help("Calculate stats, one of desc, divdesc, vwap, mvwap, roc")
-                 .required(true)
-                 .takes_value(true))
-            .arg(Arg::with_name("symbol")
-                 .short("y")
-                 .long("symbol")
-                 .help("Stock symbol")
                  .required(true)
                  .takes_value(true))
             .arg(Arg::with_name("window")
@@ -45,7 +40,7 @@ impl Arguments {
             calculate: String::from(parsed_args.value_of("calculate").unwrap()),
             ds_root: common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root"),
             ds_name: common_args::parsed_ds_name(&parsed_args),
-            symbol: String::from(parsed_args.value_of("symbol").unwrap()),
+            symbol: common_args::parsed_symbol(&parsed_args).unwrap(),
             window: match parsed_args.value_of("window") {
                 Some(win) => win.parse::<usize>().expect("Invalid calculation window"),
                 None => 0

@@ -22,17 +22,15 @@ impl Arguments {
             // Options
             .arg(common_args::ds_root())
             .arg(common_args::ds_name())
+            .arg(common_args::stocks_file(false))
+            .arg(common_args::symbol(
+                false,
+                Some("Stock symbol. Optional with update and check operations. Required with drop and export symbol operation")))
             .arg(Arg::with_name("ds_operation")
                  .short("o")
                  .long("dsop")
                  .help("Datastore tool operation, one of create, delete, update, drop, export, check, stat")
                  .required(true)
-                 .takes_value(true))
-            .arg(common_args::stocks_file(false))
-            .arg(Arg::with_name("symbol")
-                 .short("y")
-                 .long("symbol")
-                 .help("Stock symbol. Optional with update and check operations. Required with drop and export symbol operation")
                  .takes_value(true))
             .arg(Arg::with_name("export_file")
                  .short("e")
@@ -53,10 +51,7 @@ impl Arguments {
             ds_root: common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root"),
             ds_name: common_args::parsed_ds_name(&parsed_args),
             stocks_file: common_args::parsed_stocks_file(&parsed_args),
-            symbol: match parsed_args.value_of("symbol") {
-                Some(value) => Some(String::from(value)),
-                None => None
-            },
+            symbol: common_args::parsed_symbol(&parsed_args),
             export_file: match parsed_args.value_of("export_file") {
                 Some(value) => Some(String::from(value)),
                 None => None

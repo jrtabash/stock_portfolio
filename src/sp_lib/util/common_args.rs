@@ -32,6 +32,10 @@ pub fn from_date_help() -> &'static str {
     "Start from date YYYY-MM-DD"
 }
 
+pub fn symbol_help() -> &'static str {
+    "Stock symbol"
+}
+
 pub fn filter_help() -> &'static str {
     "Filter stocks by type, symbols or expression;\n\
      If type, must be one of 'stock' or 'etf'.\n\
@@ -78,6 +82,15 @@ pub fn from_date() -> Arg<'static, 'static> {
         .takes_value(true)
 }
 
+pub fn symbol(required: bool, custom_help: Option<&'static str>) -> Arg<'static, 'static> {
+    Arg::with_name("symbol")
+        .short("y")
+        .long("symbol")
+        .help(custom_help.unwrap_or(symbol_help()))
+        .required(required)
+        .takes_value(true)
+}
+
 // --------------------------------------------------------------------------------
 // Common Parsed Matches
 
@@ -106,6 +119,13 @@ pub fn parsed_stocks_file(parsed_args: &ArgMatches) -> Option<String> {
 pub fn parsed_from_date(parsed_args: &ArgMatches) -> Option<datetime::LocalDate> {
     match parsed_args.value_of("from_date") {
         Some(date) => Some(datetime::parse_date(date).expect("Invalid from date")),
+        None => None
+    }
+}
+
+pub fn parsed_symbol(parsed_args: &ArgMatches) -> Option<String> {
+    match parsed_args.value_of("symbol") {
+        Some(value) => Some(String::from(value)),
         None => None
     }
 }
