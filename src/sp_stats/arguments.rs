@@ -21,6 +21,7 @@ impl Arguments {
             // Options
             .arg(common_args::ds_root())
             .arg(common_args::ds_name())
+            .arg(common_args::from_date())
             .arg(Arg::with_name("calculate")
                  .short("c")
                  .long("calc")
@@ -38,11 +39,6 @@ impl Arguments {
                  .long("window")
                  .help("Number of days window, required with mvwap and roc calculations")
                  .takes_value(true))
-            .arg(Arg::with_name("from_date")
-                 .short("f")
-                 .long("from")
-                 .help("Describe and calculate starting from date YYYY-MM-DD")
-                 .takes_value(true))
             .get_matches();
 
         Arguments {
@@ -54,10 +50,7 @@ impl Arguments {
                 Some(win) => win.parse::<usize>().expect("Invalid calculation window"),
                 None => 0
             },
-            from: match parsed_args.value_of("from_date") {
-                Some(date) => Some(datetime::parse_date(date).expect("Invalid from date")),
-                None => None
-            }
+            from: common_args::parsed_from_date(&parsed_args)
         }
     }
 
