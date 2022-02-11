@@ -46,8 +46,8 @@ impl Application {
             return Err(format!("Datastore {} does not exist", self.ds).into());
         }
 
+        println!("Run {} on {}", self.args.ds_operation(), self.ds);
         if self.args.is_verbose() {
-            println!("Running {} operation on datastore {}", self.args.ds_operation(), self.ds);
             println!("stocks: {}", if let Some(file) = self.args.stocks_file() { file } else { "" });
             println!("symbol: {}", if let Some(symbol) = self.args.symbol() { symbol } else { "" });
             println!("export: {}", if let Some(export) = self.args.export_file() { export } else { "" });
