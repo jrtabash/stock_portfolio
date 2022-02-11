@@ -26,16 +26,13 @@ impl Arguments {
             .arg(common_args::symbol(
                 false,
                 Some("Stock symbol. Optional with update and check operations. Required with drop and export symbol operation")))
+            .arg(common_args::export_file(
+                Some("Export symbol history and dividends to csv file. Required with export operation")))
             .arg(Arg::with_name("ds_operation")
                  .short("o")
                  .long("dsop")
                  .help("Datastore tool operation, one of create, delete, update, drop, export, check, stat")
                  .required(true)
-                 .takes_value(true))
-            .arg(Arg::with_name("export_file")
-                 .short("e")
-                 .long("export")
-                 .help("Export symbol history and dividends to csv file. Required with export operation")
                  .takes_value(true))
 
             // Flags
@@ -52,10 +49,7 @@ impl Arguments {
             ds_name: common_args::parsed_ds_name(&parsed_args),
             stocks_file: common_args::parsed_stocks_file(&parsed_args),
             symbol: common_args::parsed_symbol(&parsed_args),
-            export_file: match parsed_args.value_of("export_file") {
-                Some(value) => Some(String::from(value)),
-                None => None
-            },
+            export_file: common_args::parsed_export_file(&parsed_args),
             verbose: parsed_args.is_present("verbose")
         }
     }

@@ -36,6 +36,10 @@ pub fn symbol_help() -> &'static str {
     "Stock symbol"
 }
 
+pub fn export_file_help() -> &'static str {
+    "Export file"
+}
+
 pub fn filter_help() -> &'static str {
     "Filter stocks by type, symbols or expression;\n\
      If type, must be one of 'stock' or 'etf'.\n\
@@ -91,6 +95,14 @@ pub fn symbol(required: bool, custom_help: Option<&'static str>) -> Arg<'static,
         .takes_value(true)
 }
 
+pub fn export_file(custom_help: Option<&'static str>) -> Arg<'static, 'static> {
+    Arg::with_name("export_file")
+        .short("e")
+        .long("export")
+        .help(custom_help.unwrap_or(export_file_help()))
+        .takes_value(true)
+}
+
 // --------------------------------------------------------------------------------
 // Common Parsed Matches
 
@@ -125,6 +137,13 @@ pub fn parsed_from_date(parsed_args: &ArgMatches) -> Option<datetime::LocalDate>
 
 pub fn parsed_symbol(parsed_args: &ArgMatches) -> Option<String> {
     match parsed_args.value_of("symbol") {
+        Some(value) => Some(String::from(value)),
+        None => None
+    }
+}
+
+pub fn parsed_export_file(parsed_args: &ArgMatches) -> Option<String> {
+    match parsed_args.value_of("export_file") {
         Some(value) => Some(String::from(value)),
         None => None
     }
