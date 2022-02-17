@@ -1,8 +1,6 @@
-use std::path::Path;
 use std::error::Error;
 use crate::util::datetime;
 use crate::portfolio::stock::{Price, Stock, StockList};
-use crate::portfolio::stocks_cache::{CacheEntry, StocksCache};
 use crate::yfinance::query::HistoryQuery;
 use crate::yfinance::types::{Interval, Events};
 use crate::datastore::datastore::DataStore;
@@ -80,38 +78,6 @@ pub fn update_stocks_from_ds(stocks: &mut StockList, ds: &DataStore) -> Result<u
         if update_stock_from_ds(stock, ds)? {
             count += 1;
         }
-    }
-    Ok(count)
-}
-
-pub fn update_stocks_with_cache(stocks: &mut StockList, cache_file: &Path) -> Result<usize, Box<dyn Error>> {
-    let today = datetime::today();
-    let mut cache = StocksCache::from_cache_file(cache_file)?;
-    let mut count: usize = 0;
-    for stock in stocks.iter_mut() {
-        match cache.get_mut(&stock.symbol) {
-            Some(cache_entry) => {
-                if cache_entry.is_updated(&today) {
-                    stock.set_latest_price(cache_entry.latest_price, cache_entry.latest_date.clone());
-                    count += 1;
-                }
-                else {
-                    if update_stock(stock)? {
-                        count += 1;
-                        cache_entry.update(stock.latest_price, &stock.latest_date);
-                    }
-                }
-            },
-            None => {
-                if update_stock(stock)? {
-                    count += 1;
-                    cache.add(stock.symbol.to_string(), CacheEntry::new(stock.latest_price, stock.latest_date.clone()));
-                }
-            }
-        }
-    }
-    if let Err(error) = StocksCache::save_cache_file(&cache, cache_file) {
-        eprintln!("Failed to save cache file - {}", error);
     }
     Ok(count)
 }
