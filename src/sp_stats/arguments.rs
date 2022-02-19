@@ -21,7 +21,7 @@ impl Arguments {
             // Options
             .arg(common_args::ds_root())
             .arg(common_args::ds_name())
-            .arg(common_args::from_date(false))
+            .arg(common_args::from_date(false, Some("Start from date YYYY-MM-DD")))
             .arg(common_args::symbol(true, None))
             .arg(Arg::with_name("calculate")
                  .short("c")

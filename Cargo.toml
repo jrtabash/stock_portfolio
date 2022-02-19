@@ -16,6 +16,10 @@ path = "src/sp_dstool/main.rs"
 name = "sp_stats"
 path = "src/sp_stats/main.rs"
 
+[[bin]]
+name = "sp_yhist"
+path = "src/sp_yhist/main.rs"
+
 [lib]
 name = "sp_lib"
 path = "src/sp_lib/lib.rs"

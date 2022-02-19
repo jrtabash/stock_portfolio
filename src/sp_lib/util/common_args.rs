@@ -29,7 +29,11 @@ pub fn stocks_file_help() -> &'static str {
 }
 
 pub fn from_date_help() -> &'static str {
-    "Start from date YYYY-MM-DD"
+    "Start date YYYY-MM-DD"
+}
+
+pub fn to_date_help() -> &'static str {
+    "Stop date YYYY-MM-DD"
 }
 
 pub fn symbol_help() -> &'static str {
@@ -78,11 +82,20 @@ pub fn stocks_file(required: bool) -> Arg<'static, 'static> {
         .takes_value(true)
 }
 
-pub fn from_date(required: bool) -> Arg<'static, 'static> {
+pub fn from_date(required: bool, custom_help: Option<&'static str>) -> Arg<'static, 'static> {
     Arg::with_name("from_date")
         .short("f")
         .long("from")
-        .help(from_date_help())
+        .help(custom_help.unwrap_or(from_date_help()))
+        .required(required)
+        .takes_value(true)
+}
+
+pub fn to_date(required: bool, custom_help: Option<&'static str>) -> Arg<'static, 'static> {
+    Arg::with_name("to_date")
+        .short("t")
+        .long("to")
+        .help(custom_help.unwrap_or(to_date_help()))
         .required(required)
         .takes_value(true)
 }
@@ -132,6 +145,13 @@ pub fn parsed_stocks_file(parsed_args: &ArgMatches) -> Option<String> {
 pub fn parsed_from_date(parsed_args: &ArgMatches) -> Option<datetime::LocalDate> {
     match parsed_args.value_of("from_date") {
         Some(date) => Some(datetime::parse_date(date).expect("Invalid from date")),
+        None => None
+    }
+}
+
+pub fn parsed_to_date(parsed_args: &ArgMatches) -> Option<datetime::LocalDate> {
+    match parsed_args.value_of("to_date") {
+        Some(date) => Some(datetime::parse_date(date).expect("Invalid to date")),
         None => None
     }
 }
