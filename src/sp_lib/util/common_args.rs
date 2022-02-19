@@ -78,11 +78,12 @@ pub fn stocks_file(required: bool) -> Arg<'static, 'static> {
         .takes_value(true)
 }
 
-pub fn from_date() -> Arg<'static, 'static> {
+pub fn from_date(required: bool) -> Arg<'static, 'static> {
     Arg::with_name("from_date")
         .short("f")
         .long("from")
         .help(from_date_help())
+        .required(required)
         .takes_value(true)
 }
 
