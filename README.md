@@ -2,6 +2,7 @@
 - sp_report: Stock Portfolio Report
 - sp_dstool: Stock Portfolio Datastore Tool
 - sp_stats: Stock Portfolio Stats Tool
+- sp_yhist: Stock Portfolio YFinance History Tool
 
 ## Stock Portfolio Report
 Get latest close prices and dividends and report the gains and losses of stocks in portfolio.
@@ -83,7 +84,7 @@ OPTIONS:
                                   symbol operation
 ```
 
-## Stock Portfolio Stats
+## Stock Portfolio Stats Tool
 Describe and calculate symbol stats.
 
 The following calculations are supported:
@@ -108,6 +109,35 @@ OPTIONS:
     -f, --from <from_date>    Describe and calculate starting from date YYYY-MM-DD
     -y, --symbol <symbol>     Stock symbol
     -w, --window <window>     Number of days window, required with mvwap and roc calculations
+```
+
+## Stock Portfolio YHistory Tool
+Query yfinance history.
+
+The following events are supported:
+- **history**: Historical open, high, low, close, adj_close, volume data
+- **dividend**: Historical dividend data
+- **split**: Historical split data
+
+The following intervals are supported:
+- **day**: Daily intervals
+- **week**: Weekly intervals
+- **month**: Monthly intervals
+
+```bash
+USAGE:
+    sp_yhist [OPTIONS] --events <events> --interval <interval> --symbol <symbol>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -e, --events <events>        Events to query, one of history, dividend, split
+    -f, --from <from_date>       Start date YYYY-MM-DD (default: today - 7days)
+    -i, --interval <interval>    Interval to query, one of day, week, month
+    -y, --symbol <symbol>        Stock symbol
+    -t, --to <to_date>           Stop date YYYY-MM-DD (default: today)
 ```
 
 ## Sample Stocks File
