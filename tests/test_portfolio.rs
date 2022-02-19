@@ -117,6 +117,22 @@ fn test_stock_update_from_csv_incomplete_data() {
 }
 
 #[test]
+fn test_stocks_update() {
+    let mut stocks = StockList::new();
+    stocks.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 52.21, 0.00));
+    stocks.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 0.00));
+
+    let dt = make_date(2022, 02, 17);
+
+    let cnt = update_stocks(&mut stocks, Some(dt)).unwrap();
+    assert_eq!(cnt, 2);
+    assert_eq!(stocks[0].latest_date, dt);
+    assert_eq!(stocks[1].latest_date, dt);
+    assert!((stocks[0].latest_price - 59.259998).abs() < 0.0001);
+    assert!((stocks[1].latest_price - 168.880005).abs() < 0.0001);
+}
+
+#[test]
 fn test_sort_stocks() {
     fn test_sort(stocks: &mut StockList, field: &str, desc: bool, first: &str, second: &str, third: &str) {
         sort_stocks(stocks, field, desc).unwrap();

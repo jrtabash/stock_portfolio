@@ -19,20 +19,20 @@ pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<d
     Ok(false)
 }
 
-pub fn update_stock(stock: &mut Stock) -> Result<bool, Box<dyn Error>> {
-    let today = datetime::today();
+pub fn update_stock(stock: &mut Stock, opt_day: Option<datetime::LocalDate>) -> Result<bool, Box<dyn Error>> {
+    let day = opt_day.unwrap_or_else(datetime::today);
     let back_delta =
-        if datetime::is_monday(&today) {
+        if datetime::is_monday(&day) {
             -3
-        } else if datetime::is_weekend(&today) {
+        } else if datetime::is_weekend(&day) {
             -2
         } else {
             -1
         };
     let mut query = HistoryQuery::new(
         stock.symbol.to_string(),
-        datetime::date_plus_days(&today, back_delta),
-        datetime::date_plus_days(&today, 1),
+        datetime::date_plus_days(&day, back_delta),
+        datetime::date_plus_days(&day, 1),
         Interval::Daily,
         Events::History);
 
@@ -62,10 +62,10 @@ pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, B
     Ok(false)
 }
 
-pub fn update_stocks(stocks: &mut StockList) -> Result<usize, Box<dyn Error>> {
+pub fn update_stocks(stocks: &mut StockList, opt_day: Option<datetime::LocalDate>) -> Result<usize, Box<dyn Error>> {
     let mut count: usize = 0;
     for stock in stocks.iter_mut() {
-        if update_stock(stock)? {
+        if update_stock(stock, opt_day)? {
             count += 1;
         }
     }
