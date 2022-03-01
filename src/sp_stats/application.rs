@@ -146,23 +146,23 @@ impl Application {
         Ok(())
     }
 
-    fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
-        let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
+    pub fn print_dp_list(dps: &hist_ftns::DatePriceList, name: &str) {
         println!(" field: adj_close");
-        println!(" mvwap: ");
-        for (date, price) in mvwap.iter() {
+        println!(" {:>5}: ", name);
+        for (date, price) in dps.iter() {
             println!("{} {:.4}", date.format("%Y-%m-%d"), price);
         }
+    }
+
+    fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
+        let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
+        Self::print_dp_list(&mvwap, "mvwap");
         Ok(())
     }
 
     fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
         let roc = hist_ftns::hist_roc(&self.hist, self.args.window())?;
-        println!(" field: adj_close");
-        println!("   roc: ");
-        for (date, price) in roc.iter() {
-            println!("{} {:.4}", date.format("%Y-%m-%d"), price);
-        }
+        Self::print_dp_list(&roc, "roc");
         Ok(())
     }
 }
