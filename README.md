@@ -74,7 +74,14 @@ FLAGS:
 
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
-    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, export, check, stat
+    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, export, check, stat.
+                                  create : create empty datastore
+                                  delete : delete existing datastore
+                                  update : update price and size data
+                                  drop   : drop a symbol
+                                  export : export symbol history and dividends
+                                  check  : check price and size data
+                                  stat   : calculate files count and size
     -r, --root <ds_root>          Datastore root path (default: value of HOME environment variable)
     -e, --export <export_file>    Export symbol history and dividends to csv file. Required with export operation
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
@@ -104,10 +111,16 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, mvwap, roc, pctch
+    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, mvwap, roc, pctch.
+                              desc    : describe symbol history
+                              divdesc : describe symbol dividends
+                              vwap    : calculate symbol adjusted close volume weighted average price
+                              mvwap   : calculate symbol adjusted close moving volume weighted average price
+                              roc     : calculate symbol adjusted close rate of change
+                              pctch   : calculate symbol adjusted close percent change relative to from date
     -n, --name <ds_name>      Datastore name (default: sp_datastore)
     -r, --root <ds_root>      Datastore root path (default: value of HOME environment variable)
-    -f, --from <from_date>    Describe and calculate starting from date YYYY-MM-DD
+    -f, --from <from_date>    Start from date YYYY-MM-DD
     -y, --symbol <symbol>     Stock symbol
     -w, --window <window>     Number of days window, required with mvwap and roc calculations
 ```
