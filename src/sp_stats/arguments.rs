@@ -26,7 +26,13 @@ impl Arguments {
             .arg(Arg::with_name("calculate")
                  .short("c")
                  .long("calc")
-                 .help("Calculate stats, one of desc, divdesc, vwap, mvwap, roc, pctch")
+                 .help("Calculate stats, one of desc, divdesc, vwap, mvwap, roc, pctch.\n\
+                        desc    : describe symbol history\n\
+                        divdesc : describe symbol dividends\n\
+                        vwap    : calculate symbol adjusted close volume weighted average price\n\
+                        mvwap   : calculate symbol adjusted close moving volume weighted average price\n\
+                        roc     : calculate symbol adjusted close rate of change\n\
+                        pctch   : calculate symbol adjusted close percent change relative to from date")
                  .required(true)
                  .takes_value(true))
             .arg(Arg::with_name("window")
