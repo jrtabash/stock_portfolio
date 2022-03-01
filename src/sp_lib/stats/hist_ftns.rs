@@ -93,6 +93,32 @@ pub fn hist_roc(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Er
     entries_roc(hist.entries(), days)
 }
 
+// Percent change relative to first history point
+pub fn entries_pctch(entries: &[HistoryEntry]) -> Result<DatePriceList, Box<dyn Error>> {
+    let size = entries.len();
+
+    if size < 2 {
+        return Err(format!("entries_pctch: len < 2").into())
+    }
+
+    let p0 = entries[0].adj_close;
+    if price_zero(p0) {
+        return Err(format!("entries_pctch: Cannot divide by zero price").into())
+    }
+
+    let mut pctch: DatePriceList = Vec::with_capacity(entries.len() - 1);
+    for i in 1..size {
+        pctch.push((entries[i].date.clone(), 100.0 * (entries[i].adj_close - p0) / p0));
+    }
+
+    Ok(pctch)
+}
+
+#[inline(always)]
+pub fn hist_pctch(hist: &History) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_pctch(hist.entries())
+}
+
 // --------------------------------------------------------------------------------
 // Unit Tests
 
@@ -168,6 +194,16 @@ mod tests {
         assert!(date_prices_eql(&actual, &expect));
     }
 
+    #[test]
+    fn test_hist_pctch() {
+        let hist = hist_data();
+        let expect = expect_pctch();
+        let actual = hist_pctch(&hist).unwrap();
+        println!("{:?}", actual);
+        println!("{:?}", expect);
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
     fn hist_data() -> History {
         History::parse_csv(
             "AAPL",
@@ -218,6 +254,15 @@ mod tests {
                           -1.392576, 0.665214,  2.353192,  4.002550,  3.478014,
                           3.051642, 1.999310, -0.047047, -0.415380, -0.107022,
                           0.107611, 2.643970,  0.321452];
+        make_date_prices(&prices, date0)
+    }
+
+    fn expect_pctch() -> DatePriceList {
+        let date0 = make_date(2021, 10, 04);
+        let prices = vec![-2.460567, -1.079561, -0.455657, 0.448652, 0.175253,
+                          0.112168, -0.799157, -1.219764, 0.778129, 1.53523,
+                          2.733965, 4.283207, 4.633722, 4.787937, 4.234144,
+                          4.199094, 4.67579, 4.346312, 6.954087, 5.012273];
         make_date_prices(&prices, date0)
     }
 

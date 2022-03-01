@@ -93,6 +93,7 @@ The following calculations are supported:
 - **vwap**: Calculate symbol adjusted close volume weighted average price
 - **mvwap**: Calculate symbol adjusted close moving volume weighted average price
 - **roc**: Calculate symbol adjusted close rate of change
+- **pctch**: Calculate symbol adjusted close percent change relative to from date
 
 ```bash
 USAGE:
@@ -103,7 +104,7 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, mvwap, roc
+    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, mvwap, roc, pctch
     -n, --name <ds_name>      Datastore name (default: sp_datastore)
     -r, --root <ds_root>      Datastore root path (default: value of HOME environment variable)
     -f, --from <from_date>    Describe and calculate starting from date YYYY-MM-DD

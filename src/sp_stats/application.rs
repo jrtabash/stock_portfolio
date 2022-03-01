@@ -9,6 +9,7 @@ const DIVDESC: &str = "divdesc";
 const VWAP: &str = "vwap";
 const MVWAP: &str = "mvwap";
 const ROC: &str = "roc";
+const PCTCH: &str = "pctch";
 
 pub struct Application {
     args: Arguments,
@@ -43,6 +44,7 @@ impl Application {
             VWAP => self.calc_vwap()?,
             MVWAP => self.calc_mvwap()?,
             ROC => self.calc_roc()?,
+            PCTCH => self.calc_pctch()?,
             _ => return Err(format!("Invalid calculate option - '{}'", self.args.calculate()).into())
         };
 
@@ -156,13 +158,19 @@ impl Application {
 
     fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
         let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
-        Self::print_dp_list(&mvwap, "mvwap");
+        Self::print_dp_list(&mvwap, MVWAP);
         Ok(())
     }
 
     fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
         let roc = hist_ftns::hist_roc(&self.hist, self.args.window())?;
-        Self::print_dp_list(&roc, "roc");
+        Self::print_dp_list(&roc, ROC);
+        Ok(())
+    }
+
+    fn calc_pctch(&self) -> Result<(), Box<dyn Error>> {
+        let pctch = hist_ftns::hist_pctch(&self.hist)?;
+        Self::print_dp_list(&pctch, PCTCH);
         Ok(())
     }
 }

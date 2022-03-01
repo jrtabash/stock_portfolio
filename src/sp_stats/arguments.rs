@@ -26,7 +26,7 @@ impl Arguments {
             .arg(Arg::with_name("calculate")
                  .short("c")
                  .long("calc")
-                 .help("Calculate stats, one of desc, divdesc, vwap, mvwap, roc")
+                 .help("Calculate stats, one of desc, divdesc, vwap, mvwap, roc, pctch")
                  .required(true)
                  .takes_value(true))
             .arg(Arg::with_name("window")
