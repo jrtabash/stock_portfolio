@@ -3,6 +3,8 @@ use crate::datastore::history::{History, HistoryEntry, Price};
 use crate::util::datetime::LocalDate;
 use crate::util::price_type::price_zero;
 
+pub type DatePriceList = Vec<(LocalDate, Price)>;
+
 // Volume Weighted Average Price
 pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
     let mut notional: Price = 0.0;
@@ -23,7 +25,7 @@ pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
 }
 
 // Moving Volume Weighted Average Price
-pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<(LocalDate, Price)>, Box<dyn Error>> {
+pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     if days < 1 {
         return Err(format!("entries_mvwap: days < 1").into())
     }
@@ -41,7 +43,7 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<(Local
         volume += entries[i].volume;
     }
 
-    let mut prices: Vec<(LocalDate, Price)> = Vec::with_capacity(size - base);
+    let mut prices: DatePriceList = Vec::with_capacity(size - base);
     for i in base..size {
         notional += entries[i].adj_close * entries[i].volume as Price;
         volume += entries[i].volume;
@@ -60,12 +62,12 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<Vec<(Local
 }
 
 #[inline(always)]
-pub fn hist_mvwap(hist: &History, days: usize) -> Result<Vec<(LocalDate, Price)>, Box<dyn Error>> {
+pub fn hist_mvwap(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     entries_mvwap(hist.entries(), days)
 }
 
 // Rate of Change
-pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<Vec<(LocalDate, Price)>, Box<dyn Error>> {
+pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     if days < 1 {
         return Err(format!("entries_roc: days < 1").into())
     }
@@ -74,7 +76,7 @@ pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<Vec<(LocalDa
     }
 
     let size = entries.len();
-    let mut rocs: Vec<(LocalDate, Price)> = Vec::with_capacity(size - days);
+    let mut rocs: DatePriceList = Vec::with_capacity(size - days);
     for i in days..size {
         let p0 = entries[i - days].adj_close;
         if price_zero(p0) {
@@ -87,7 +89,7 @@ pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<Vec<(LocalDa
 }
 
 #[inline(always)]
-pub fn hist_roc(hist: &History, days: usize) -> Result<Vec<(LocalDate, Price)>, Box<dyn Error>> {
+pub fn hist_roc(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     entries_roc(hist.entries(), days)
 }
 
@@ -192,7 +194,7 @@ mod tests {
              2021-10-29,147.220001,149.940002,146.410004,149.800003,149.581696,124850400").unwrap()
     }
 
-    fn expect_mvwap() -> Vec<(LocalDate, Price)> {
+    fn expect_mvwap() -> DatePriceList {
         let date0 = make_date(2021, 10, 07);
         let prices = vec![141.287520, 141.217479, 142.115587, 142.228876, 141.980042,
                           142.101272, 142.488000, 143.346371, 144.789113, 146.380997,
@@ -201,7 +203,7 @@ mod tests {
         make_date_prices(&prices, date0)
     }
 
-    fn expect_roc1() -> Vec<(LocalDate, Price)> {
+    fn expect_roc1() -> DatePriceList {
         let date0 = make_date(2021, 10, 04);
         let prices = vec![-2.460566,  1.415843,  0.630712, 0.908448, -0.272177,
                           -0.062974, -0.910304, -0.423995, 2.022562,  0.751255,
@@ -210,7 +212,7 @@ mod tests {
         make_date_prices(&prices, date0)
     }
 
-    fn expect_roc3() -> Vec<(LocalDate, Price)> {
+    fn expect_roc3() -> DatePriceList {
         let date0 = make_date(2021, 10, 06);
         let prices = vec![-0.455657, 2.982607,  1.268508,  0.570424, -1.242235,
                           -1.392576, 0.665214,  2.353192,  4.002550,  3.478014,
@@ -219,7 +221,7 @@ mod tests {
         make_date_prices(&prices, date0)
     }
 
-    fn make_date_prices(prices: &Vec<Price>, date0: LocalDate) -> Vec<(LocalDate, Price)> {
+    fn make_date_prices(prices: &Vec<Price>, date0: LocalDate) -> DatePriceList {
         let mut days: i64 = 0;
         prices
             .iter()
