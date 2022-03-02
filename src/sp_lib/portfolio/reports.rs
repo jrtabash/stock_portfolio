@@ -3,8 +3,8 @@ use std::collections::HashSet;
 use std::error::Error;
 use std::fs::File;
 
-use crate::util::datetime;
-use crate::portfolio::stock::StockList;
+use crate::util::{price_type, datetime};
+use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::portfolio::algorithms;
 
 // --------------------------------------------------------------------------------
@@ -103,6 +103,78 @@ pub fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Er
                stock.latest_notional(),
                stock.net_notional(),
                stock.cum_dividend)?;
+    }
+    Ok(())
+}
+
+// --------------------------------------------------------------------------------
+// Top/Bottom Performing Stocks Report and Export
+
+type TopTuple<'a> = (&'a str, Price, Price, Price, Price, Price, Price);
+
+fn make_top_tuple(stock: &Stock) -> TopTuple {
+    (stock.symbol.as_str(),
+     stock.pct_change(),
+     stock.net_price(),
+     stock.cum_dividend,
+     stock.pct_change() / stock.days_held as Price,
+     stock.net_price() / stock.days_held as Price,
+     stock.cum_dividend / stock.days_held as Price
+    )
+}
+
+pub fn top_report(stocks: &StockList, _groupby: bool) {
+    fn prt_row(name: &str, d: &mut Vec<TopTuple>, ftn: fn (&TopTuple) -> Price) {
+        d.sort_by(|lhs, rhs| price_type::price_cmp(ftn(lhs), ftn(rhs)));
+        println!("{:18} {:8} {:8}", name, d[d.len() - 1].0, d[0].0);
+    }
+
+    println!("Stocks Top/Bottom Performing Report");
+    println!("-----------------------------------");
+    println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
+    println!("Number of Stocks: {}", stocks.len());
+    println!("");
+
+    println!("{:18} {:8} {:8}",
+             "Category",
+             "Top",
+             "Bottom");
+    println!("{:18} {:8} {:8}",
+             "--------",
+             "---",
+             "------");
+
+    let mut data: Vec<TopTuple> = stocks.iter().map(make_top_tuple).collect();
+    if data.len() > 0 {
+        prt_row("Pct Change", &mut data, |t| t.1);
+        prt_row("Net Change", &mut data, |t| t.2);
+        prt_row("Cum Div", &mut data, |t| t.3);
+        prt_row("Pct Change / Day", &mut data, |t| t.4);
+        prt_row("Net Change / Day", &mut data, |t| t.5);
+        prt_row("Cum Div / Day", &mut data, |t| t.6);
+    }
+
+    // TODO: groupby support
+}
+
+pub fn top_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
+    fn write_row(file: &mut File, name: &str, d: &mut Vec<TopTuple>, ftn: fn (&TopTuple) -> Price) -> Result<(), Box<dyn Error>>{
+        d.sort_by(|lhs, rhs| price_type::price_cmp(ftn(lhs), ftn(rhs)));
+        write!(file, "{},{},{}\n", name, d[d.len() - 1].0, d[0].0)?;
+        Ok(())
+    }
+
+    let mut file = File::create(&filename)?;
+    write!(file, "Category,Top,Bottom\n")?;
+
+    let mut data: Vec<TopTuple> = stocks.iter().map(make_top_tuple).collect();
+    if data.len() > 0 {
+        write_row(&mut file, "Pct Change", &mut data, |t| t.1)?;
+        write_row(&mut file, "Net Change", &mut data, |t| t.2)?;
+        write_row(&mut file, "Cum Div", &mut data, |t| t.3)?;
+        write_row(&mut file, "Pct Change / Day", &mut data, |t| t.4)?;
+        write_row(&mut file, "Net Change / Day", &mut data, |t| t.5)?;
+        write_row(&mut file, "Cum Div / Day", &mut data, |t| t.6)?;
     }
     Ok(())
 }

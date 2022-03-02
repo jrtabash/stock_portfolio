@@ -5,6 +5,7 @@ use clap::{Arg, App};
 
 pub struct Arguments {
     stocks_file: String,
+    report_type: Option<String>,
     order_by: Option<String>,
     include: Option<String>,
     exclude: Option<String>,
@@ -19,13 +20,20 @@ impl Arguments {
     pub fn new() -> Arguments {
         let parsed_args = App::new("Stock Portfolio Report")
             .version(common_args::app_version())
-            .about("Get latest close prices and report the gains and losses of stocks in portfolio.")
+            .about("Get latest close prices and generate portfolio report. Supported reports include gains & losses, and top/bottom performers.")
 
             // Options
             .arg(common_args::stocks_file(true))
             .arg(common_args::ds_root())
             .arg(common_args::ds_name())
             .arg(common_args::export_file(Some("Export gains and losses table to a csv file")))
+            .arg(Arg::with_name("report_type")
+                 .short("p")
+                 .long("type")
+                 .help("Report type, one of value, top (default: value)\n\
+                        value : stocks value (gains & losses)\n\
+                        top   : Top/Bottom performing stocks")
+                 .takes_value(true))
             .arg(Arg::with_name("order_by")
                  .short("o")
                  .long("orderby")
@@ -54,6 +62,10 @@ impl Arguments {
             .get_matches();
 
         let stocks_file = common_args::parsed_stocks_file(&parsed_args).unwrap();
+        let report_type = match parsed_args.value_of("report_type") {
+            Some(value) => Some(String::from(value)),
+            None => None
+        };
         let order_by = match parsed_args.value_of("order_by") {
             Some(value) => Some(String::from(value)),
             None => None
@@ -74,6 +86,7 @@ impl Arguments {
 
         Arguments {
             stocks_file,
+            report_type,
             order_by,
             include,
             exclude,
@@ -87,6 +100,10 @@ impl Arguments {
 
     pub fn stocks_file(self: &Arguments) -> &String {
         &self.stocks_file
+    }
+
+    pub fn report_type(self: &Arguments) -> Option<&String> {
+        self.report_type.as_ref()
     }
 
     pub fn order_by(self: &Arguments) -> Option<&String> {

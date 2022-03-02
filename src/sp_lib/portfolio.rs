@@ -1,4 +1,5 @@
 pub mod stock_type;
+pub mod report_type;
 pub mod stock;
 pub mod algorithms;
 pub mod stocks_filter;

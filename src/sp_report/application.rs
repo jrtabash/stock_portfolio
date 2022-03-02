@@ -1,10 +1,12 @@
 use std::error::Error;
-use sp_lib::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms};
+use sp_lib::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms, report_type};
+use sp_lib::portfolio::report_type::ReportType;
 use sp_lib::datastore::datastore;
 use crate::arguments::Arguments;
 
 pub struct Application {
     args: Arguments,
+    rtype: ReportType,
     stocks: stock::StockList,
     ds: datastore::DataStore
 }
@@ -15,6 +17,7 @@ impl Application {
         let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
         Application {
             args: args,
+            rtype: ReportType::Value,
             stocks: stock::StockList::new(),
             ds: ds
         }
@@ -23,6 +26,10 @@ impl Application {
     pub fn run(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if !self.ds.exists() {
             return Err(format!("Datastore {} does not exist", self.ds).into());
+        }
+
+        if let Some(rtype) = self.args.report_type() {
+            self.rtype = report_type::str2reporttype(rtype)?;
         }
 
         self.read()?;
@@ -76,12 +83,18 @@ impl Application {
     }
 
     fn report(self: &Application) {
-        reports::value_report(&self.stocks, self.args.show_groupby());
+        match self.rtype {
+            ReportType::Value => reports::value_report(&self.stocks, self.args.show_groupby()),
+            ReportType::Top => reports::top_report(&self.stocks, self.args.show_groupby())
+        }
     }
 
     fn export(self: &Application) -> Result<(), Box<dyn Error>> {
         if let Some(export_file) = self.args.export_file() {
-            reports::value_export(&self.stocks, &export_file)?;
+            match self.rtype {
+                ReportType::Value => reports::value_export(&self.stocks, &export_file)?,
+                ReportType::Top => reports::top_export(&self.stocks, &export_file)?
+            };
         }
         Ok(())
     }
