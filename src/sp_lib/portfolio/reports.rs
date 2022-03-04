@@ -110,7 +110,15 @@ pub fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Er
 // --------------------------------------------------------------------------------
 // Top/Bottom Performing Stocks Report and Export
 
+const PCT_CHG: &str = "Pct Change";
+const NET_CHG: &str = "Net Change";
+const CUM_DIV: &str = "Cum Div";
+const PCT_CHG_DAY: &str = "Pct Change / Day";
+const NET_CHG_DAY: &str = "Net Change / Day";
+const CUM_DIV_DAY: &str = "Cum Div / Day";
+
 type TopTuple<'a> = (&'a str, Price, Price, Price, Price, Price, Price);
+type TopBottom<'a> = (&'a str, &'a str);
 
 fn make_top_tuple(stock: &Stock) -> TopTuple {
     (stock.symbol.as_str(),
@@ -123,10 +131,21 @@ fn make_top_tuple(stock: &Stock) -> TopTuple {
     )
 }
 
+fn calc_top_bottom<'a>(data: &'a mut Vec<TopTuple>, ftn: fn(&TopTuple) -> Price) -> TopBottom<'a> {
+    data.sort_by(|lhs, rhs| price_type::price_cmp(ftn(lhs), ftn(rhs)));
+    (data[data.len() - 1].0, data[0].0)
+}
+
+fn tb_pct_chg<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.1) }
+fn tb_net_chg<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.2) }
+fn tb_cum_div<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.3) }
+fn tb_pct_chg_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.4) }
+fn tb_net_chg_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.5) }
+fn tb_cum_div_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.6) }
+
 pub fn top_report(stocks: &StockList, _groupby: bool) {
-    fn prt_row(name: &str, d: &mut Vec<TopTuple>, ftn: fn (&TopTuple) -> Price) {
-        d.sort_by(|lhs, rhs| price_type::price_cmp(ftn(lhs), ftn(rhs)));
-        println!("{:18} {:8} {:8}", name, d[d.len() - 1].0, d[0].0);
+    fn print_row(name: &str, top_bottom: &TopBottom) {
+        println!("{:18} {:8} {:8}", name, (*top_bottom).0, (*top_bottom).1);
     }
 
     println!("Stocks Top/Bottom Performing Report");
@@ -146,21 +165,18 @@ pub fn top_report(stocks: &StockList, _groupby: bool) {
 
     let mut data: Vec<TopTuple> = stocks.iter().map(make_top_tuple).collect();
     if data.len() > 0 {
-        prt_row("Pct Change", &mut data, |t| t.1);
-        prt_row("Net Change", &mut data, |t| t.2);
-        prt_row("Cum Div", &mut data, |t| t.3);
-        prt_row("Pct Change / Day", &mut data, |t| t.4);
-        prt_row("Net Change / Day", &mut data, |t| t.5);
-        prt_row("Cum Div / Day", &mut data, |t| t.6);
+        print_row(PCT_CHG, &tb_pct_chg(&mut data));
+        print_row(NET_CHG, &tb_net_chg(&mut data));
+        print_row(CUM_DIV, &tb_cum_div(&mut data));
+        print_row(PCT_CHG_DAY, &tb_pct_chg_day(&mut data));
+        print_row(NET_CHG_DAY, &tb_net_chg_day(&mut data));
+        print_row(CUM_DIV_DAY, &tb_cum_div_day(&mut data));
     }
-
-    // TODO: groupby support
 }
 
 pub fn top_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
-    fn write_row(file: &mut File, name: &str, d: &mut Vec<TopTuple>, ftn: fn (&TopTuple) -> Price) -> Result<(), Box<dyn Error>>{
-        d.sort_by(|lhs, rhs| price_type::price_cmp(ftn(lhs), ftn(rhs)));
-        write!(file, "{},{},{}\n", name, d[d.len() - 1].0, d[0].0)?;
+    fn write_row(file: &mut File, name: &str, top_bottom: &TopBottom) -> Result<(), Box<dyn Error>> {
+        write!(file, "{},{},{}\n", name, (*top_bottom).0, (*top_bottom).1)?;
         Ok(())
     }
 
@@ -169,12 +185,12 @@ pub fn top_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Erro
 
     let mut data: Vec<TopTuple> = stocks.iter().map(make_top_tuple).collect();
     if data.len() > 0 {
-        write_row(&mut file, "Pct Change", &mut data, |t| t.1)?;
-        write_row(&mut file, "Net Change", &mut data, |t| t.2)?;
-        write_row(&mut file, "Cum Div", &mut data, |t| t.3)?;
-        write_row(&mut file, "Pct Change / Day", &mut data, |t| t.4)?;
-        write_row(&mut file, "Net Change / Day", &mut data, |t| t.5)?;
-        write_row(&mut file, "Cum Div / Day", &mut data, |t| t.6)?;
+        write_row(&mut file, PCT_CHG, &tb_pct_chg(&mut data))?;
+        write_row(&mut file, NET_CHG, &tb_net_chg(&mut data))?;
+        write_row(&mut file, CUM_DIV, &tb_cum_div(&mut data))?;
+        write_row(&mut file, PCT_CHG_DAY, &tb_pct_chg_day(&mut data))?;
+        write_row(&mut file, NET_CHG_DAY, &tb_net_chg_day(&mut data))?;
+        write_row(&mut file, CUM_DIV_DAY, &tb_cum_div_day(&mut data))?;
     }
     Ok(())
 }
