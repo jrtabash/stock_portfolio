@@ -113,6 +113,12 @@ impl DataStore {
         self.read_last(&sym_file)
     }
 
+    pub fn show_symbol(&self, tag: &str, symbol: &str) -> Result<(), Box<dyn Error>> {
+        let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
+        println!("{}", self.read_file(&sym_file)?.trim());
+        Ok(())
+    }
+
     pub fn insert_symbol(&self, tag: &str, symbol: &str, csv: &str) -> Result<usize, Box<dyn Error>> {
         // Skip non-numeric header if one exists.
         let csv_ref =

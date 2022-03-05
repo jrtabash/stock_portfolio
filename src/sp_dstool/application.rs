@@ -14,6 +14,8 @@ const CHECK: &str = "check";
 const CREATE: &str = "create";
 const DELETE: &str = "delete";
 const STAT: &str = "stat";
+const SHOWH: &str = "showh";
+const SHOWD: &str = "showd";
 const EXPORT: &str = "export";
 
 struct StatAgg {
@@ -63,6 +65,8 @@ impl Application {
             CREATE => self.create()?,
             DELETE => self.delete()?,
             STAT => self.stat()?,
+            SHOWH => self.show_history()?,
+            SHOWD => self.show_dividends()?,
             EXPORT => self.export()?,
             _ => return Err(format!("Invalid ds_operation - '{}'", self.args.ds_operation()).into())
         };
@@ -224,6 +228,36 @@ impl Application {
             count += 1;
         }
         Ok(count)
+    }
+
+    fn show_history(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Show history"); }
+
+        if self.args.symbol().is_none() {
+            return Err("Missing symbol for show history operation".into())
+        }
+
+        let symbol = self.args.symbol().unwrap();
+        if self.ds.symbol_exists(history::tag(), &symbol) {
+            self.ds.show_symbol(history::tag(), &symbol)?;
+        }
+
+        Ok(())
+    }
+
+    fn show_dividends(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Show dividends"); }
+
+        if self.args.symbol().is_none() {
+            return Err("Missing symbol for show dividends operation".into())
+        }
+
+        let symbol = self.args.symbol().unwrap();
+        if self.ds.symbol_exists(dividends::tag(), &symbol) {
+            self.ds.show_symbol(dividends::tag(), &symbol)?;
+        }
+
+        Ok(())
     }
 
     fn export(self: &Self) -> Result<(), Box<dyn Error>> {

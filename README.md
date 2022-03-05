@@ -65,6 +65,8 @@ The following operations are supported:
 - **Delete**: Delete datastore
 - **Update**: Update price and size data
 - **Drop**: Drop symbol
+- **Showh**: Show symbol history
+- **Showd**: Show symbol dividends
 - **Export**: Export symbol history and dividends
 - **Check**: Check price and size data
 - **Stat**: Calculate files count and size
@@ -80,11 +82,14 @@ FLAGS:
 
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
-    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, export, check, stat.
+    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, showh, showd, export,
+                                  check, stat.
                                   create : create empty datastore
                                   delete : delete existing datastore
                                   update : update price and size data
                                   drop   : drop a symbol
+                                  showh  : show history for symbol
+                                  showd  : show dividends for symbol
                                   export : export symbol history and dividends
                                   check  : check price and size data
                                   stat   : calculate files count and size
@@ -93,8 +98,8 @@ OPTIONS:
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
                                   include stock and etf
-    -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop and export
-                                  symbol operation
+    -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop, showh,
+                                  showd and export operations
 ```
 
 ## Stock Portfolio Stats Tool

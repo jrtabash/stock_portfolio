@@ -25,17 +25,19 @@ impl Arguments {
             .arg(common_args::stocks_file(false))
             .arg(common_args::symbol(
                 false,
-                Some("Stock symbol. Optional with update and check operations. Required with drop and export symbol operation")))
+                Some("Stock symbol. Optional with update and check operations. Required with drop, showh, showd and export operations")))
             .arg(common_args::export_file(
                 Some("Export symbol history and dividends to csv file. Required with export operation")))
             .arg(Arg::with_name("ds_operation")
                  .short("o")
                  .long("dsop")
-                 .help("Datastore tool operation, one of create, delete, update, drop, export, check, stat.\n\
+                 .help("Datastore tool operation, one of create, delete, update, drop, showh, showd, export, check, stat.\n\
                         create : create empty datastore\n\
                         delete : delete existing datastore\n\
                         update : update price and size data\n\
                         drop   : drop a symbol\n\
+                        showh  : show history for symbol\n\
+                        showd  : show dividends for symbol\n\
                         export : export symbol history and dividends\n\
                         check  : check price and size data\n\
                         stat   : calculate files count and size")
