@@ -307,21 +307,15 @@ impl Application {
     fn check_entry(self: &Self, entry_path: &Path) -> Result<(), Box<dyn Error>> {
         let content = self.ds.read_file(&entry_path)?;
 
-        let content_ref = match content.find('\n') {
-            Some(pos) => &content[0..pos],
-            None => return Err(format!("Invalid entry data").into())
-        };
-
-        // TODO: Using number of fields is not future proof, fix it!
-        let num_of_fields = content_ref.split(',').count();
-        if num_of_fields == history::HistoryEntry::number_of_fields() {
+        let fname = misc::path_basename(entry_path)?;
+        if fname.starts_with(history::tag()) {
             history::History::check_csv(&content)?;
         }
-        else if num_of_fields == dividends::DividendEntry::number_of_fields() {
+        else if fname.starts_with(dividends::tag()) {
             dividends::Dividends::check_csv(&content)?;
         }
         else {
-            return Err(format!("Unknown entry data").into())
+            return Err(format!("Unknown entry name").into())
         }
 
         Ok(())

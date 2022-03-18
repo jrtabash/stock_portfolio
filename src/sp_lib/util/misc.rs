@@ -1,4 +1,6 @@
+use std::error::Error;
 use std::fs;
+use std::path::Path;
 
 #[inline(always)]
 pub fn maybe_letter_s(sz: usize) -> &'static str {
@@ -16,6 +18,15 @@ pub fn direntry_filename(entry: &fs::DirEntry) -> String {
         Some(fname) => String::from(fname),
         None => String::from("?")
     }
+}
+
+pub fn path_basename<'a>(path: &'a Path) -> Result<&'a str, Box<dyn Error>> {
+    if let Some(basename) = path.file_name() {
+        if let Some(fname) = basename.to_str() {
+            return Ok(fname)
+        }
+    }
+    Err(format!("Invalid entry path").into())
 }
 
 // --------------------------------------------------------------------------------
@@ -67,4 +78,21 @@ mod tests {
         assert!(found);
         assert!(temp_file::remove_file(&name));
     }
+
+    #[test]
+    fn test_path_basename() {
+        let name = "somefile.txt";
+        let path_str = format!("{}", temp_file::make_path(&name).display());
+        let path = Path::new(&path_str);
+        let data = "";
+
+        temp_file::remove_file(&name);
+        assert!(temp_file::create_file(&name, &data));
+
+        let basename = path_basename(&path).unwrap();
+        assert_eq!(basename, name);
+
+        assert!(temp_file::remove_file(&name));
+    }
+
 }
