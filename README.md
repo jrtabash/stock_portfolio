@@ -58,7 +58,7 @@ OPTIONS:
 ```
 
 ## Stock Portfolio Datastore Tool
-Manage datastore and symbol price and size data. Data includes open, high, low, and close prices, trading volumes, and dividends.
+Manage datastore and symbol price and size data. Data includes open, high, low, and close prices, trading volumes, dividends and splits.
 
 The following operations are supported:
 - **Create**: Create datastore
@@ -67,6 +67,7 @@ The following operations are supported:
 - **Drop**: Drop symbol
 - **Showh**: Show symbol history
 - **Showd**: Show symbol dividends
+- **Shows**: Show symbol splits
 - **Export**: Export symbol history and dividends
 - **Check**: Check history, dividend and split data
 - **Stat**: Calculate files count and size
@@ -82,14 +83,15 @@ FLAGS:
 
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
-    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, showh, showd, export,
-                                  check, stat.
+    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, showh, showd, shows,
+                                  export, check, stat.
                                   create : create empty datastore
                                   delete : delete existing datastore
                                   update : update history, dividend and split data
                                   drop   : drop a symbol
                                   showh  : show history for symbol
                                   showd  : show dividends for symbol
+                                  shows  : show splits for symbol
                                   export : export symbol history and dividends
                                   check  : check history, dividend and split data
                                   stat   : calculate files count and size
@@ -99,7 +101,7 @@ OPTIONS:
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
                                   include stock and etf
     -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop, showh,
-                                  showd and export operations
+                                  showd, shows, and export operations
 ```
 
 ## Stock Portfolio Stats Tool

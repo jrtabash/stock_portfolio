@@ -16,6 +16,7 @@ const DELETE: &str = "delete";
 const STAT: &str = "stat";
 const SHOWH: &str = "showh";
 const SHOWD: &str = "showd";
+const SHOWS: &str = "shows";
 const EXPORT: &str = "export";
 
 struct StatAgg {
@@ -69,6 +70,7 @@ impl Application {
             STAT => self.stat()?,
             SHOWH => self.show_history()?,
             SHOWD => self.show_dividends()?,
+            SHOWS => self.show_splits()?,
             EXPORT => self.export()?,
             _ => return Err(format!("Invalid ds_operation - '{}'", self.args.ds_operation()).into())
         };
@@ -295,6 +297,21 @@ impl Application {
         let symbol = self.args.symbol().unwrap();
         if self.ds.symbol_exists(dividends::tag(), &symbol) {
             self.ds.show_symbol(dividends::tag(), &symbol)?;
+        }
+
+        Ok(())
+    }
+
+    fn show_splits(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Show splits"); }
+
+        if self.args.symbol().is_none() {
+            return Err("Missing symbol for show splits operation".into())
+        }
+
+        let symbol = self.args.symbol().unwrap();
+        if self.ds.symbol_exists(splits::tag(), &symbol) {
+            self.ds.show_symbol(splits::tag(), &symbol)?;
         }
 
         Ok(())

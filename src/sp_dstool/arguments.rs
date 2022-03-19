@@ -17,7 +17,7 @@ impl Arguments {
     pub fn new() -> Self {
         let parsed_args = App::new("Stock Portfolio Datastore Tool")
             .version(common_args::app_version())
-            .about("Datastore tool - create, delete, update, drop, showh, showd, export, check or stat.")
+            .about("Datastore tool - create, delete, update, drop, showh, showd, shows, export, check or stat.")
 
             // Options
             .arg(common_args::ds_root())
@@ -25,19 +25,20 @@ impl Arguments {
             .arg(common_args::stocks_file(false))
             .arg(common_args::symbol(
                 false,
-                Some("Stock symbol. Optional with update and check operations. Required with drop, showh, showd and export operations")))
+                Some("Stock symbol. Optional with update and check operations. Required with drop, showh, showd, shows, and export operations")))
             .arg(common_args::export_file(
                 Some("Export symbol history and dividends to csv file. Required with export operation")))
             .arg(Arg::with_name("ds_operation")
                  .short("o")
                  .long("dsop")
-                 .help("Datastore tool operation, one of create, delete, update, drop, showh, showd, export, check, stat.\n\
+                 .help("Datastore tool operation, one of create, delete, update, drop, showh, showd, shows, export, check, stat.\n\
                         create : create empty datastore\n\
                         delete : delete existing datastore\n\
                         update : update history, dividend and split data\n\
                         drop   : drop a symbol\n\
                         showh  : show history for symbol\n\
                         showd  : show dividends for symbol\n\
+                        shows  : show splits for symbol\n\
                         export : export symbol history and dividends\n\
                         check  : check history, dividend and split data\n\
                         stat   : calculate files count and size")
