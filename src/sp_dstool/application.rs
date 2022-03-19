@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use sp_lib::util::{datetime, misc};
 use sp_lib::portfolio::{stocks_reader, algorithms};
 use sp_lib::yfinance::{types, query};
-use sp_lib::datastore::{datastore, history, dividends, export};
+use sp_lib::datastore::{datastore, history, dividends, splits, export};
 use crate::arguments::Arguments;
 
 const UPDATE: &str = "update";
@@ -22,8 +22,10 @@ struct StatAgg {
     tot_size: u64,
     hist_size: u64,
     div_size: u64,
+    splt_size: u64,
     hist_count: usize,
-    div_count: usize
+    div_count: usize,
+    splt_count: usize
 }
 
 pub struct Application {
@@ -133,6 +135,7 @@ impl Application {
     fn update_stock_data(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
         self.update_stock_history(symbol, base_date)?;
         self.update_stock_dividends(symbol, base_date)?;
+        self.update_stock_splits(symbol, base_date)?;
         Ok(())
     }
 
@@ -206,6 +209,42 @@ impl Application {
         Ok(())
     }
 
+    fn update_stock_splits(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
+        let splt =
+            if self.ds.symbol_exists(splits::tag(), symbol) {
+                splits::Splits::ds_select_last(&self.ds, symbol)?
+            } else {
+                splits::Splits::new(symbol)
+            };
+
+        if splt.count() > 1 {
+            return Err(format!("Found unexpected splits query result size {}, expected 0 or 1", splt.count()).into());
+        }
+
+        let begin_date =
+            if splt.count() == 1 {
+                datetime::date_plus_days(&splt.entries()[0].date, 1)
+            } else {
+                base_date.clone()
+            };
+
+        let today = datetime::today();
+        if begin_date <= today {
+            let mut query = query::HistoryQuery::new(
+                symbol.to_string(),
+                begin_date,
+                datetime::date_plus_days(&today, 1),
+                types::Interval::Daily,
+                types::Events::Split);
+
+            query.execute()?;
+            if self.ds.insert_symbol(splits::tag(), symbol, &query.result)? > 0 {
+                println!("Splits updated, check if {} data reset is needed", symbol);
+            }
+        }
+        Ok(())
+    }
+
     fn drop(self: &Self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() { println!("Drop symbol"); }
 
@@ -217,6 +256,7 @@ impl Application {
         let mut count = 0;
         count += self.drop_symbol(history::tag(), &symbol)?;
         count += self.drop_symbol(dividends::tag(), &symbol)?;
+        count += self.drop_symbol(splits::tag(), &symbol)?;
         println!("Dropped {} for symbol {}", misc::count_format(count, "file"), symbol);
         Ok(())
     }
@@ -314,6 +354,9 @@ impl Application {
         else if fname.starts_with(dividends::tag()) {
             dividends::Dividends::check_csv(&content)?;
         }
+        else if fname.starts_with(splits::tag()) {
+            splits::Splits::check_csv(&content)?;
+        }
         else {
             return Err(format!("Unknown entry name").into())
         }
@@ -344,7 +387,7 @@ impl Application {
 
         let (stat_agg, itm_count, err_count) =
             self.ds.foreach_entry(
-                StatAgg { tot_size: 0, hist_size: 0, div_size: 0, hist_count: 0, div_count: 0 },
+                StatAgg { tot_size: 0, hist_size: 0, div_size: 0, splt_size: 0, hist_count: 0, div_count: 0, splt_count: 0 },
                 |entry, agg| {
                     let mut agg_ref = &mut *agg;
                     let size = fs::metadata(entry.path())?.len();
@@ -358,6 +401,10 @@ impl Application {
                     else if filename.starts_with(dividends::tag()) {
                         agg_ref.div_count += 1;
                         agg_ref.div_size += size;
+                    }
+                    else if filename.starts_with(splits::tag()) {
+                        agg_ref.splt_count += 1;
+                        agg_ref.splt_size += size;
                     }
 
                     if self.args.is_verbose() {
@@ -376,9 +423,11 @@ impl Application {
         println!("Total Cnt: {}", misc::count_format(itm_count, "file"));
         println!(" Hist Cnt: {}", misc::count_format(stat_agg.hist_count, "file"));
         println!("  Div Cnt: {}", misc::count_format(stat_agg.div_count, "file"));
+        println!(" Splt Cnt: {}", misc::count_format(stat_agg.splt_count, "file"));
         println!("Total Siz: {}", misc::count_format(stat_agg.tot_size as usize, "byte"));
         println!(" Hist Siz: {}", misc::count_format(stat_agg.hist_size as usize, "byte"));
         println!("  Div Siz: {}", misc::count_format(stat_agg.div_size as usize, "byte"));
+        println!(" Splt Siz: {}", misc::count_format(stat_agg.splt_size as usize, "byte"));
         if err_count > 0 {
             println!("Error Cnt: {}", misc::count_format(err_count, "error"));
         }

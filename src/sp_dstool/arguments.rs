@@ -34,7 +34,7 @@ impl Arguments {
                  .help("Datastore tool operation, one of create, delete, update, drop, showh, showd, export, check, stat.\n\
                         create : create empty datastore\n\
                         delete : delete existing datastore\n\
-                        update : update price and size data\n\
+                        update : update price, size, dividend and split data\n\
                         drop   : drop a symbol\n\
                         showh  : show history for symbol\n\
                         showd  : show dividends for symbol\n\
