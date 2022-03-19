@@ -17,7 +17,7 @@ impl Arguments {
     pub fn new() -> Self {
         let parsed_args = App::new("Stock Portfolio Datastore Tool")
             .version(common_args::app_version())
-            .about("Datastore tool - create, delete, update, drop, export, check or stat.")
+            .about("Datastore tool - create, delete, update, drop, showh, showd, export, check or stat.")
 
             // Options
             .arg(common_args::ds_root())
@@ -34,12 +34,12 @@ impl Arguments {
                  .help("Datastore tool operation, one of create, delete, update, drop, showh, showd, export, check, stat.\n\
                         create : create empty datastore\n\
                         delete : delete existing datastore\n\
-                        update : update price, size, dividend and split data\n\
+                        update : update history, dividend and split data\n\
                         drop   : drop a symbol\n\
                         showh  : show history for symbol\n\
                         showd  : show dividends for symbol\n\
                         export : export symbol history and dividends\n\
-                        check  : check price and size data\n\
+                        check  : check history, dividend and split data\n\
                         stat   : calculate files count and size")
                  .required(true)
                  .takes_value(true))

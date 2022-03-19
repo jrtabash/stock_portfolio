@@ -63,12 +63,12 @@ Manage datastore and symbol price and size data. Data includes open, high, low, 
 The following operations are supported:
 - **Create**: Create datastore
 - **Delete**: Delete datastore
-- **Update**: Update price and size data
+- **Update**: Update history, dividend and split data
 - **Drop**: Drop symbol
 - **Showh**: Show symbol history
 - **Showd**: Show symbol dividends
 - **Export**: Export symbol history and dividends
-- **Check**: Check price and size data
+- **Check**: Check history, dividend and split data
 - **Stat**: Calculate files count and size
 
 ```bash
@@ -86,12 +86,12 @@ OPTIONS:
                                   check, stat.
                                   create : create empty datastore
                                   delete : delete existing datastore
-                                  update : update price, size, dividend and split data
+                                  update : update history, dividend and split data
                                   drop   : drop a symbol
                                   showh  : show history for symbol
                                   showd  : show dividends for symbol
                                   export : export symbol history and dividends
-                                  check  : check price and size data
+                                  check  : check history, dividend and split data
                                   stat   : calculate files count and size
     -r, --root <ds_root>          Datastore root path (default: value of HOME environment variable)
     -e, --export <export_file>    Export symbol history and dividends to csv file. Required with export operation
