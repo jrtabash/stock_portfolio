@@ -272,49 +272,31 @@ impl Application {
         Ok(count)
     }
 
-    fn show_history(self: &Self) -> Result<(), Box<dyn Error>> {
-        if self.args.is_verbose() { println!("Show history"); }
+    fn show_data(self: &Self, tag: &str) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Show {}", tag); }
 
         if self.args.symbol().is_none() {
-            return Err("Missing symbol for show history operation".into())
+            return Err(format!("Missing symbol for show {} operation", tag).into())
         }
 
         let symbol = self.args.symbol().unwrap();
-        if self.ds.symbol_exists(history::tag(), &symbol) {
-            self.ds.show_symbol(history::tag(), &symbol)?;
+        if self.ds.symbol_exists(tag, &symbol) {
+            self.ds.show_symbol(tag, &symbol)?;
         }
 
         Ok(())
+    }
+
+    fn show_history(self: &Self) -> Result<(), Box<dyn Error>> {
+        self.show_data(history::tag())
     }
 
     fn show_dividends(self: &Self) -> Result<(), Box<dyn Error>> {
-        if self.args.is_verbose() { println!("Show dividends"); }
-
-        if self.args.symbol().is_none() {
-            return Err("Missing symbol for show dividends operation".into())
-        }
-
-        let symbol = self.args.symbol().unwrap();
-        if self.ds.symbol_exists(dividends::tag(), &symbol) {
-            self.ds.show_symbol(dividends::tag(), &symbol)?;
-        }
-
-        Ok(())
+        self.show_data(dividends::tag())
     }
 
     fn show_splits(self: &Self) -> Result<(), Box<dyn Error>> {
-        if self.args.is_verbose() { println!("Show splits"); }
-
-        if self.args.symbol().is_none() {
-            return Err("Missing symbol for show splits operation".into())
-        }
-
-        let symbol = self.args.symbol().unwrap();
-        if self.ds.symbol_exists(splits::tag(), &symbol) {
-            self.ds.show_symbol(splits::tag(), &symbol)?;
-        }
-
-        Ok(())
+        self.show_data(splits::tag())
     }
 
     fn export(self: &Self) -> Result<(), Box<dyn Error>> {
