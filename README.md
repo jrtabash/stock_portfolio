@@ -86,7 +86,7 @@ OPTIONS:
                                   check, stat.
                                   create : create empty datastore
                                   delete : delete existing datastore
-                                  update : update price and size data
+                                  update : update price, size, dividend and split data
                                   drop   : drop a symbol
                                   showh  : show history for symbol
                                   showd  : show dividends for symbol
