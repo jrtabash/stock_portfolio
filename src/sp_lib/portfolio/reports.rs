@@ -110,12 +110,12 @@ pub fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Er
 // --------------------------------------------------------------------------------
 // Top/Bottom Performing Stocks Report and Export
 
-const PCT_CHG: &str = "Pct Change";
-const NET_CHG: &str = "Net Change";
-const CUM_DIV: &str = "Cum Div";
-const PCT_CHG_DAY: &str = "Pct Change / Day";
-const NET_CHG_DAY: &str = "Net Change / Day";
-const CUM_DIV_DAY: &str = "Cum Div / Day";
+const PCT_CHG: &str = "Total Pct Change";
+const NET_CHG: &str = "Total Net Change";
+const CUM_DIV: &str = "Total Cum Div";
+const PCT_CHG_DAY: &str = "Daily Pct Change";
+const NET_CHG_DAY: &str = "Daily Net Change";
+const CUM_DIV_DAY: &str = "Daily Cum Div";
 
 type TopTuple<'a> = (&'a str, Price, Price, Price, Price, Price, Price);
 type TopBottom<'a> = (&'a str, &'a str);
