@@ -6,11 +6,47 @@ use std::fs::File;
 use crate::util::{price_type, datetime};
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::portfolio::algorithms;
+use crate::portfolio::report_type::ReportType;
+
+pub struct ReportParams<'a> {
+    rtype: ReportType,
+    stocks: &'a StockList,
+    groupby: bool
+}
+
+impl<'a> ReportParams<'a> {
+    pub fn new(rtype: ReportType, stocks: &'a StockList) -> Self {
+        ReportParams { rtype: rtype, stocks: stocks, groupby: false }
+    }
+
+    pub fn show_groupby(mut self, grpby: bool) -> Self {
+        self.groupby = grpby;
+        self
+    }
+
+    pub fn rtype(&self) -> ReportType { self.rtype }
+    pub fn stocks(&self) -> &'a StockList { self.stocks }
+    pub fn groupby(&self) -> bool { self.groupby }
+}
+
+pub fn print_report(params: ReportParams) {
+    match params.rtype() {
+        ReportType::Value => value_report(params.stocks(), params.groupby()),
+        ReportType::Top => top_report(params.stocks, params.groupby()),
+    }
+}
+
+pub fn export_report(params: ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+    match params.rtype() {
+        ReportType::Value => value_export(params.stocks(), filename),
+        ReportType::Top => top_export(params.stocks(), filename),
+    }
+}
 
 // --------------------------------------------------------------------------------
 // Portfolio Value (Gain & Loss) Report and Export
 
-pub fn value_report(stocks: &StockList, groupby: bool) {
+fn value_report(stocks: &StockList, groupby: bool) {
     println!("Stocks Value Report");
     println!("-------------------");
     println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
@@ -85,7 +121,7 @@ pub fn value_report(stocks: &StockList, groupby: bool) {
     }
 }
 
-pub fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
+fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
     let mut file = File::create(&filename)?;
     write!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value,Cum Div\n")?;
     for stock in stocks.iter() {
@@ -143,7 +179,7 @@ fn tb_pct_chg_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_b
 fn tb_net_chg_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.5) }
 fn tb_cum_div_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.6) }
 
-pub fn top_report(stocks: &StockList, _groupby: bool) {
+fn top_report(stocks: &StockList, _groupby: bool) {
     fn print_row(name: &str, top_bottom: &TopBottom) {
         println!("{:18} {:8} {:8}", name, (*top_bottom).0, (*top_bottom).1);
     }
@@ -174,7 +210,7 @@ pub fn top_report(stocks: &StockList, _groupby: bool) {
     }
 }
 
-pub fn top_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
+fn top_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
     fn write_row(file: &mut File, name: &str, top_bottom: &TopBottom) -> Result<(), Box<dyn Error>> {
         write!(file, "{},{},{}\n", name, (*top_bottom).0, (*top_bottom).1)?;
         Ok(())

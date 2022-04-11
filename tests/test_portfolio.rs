@@ -8,7 +8,8 @@ use sp_lib::portfolio::stock::*;
 use sp_lib::portfolio::algorithms::*;
 use sp_lib::portfolio::stocks_update::*;
 use sp_lib::portfolio::stocks_reader::*;
-use sp_lib::portfolio::reports::value_export;
+use sp_lib::portfolio::report_type::ReportType;
+use sp_lib::portfolio::reports;
 
 #[test]
 fn test_stock_list() {
@@ -292,7 +293,8 @@ fn test_value_export() {
 
     let temp_name = "sp_test_value_export.csv";
     let csv_filename = temp_file::make_path(&temp_name);
-    value_export(&list, &csv_filename.to_str().unwrap()).unwrap();
+    let rparams = reports::ReportParams::new(ReportType::Value, &list);
+    reports::export_report(rparams, &csv_filename.to_str().unwrap()).unwrap();
 
     let csv_content = fs::read_to_string(&csv_filename).unwrap();
     let today_str = today_plus_days(0).format("%Y-%m-%d");

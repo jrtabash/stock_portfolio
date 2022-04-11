@@ -83,18 +83,16 @@ impl Application {
     }
 
     fn report(self: &Application) {
-        match self.rtype {
-            ReportType::Value => reports::value_report(&self.stocks, self.args.show_groupby()),
-            ReportType::Top => reports::top_report(&self.stocks, self.args.show_groupby())
-        }
+        reports::print_report(
+            reports::ReportParams::new(self.rtype, &self.stocks)
+                .show_groupby(self.args.show_groupby()));
     }
 
     fn export(self: &Application) -> Result<(), Box<dyn Error>> {
         if let Some(export_file) = self.args.export_file() {
-            match self.rtype {
-                ReportType::Value => reports::value_export(&self.stocks, &export_file)?,
-                ReportType::Top => reports::top_export(&self.stocks, &export_file)?
-            };
+            reports::export_report(
+                reports::ReportParams::new(self.rtype, &self.stocks),
+                &export_file)?;
         }
         Ok(())
     }
