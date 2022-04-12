@@ -228,11 +228,11 @@ fn sp_ds_select_splits() {
 
     // No Filter
     match splits::Splits::ds_select_all(&ds, sp_ds_symbol()) {
-        Ok(div) => {
-            assert_eq!(div.symbol(), sp_ds_symbol());
-            assert_eq!(div.count(), 1);
+        Ok(splt) => {
+            assert_eq!(splt.symbol(), sp_ds_symbol());
+            assert_eq!(splt.count(), 1);
 
-            let entries = div.entries();
+            let entries = splt.entries();
             check_split(&entries[0], "2021-02-25,2:1");
         },
         Err(_) => assert!(false)
@@ -240,20 +240,20 @@ fn sp_ds_select_splits() {
 
     // Filter
     match splits::Splits::ds_select_if(&ds, sp_ds_symbol(), |entry| entry.split == "3:1") {
-        Ok(div) => {
-            assert_eq!(div.symbol(), sp_ds_symbol());
-            assert_eq!(div.count(), 0);
+        Ok(splt) => {
+            assert_eq!(splt.symbol(), sp_ds_symbol());
+            assert_eq!(splt.count(), 0);
         },
         Err(_) => assert!(false)
     };
 
     // Last
     match splits::Splits::ds_select_last(&ds, sp_ds_symbol()) {
-        Ok(div) => {
-            assert_eq!(div.symbol(), sp_ds_symbol());
-            assert_eq!(div.count(), 1);
+        Ok(splt) => {
+            assert_eq!(splt.symbol(), sp_ds_symbol());
+            assert_eq!(splt.count(), 1);
 
-            let entries = div.entries();
+            let entries = splt.entries();
             check_split(&entries[0], "2021-02-25,2:1");
         },
         Err(_) => assert!(false)
@@ -261,11 +261,11 @@ fn sp_ds_select_splits() {
 
     // Last n
     match splits::Splits::ds_select_last_n(&ds, sp_ds_symbol(), 2) {
-        Ok(div) => {
-            assert_eq!(div.symbol(), sp_ds_symbol());
-            assert_eq!(div.count(), 1);
+        Ok(splt) => {
+            assert_eq!(splt.symbol(), sp_ds_symbol());
+            assert_eq!(splt.count(), 1);
 
-            let entries = div.entries();
+            let entries = splt.entries();
             check_split(&entries[0], "2021-02-25,2:1");
         },
         Err(_) => assert!(false)
