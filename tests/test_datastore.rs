@@ -132,6 +132,15 @@ fn sp_ds_select_history() {
         Err(_) => assert!(false)
     };
 
+    // Filter 2
+    match history::History::ds_select_if(&ds, sp_ds_symbol(), |entry| entry.volume > 15000) {
+        Ok(hist) => {
+            assert_eq!(hist.symbol(), sp_ds_symbol());
+            assert_eq!(hist.count(), 0);
+        },
+        Err(_) => assert!(false)
+    };
+
     // Last
     match history::History::ds_select_last(&ds, sp_ds_symbol()) {
         Ok(hist) => {
@@ -190,6 +199,18 @@ fn sp_ds_select_dividends() {
         Err(_) => assert!(false)
     };
 
+    // Filter 2
+    match dividends::Dividends::ds_select_if(&ds, sp_ds_symbol(), |entry| entry.price < 1.5) {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 1);
+
+            let entries = div.entries();
+            check_dividend(&entries[0], "2021-02-23,1.2");
+        },
+        Err(_) => assert!(false)
+    };
+
     // Last
     match dividends::Dividends::ds_select_last(&ds, sp_ds_symbol()) {
         Ok(div) => {
@@ -243,6 +264,18 @@ fn sp_ds_select_splits() {
         Ok(splt) => {
             assert_eq!(splt.symbol(), sp_ds_symbol());
             assert_eq!(splt.count(), 0);
+        },
+        Err(_) => assert!(false)
+    };
+
+    // Filter 2
+    match splits::Splits::ds_select_if(&ds, sp_ds_symbol(), |entry| entry.split == "2:1") {
+        Ok(splt) => {
+            assert_eq!(splt.symbol(), sp_ds_symbol());
+            assert_eq!(splt.count(), 1);
+
+            let entries = splt.entries();
+            check_split(&entries[0], "2021-02-25,2:1");
         },
         Err(_) => assert!(false)
     };
