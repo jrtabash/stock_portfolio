@@ -103,6 +103,11 @@ impl Splits {
         Splits::parse_csv(symbol, &content)
     }
 
+    pub fn ds_select_last_n(ds: &DataStore, symbol: &str, n: usize) -> Result<Self, Box<dyn Error>> {
+        let content = ds.select_last_n(tag(), symbol, n)?;
+        Splits::parse_csv(symbol, &content)
+    }
+
     pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
         let splt = Splits::parse_csv("splits_check", csv)?;
         let cnt = splt.count();

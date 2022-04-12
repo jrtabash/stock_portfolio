@@ -134,6 +134,19 @@ fn sp_ds_select_history() {
         },
         Err(_) => assert!(false)
     };
+
+    // Last n
+    match history::History::ds_select_last_n(&ds, sp_ds_symbol(), 2) {
+        Ok(hist) => {
+            assert_eq!(hist.symbol(), sp_ds_symbol());
+            assert_eq!(hist.count(), 2);
+
+            let entries = hist.entries();
+            check_history(&entries[0], "2021-02-25,12.5,13.5,10.5,12.0,12.0,10000");
+            check_history(&entries[1], "2021-02-26,12.0,14.0,11.0,14.0,14.0,12000");
+        },
+        Err(_) => assert!(false)
+    };
 }
 
 fn sp_ds_select_dividends() {
@@ -170,6 +183,18 @@ fn sp_ds_select_dividends() {
 
     // Last
     match dividends::Dividends::ds_select_last(&ds, sp_ds_symbol()) {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 1);
+
+            let entries = div.entries();
+            check_dividend(&entries[0], "2021-02-23,1.2");
+        },
+        Err(_) => assert!(false)
+    };
+
+    // Last n
+    match dividends::Dividends::ds_select_last_n(&ds, sp_ds_symbol(), 2) {
         Ok(div) => {
             assert_eq!(div.symbol(), sp_ds_symbol());
             assert_eq!(div.count(), 1);

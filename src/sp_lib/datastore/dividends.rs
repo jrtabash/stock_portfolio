@@ -106,6 +106,11 @@ impl Dividends {
         Dividends::parse_csv(symbol, &content)
     }
 
+    pub fn ds_select_last_n(ds: &DataStore, symbol: &str, n: usize) -> Result<Self, Box<dyn Error>> {
+        let content = ds.select_last_n(tag(), symbol, n)?;
+        Dividends::parse_csv(symbol, &content)
+    }
+
     pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
         let div = Dividends::parse_csv("dividends_check", csv)?;
         let cnt = div.count();

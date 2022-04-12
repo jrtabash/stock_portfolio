@@ -76,7 +76,7 @@ impl DataStore {
         Ok(content)
     }
 
-    pub fn read_last(&self, sym_file: &Path) -> Result<String, Box<dyn Error>> {
+    pub fn read_last_n(&self, sym_file: &Path, n: usize) -> Result<String, Box<dyn Error>> {
         let mut file = fs::File::open(sym_file)?;
 
         let meta_data = file.metadata()?;
@@ -86,10 +86,14 @@ impl DataStore {
         file.seek(std::io::SeekFrom::Start(position))?;
 
         let mut buf = [0; 1];
+        let mut count = 0;
         while position > 0 {
             file.read(&mut buf)?;
             if str::from_utf8(&buf)? == "\n" {
-                break;
+                count += 1;
+                if count >= n {
+                    break;
+                }
             }
             position = position - 1;
             file.seek(std::io::SeekFrom::Start(position))?;
@@ -97,15 +101,21 @@ impl DataStore {
 
         let mut content = String::new();
         file.read_to_string(&mut content)?;
-        match content.trim().split('\n').last() {
-            Some(line) => Ok(String::from(line)),
-            None => Ok(String::new())
-        }
+        Ok(String::from(content.trim()))
+    }
+
+    pub fn read_last(&self, sym_file: &Path) -> Result<String, Box<dyn Error>> {
+        self.read_last_n(sym_file, 1)
     }
 
     pub fn select_symbol(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
         let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         self.read_file(&sym_file)
+    }
+
+    pub fn select_last_n(&self, tag: &str, symbol: &str, n: usize) -> Result<String, Box<dyn Error>> {
+        let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
+        self.read_last_n(&sym_file, n)
     }
 
     pub fn select_last(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
@@ -369,6 +379,47 @@ mod tests {
         let dvec: Vec<&str> = data.split('\n').collect();
         assert_eq!(dvec.len(), 1);
         assert_eq!(dvec[0], "11,12,13,14,15");
+
+        ds.delete().unwrap();
+        assert!(!base_path.exists());
+    }
+
+    #[test]
+    fn test_datastore_insert_select_last_n() {
+        let root = env::temp_dir();
+        let base_path = temp_file::make_path("test_insert_select_last_n");
+        let ds = DataStore::new(root.to_str().unwrap(), "test_insert_select_last_n");
+
+        let tag = "tst";
+        let symbol = "TEST";
+        let csv = "1,2,3,4,5\n\
+                   6,7,8,9,10\n\
+                   11,12,13,14,15\n\
+                   16,17,18,19,20\n";
+
+        ds.create().unwrap();
+        assert!(!ds.symbol_exists(&tag, &symbol));
+
+        assert_eq!(ds.insert_symbol(&tag, &symbol, &csv).unwrap(), 4);
+        assert!(ds.symbol_exists(&tag, &symbol));
+
+        let data = ds.select_last_n(&tag, &symbol, 1).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 1);
+        assert_eq!(dvec[0], "16,17,18,19,20");
+
+        let data = ds.select_last_n(&tag, &symbol, 2).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 2);
+        assert_eq!(dvec[0], "11,12,13,14,15");
+        assert_eq!(dvec[1], "16,17,18,19,20");
+
+        let data = ds.select_last_n(&tag, &symbol, 3).unwrap();
+        let dvec: Vec<&str> = data.split('\n').collect();
+        assert_eq!(dvec.len(), 3);
+        assert_eq!(dvec[0], "6,7,8,9,10");
+        assert_eq!(dvec[1], "11,12,13,14,15");
+        assert_eq!(dvec[2], "16,17,18,19,20");
 
         ds.delete().unwrap();
         assert!(!base_path.exists());
