@@ -1,6 +1,6 @@
 use std::{env, fs};
 use sp_lib::util::{datetime, temp_file};
-use sp_lib::datastore::{datastore, history, dividends, export};
+use sp_lib::datastore::{datastore, history, dividends, splits, export};
 
 type Price = history::Price;
 
@@ -12,9 +12,12 @@ fn test_datastore() {
     sp_ds_insert(history::tag(), 2);
     sp_ds_insert(dividends::tag(), 1);
     sp_ds_insert(dividends::tag(), 2);
+    sp_ds_insert(splits::tag(), 1);
+    sp_ds_insert(splits::tag(), 2);
 
     sp_ds_select_history();
     sp_ds_select_dividends();
+    sp_ds_select_splits();
 
     sp_ds_export_symbol();
 
@@ -55,6 +58,12 @@ fn sp_ds_data(which: &str, idx: i32) -> &'static str {
         if idx == 1 {
             return &"Date,Dividends\n\
                      2021-02-23,1.2";
+        }
+    }
+    else if which == splits::tag() {
+        if idx == 1 {
+            return &"Date,Split\n\
+                     2021-02-25,2:1";
         }
     }
     &""
@@ -201,6 +210,63 @@ fn sp_ds_select_dividends() {
 
             let entries = div.entries();
             check_dividend(&entries[0], "2021-02-23,1.2");
+        },
+        Err(_) => assert!(false)
+    };
+}
+
+fn sp_ds_select_splits() {
+    let ds = datastore::DataStore::new(&sp_ds_root(), sp_ds_name());
+    assert!(ds.exists());
+
+    fn check_split(entry: &splits::SplitEntry, csv: &str) {
+        let values: Vec<&str> = csv.split(',').collect();
+        assert_eq!(values.len(), 2);
+        assert_eq!(entry.date, datetime::parse_date(&values[0]).unwrap());
+        assert_eq!(entry.split, values[1]);
+    }
+
+    // No Filter
+    match splits::Splits::ds_select_all(&ds, sp_ds_symbol()) {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 1);
+
+            let entries = div.entries();
+            check_split(&entries[0], "2021-02-25,2:1");
+        },
+        Err(_) => assert!(false)
+    };
+
+    // Filter
+    match splits::Splits::ds_select_if(&ds, sp_ds_symbol(), |entry| entry.split == "3:1") {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 0);
+        },
+        Err(_) => assert!(false)
+    };
+
+    // Last
+    match splits::Splits::ds_select_last(&ds, sp_ds_symbol()) {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 1);
+
+            let entries = div.entries();
+            check_split(&entries[0], "2021-02-25,2:1");
+        },
+        Err(_) => assert!(false)
+    };
+
+    // Last n
+    match splits::Splits::ds_select_last_n(&ds, sp_ds_symbol(), 2) {
+        Ok(div) => {
+            assert_eq!(div.symbol(), sp_ds_symbol());
+            assert_eq!(div.count(), 1);
+
+            let entries = div.entries();
+            check_split(&entries[0], "2021-02-25,2:1");
         },
         Err(_) => assert!(false)
     };
