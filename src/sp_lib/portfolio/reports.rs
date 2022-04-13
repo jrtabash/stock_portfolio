@@ -24,15 +24,20 @@ impl<'a> ReportParams<'a> {
         self
     }
 
+    #[inline(always)]
     pub fn rtype(&self) -> ReportType { self.rtype }
+
+    #[inline(always)]
     pub fn stocks(&self) -> &'a StockList { self.stocks }
+
+    #[inline(always)]
     pub fn groupby(&self) -> bool { self.groupby }
 }
 
 pub fn print_report(params: ReportParams) {
     match params.rtype() {
         ReportType::Value => value_report(params.stocks(), params.groupby()),
-        ReportType::Top => top_report(params.stocks, params.groupby()),
+        ReportType::Top => top_report(params.stocks(), params.groupby()),
     }
 }
 
