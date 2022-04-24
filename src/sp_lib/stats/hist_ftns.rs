@@ -2,6 +2,7 @@ use std::error::Error;
 use crate::datastore::history::{History, HistoryEntry, Price};
 use crate::util::datetime::LocalDate;
 use crate::util::price_type::price_zero;
+use crate::stats::reduce_ftns;
 
 pub type DatePriceList = Vec<(LocalDate, Price)>;
 
@@ -22,6 +23,17 @@ pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
 #[inline(always)]
 pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
     entries_vwap(hist.entries())
+}
+
+// Volatility
+pub fn entries_volatility(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+    let roc = entries_roc(entries, 1)?;
+    reduce_ftns::stddev(&roc, |r| r.1)
+}
+
+#[inline(always)]
+pub fn hist_volatility(hist: &History) -> Result<Price, Box<dyn Error>> {
+    entries_volatility(hist.entries())
 }
 
 // Moving Volume Weighted Average Price
@@ -140,6 +152,20 @@ mod tests {
     fn test_hist_vwap() {
         let hist = hist_data();
         assert!(price_eql(hist_vwap(&hist).unwrap(), 145.282762));
+    }
+
+    #[test]
+    fn test_entries_volatility() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        assert!(price_eql(entries_volatility(&entries).unwrap(), 1.207204));
+        assert!(price_eql(entries_volatility(&entries[3..8]).unwrap(), 0.753566));
+    }
+
+    #[test]
+    fn test_hist_volatility() {
+        let hist = hist_data();
+        assert!(price_eql(hist_volatility(&hist).unwrap(), 1.207204));
     }
 
     #[test]

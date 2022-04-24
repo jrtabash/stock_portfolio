@@ -7,6 +7,7 @@ use crate::arguments::Arguments;
 const DESC: &str = "desc";
 const DIVDESC: &str = "divdesc";
 const VWAP: &str = "vwap";
+const VOLAT: &str = "volat";
 const MVWAP: &str = "mvwap";
 const ROC: &str = "roc";
 const PCTCH: &str = "pctch";
@@ -42,6 +43,7 @@ impl Application {
             DESC => self.describe()?,
             DIVDESC => self.div_describe()?,
             VWAP => self.calc_vwap()?,
+            VOLAT => self.calc_volat()?,
             MVWAP => self.calc_mvwap()?,
             ROC => self.calc_roc()?,
             PCTCH => self.calc_pctch()?,
@@ -145,6 +147,13 @@ impl Application {
         let vwap = hist_ftns::hist_vwap(&self.hist)?;
         println!(" field: adj_close");
         println!("  vwap: {:.4}", vwap);
+        Ok(())
+    }
+
+    fn calc_volat(&self) -> Result<(), Box<dyn Error>> {
+        let volat = hist_ftns::hist_volatility(&self.hist)?;
+        println!(" field: adj_close");
+        println!(" volat: {:.4}", volat);
         Ok(())
     }
 
