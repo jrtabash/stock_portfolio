@@ -111,6 +111,7 @@ The following calculations are supported:
 - **desc**: Describe symbol history
 - **divdesc**: Describe symbol dividends
 - **vwap**: Calculate symbol adjusted close volume weighted average price
+- **volat**: Calculate symbol adjusted close volatility
 - **mvwap**: Calculate symbol adjusted close moving volume weighted average price
 - **roc**: Calculate symbol adjusted close rate of change
 - **pctch**: Calculate symbol adjusted close percent change relative to from date
@@ -124,10 +125,11 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, mvwap, roc, pctch.
+    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, volat, mvwap, roc, pctch.
                               desc    : describe symbol history
                               divdesc : describe symbol dividends
                               vwap    : calculate symbol adjusted close volume weighted average price
+                              volat   : calculate symbol adjusted close volatility
                               mvwap   : calculate symbol adjusted close moving volume weighted average price
                               roc     : calculate symbol adjusted close rate of change
                               pctch   : calculate symbol adjusted close percent change relative to from date
