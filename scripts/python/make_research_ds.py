@@ -1,72 +1,56 @@
+import argparse
 import os
 import subprocess
 import sys
 from datetime import date
 
-class ParsedArgs:
-    def __init__(self):
-        self.verbose = False
-        self.update = False
-        self.ds_root = ""
-        self.ds_name = ""
-        self.ds_stocks = ""
-        self.symbols = []
-        self.base_date = None
-        self.parse()
-        self.validate()
+def parse_args():
+    args = argparse.ArgumentParser()
+    args.add_argument("-v", "--verbose", help="Use verbose mode",
+                      dest="verbose",
+                      action="store_true",
+                      default=False)
+    args.add_argument("-u", "--update", help="Update symbols in new datastore",
+                      dest="update",
+                      action="store_true",
+                      default=False)
+    args.add_argument("--root", help="New datastore root",
+                      dest="ds_root",
+                      type=str,
+                      default="",
+                      required=True)
+    args.add_argument("--name", help="New datastore name sp_<NAME>, and new csv file <NAME>.csv",
+                      dest="name",
+                      type=str,
+                      default="",
+                      required=True)
+    args.add_argument("--date", help="Base date, formatted as YYYY-MM-DD",
+                      dest="base_date",
+                      type=str,
+                      default="",
+                      required=True)
+    args.add_argument("--symbols", help="Comma separated list of symbols",
+                      dest="symbols",
+                      type=str,
+                      default="",
+                      required=True)
 
-    def usage(self):
-        print("Create a research stock portfolio datastore")
-        print("")
-        print("Usage")
-        print("    {} [FLAGS] [OPTIONS]".format(os.path.basename(sys.argv[0])))
-        print("")
-        print("FLAGS")
-        print("       --help : Print usage and exit")
-        print("    --verbose : Use verbose mode")
-        print("     --update : Update symbols in new datastore")
-        print("")
-        print("OPTIONS")
-        print("       --root=<ROOT> : New datastore root")
-        print("       --name=<NAME> : New datastore name sp_<NAME>, and new csv file <NAME>.csv")
-        print("       --date=<DATE> : Base date, formatted as YYYY-MM-DD")
-        print("    --symbols=<SYMS> : Comma separated list of symbols")
-        print("")
+    ns = args.parse_args()
+    if ns.ds_root == "":
+        raise Exception("Missing root")
+    if ns.name == "":
+        raise Exception("Missing name")
+    if ns.symbols == "":
+        raise Exception("Missing symbols")
+    if ns.base_date == "":
+        raise Exception("Missing date")
 
-    def parse(self):
-        for arg in sys.argv[1:]:
-            if arg == "--help":
-                self.usage()
-                sys.exit(0)
-            elif arg == "--verbose":
-                self.verbose = True
-            elif arg == "--update":
-                self.update = True
-            else:
-                name, value = arg.split("=")
-                if name == "--root":
-                    self.ds_root = value
-                elif name == "--name":
-                    self.ds_name = f"sp_{value}"
-                    self.ds_stocks = f"{value}.csv"
-                elif name == "--date":
-                    self.base_date = date.fromisoformat(value)
-                elif name == "--symbols":
-                    self.symbols = [s.strip() for s in value.split(',')]
-                else:
-                    raise Exception(f"Unknown argument {arg}")
+    ns.ds_name = f"sp_{ns.name}"
+    ns.ds_stocks = f"{ns.name}.csv"
+    ns.base_date = date.fromisoformat(ns.base_date)
+    ns.symbols = [s.strip() for s in ns.symbols.split(',')]
 
-    def validate(self):
-        if self.ds_root == "":
-            raise Exception("Missing root")
-        if self.ds_name == "" or self.ds_name == "sp_":
-            raise Exception("Missing name")
-        if self.ds_stocks == "" or self.ds_stocks == ".csv":
-            raise Exception("Missing name")
-        if self.symbols == [] or self.symbols == [""]:
-            raise Exception("Missing symbols")
-        if self.base_date is None:
-            raise Exception("Missing date")
+    return ns
 
 class MakeDSProcessor:
     def __init__(self, parsed_args):
@@ -114,4 +98,4 @@ class MakeDSProcessor:
             raise Exception(f"Failed to run command: {command}")
 
 if __name__ == "__main__":
-    MakeDSProcessor(ParsedArgs()).run()
+    MakeDSProcessor(parse_args()).run()
