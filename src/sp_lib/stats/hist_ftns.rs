@@ -131,6 +131,33 @@ pub fn hist_pctch(hist: &History) -> Result<DatePriceList, Box<dyn Error>> {
     entries_pctch(hist.entries())
 }
 
+// Moving Volatility
+pub fn entries_mvolatility(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    let size = entries.len();
+    if size < 2 {
+        return Err(format!("entries_mvolatility: len < 2").into())
+    }
+
+    if days < 1 {
+        return Err(format!("entries_mvolatility: days < 1").into())
+    }
+    if days > entries.len() {
+        return Err(format!("entries_mvolatility: days > len").into())
+    }
+
+    let mut mvols: DatePriceList = Vec::with_capacity(size - days);
+    for i in days..size {
+        mvols.push((entries[i].date.clone(), entries_volatility(&entries[(i-days)..(i+1)])?));
+    }
+
+    Ok(mvols)
+}
+
+#[inline(always)]
+pub fn hist_mvolatility(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_mvolatility(hist.entries(), days)
+}
+
 // --------------------------------------------------------------------------------
 // Unit Tests
 
@@ -225,8 +252,14 @@ mod tests {
         let hist = hist_data();
         let expect = expect_pctch();
         let actual = hist_pctch(&hist).unwrap();
-        println!("{:?}", actual);
-        println!("{:?}", expect);
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
+    fn test_hist_mvolatility() {
+        let hist = hist_data();
+        let expect = expect_mvolat();
+        let actual = hist_mvolatility(&hist, 5).unwrap();
         assert!(date_prices_eql(&actual, &expect));
     }
 
@@ -290,6 +323,15 @@ mod tests {
                           2.733965, 4.283207, 4.633722, 4.787937, 4.234144,
                           4.199094, 4.67579, 4.346312, 6.954087, 5.012273];
         make_date_prices(&prices, date0)
+    }
+
+    fn expect_mvolat() -> DatePriceList {
+        let date0 = make_date(2021, 10, 08);
+        let vols = vec![1.528584, 0.695163, 0.726726, 0.670060,
+                        1.134933, 1.149843, 1.192098, 0.925428,
+                        0.654103, 0.567547, 0.819173, 0.755081,
+                        0.385912, 0.385915, 1.221626, 1.559314];
+        make_date_prices(&vols, date0)
     }
 
     fn make_date_prices(prices: &Vec<Price>, date0: LocalDate) -> DatePriceList {

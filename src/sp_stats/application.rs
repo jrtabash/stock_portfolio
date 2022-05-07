@@ -11,6 +11,7 @@ const VOLAT: &str = "volat";
 const MVWAP: &str = "mvwap";
 const ROC: &str = "roc";
 const PCTCH: &str = "pctch";
+const MVOLAT: &str = "mvolat";
 
 pub struct Application {
     args: Arguments,
@@ -47,6 +48,7 @@ impl Application {
             MVWAP => self.calc_mvwap()?,
             ROC => self.calc_roc()?,
             PCTCH => self.calc_pctch()?,
+            MVOLAT => self.calc_mvolat()?,
             _ => return Err(format!("Invalid calculate option - '{}'", self.args.calculate()).into())
         };
 
@@ -180,6 +182,12 @@ impl Application {
     fn calc_pctch(&self) -> Result<(), Box<dyn Error>> {
         let pctch = hist_ftns::hist_pctch(&self.hist)?;
         Self::print_dp_list(&pctch, PCTCH);
+        Ok(())
+    }
+
+    fn calc_mvolat(&self) -> Result<(), Box<dyn Error>> {
+        let mvolat = hist_ftns::hist_mvolatility(&self.hist, self.args.window())?;
+        Self::print_dp_list(&mvolat, MVOLAT);
         Ok(())
     }
 }
