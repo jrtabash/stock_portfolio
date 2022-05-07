@@ -115,6 +115,7 @@ The following calculations are supported:
 - **mvwap**: Calculate symbol adjusted close moving volume weighted average price
 - **roc**: Calculate symbol adjusted close rate of change
 - **pctch**: Calculate symbol adjusted close percent change relative to from date
+- **mvolat**: Calculate symbol adjusted close moving volatility
 
 ```bash
 USAGE:
@@ -125,7 +126,7 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, volat, mvwap, roc, pctch.
+    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, vwap, volat, mvwap, roc, pctch, mvolat.
                               desc    : describe symbol history
                               divdesc : describe symbol dividends
                               vwap    : calculate symbol adjusted close volume weighted average price
@@ -133,11 +134,12 @@ OPTIONS:
                               mvwap   : calculate symbol adjusted close moving volume weighted average price
                               roc     : calculate symbol adjusted close rate of change
                               pctch   : calculate symbol adjusted close percent change relative to from date
+                              mvolat  : calculate symbol adjusted close moving volatility
     -n, --name <ds_name>      Datastore name (default: sp_datastore)
     -r, --root <ds_root>      Datastore root path (default: value of HOME environment variable)
     -f, --from <from_date>    Start from date YYYY-MM-DD
     -y, --symbol <symbol>     Stock symbol
-    -w, --window <window>     Number of days window, required with mvwap and roc calculations
+    -w, --window <window>     Number of days window, required with mvwap, roc and mvolat calculations
 ```
 
 ## Stock Portfolio YHistory Tool
