@@ -34,7 +34,7 @@ OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
     -r, --root <ds_root>          Datastore root path (default: value of HOME environment variable)
     -x, --exclude <exclude>       Filter stocks by type, symbols or expression;
-                                  If type, must be one of 'stock' or 'etf'.
+                                  If type, must be one of 'stock', 'etf', or 'index'.
                                   If symbols, must be a comma separated list of symbol names.
                                   If expression, must follow the format '<field> <op> <value>', where:
                                   <field> : one of days, price, net, pct, div, size, value
@@ -42,7 +42,7 @@ OPTIONS:
                                   Example : 'days > 365'
     -e, --export <export_file>    Export gains and losses table to a csv file
     -i, --include <include>       Filter stocks by type, symbols or expression;
-                                  If type, must be one of 'stock' or 'etf'.
+                                  If type, must be one of 'stock', 'etf', or 'index'.
                                   If symbols, must be a comma separated list of symbol names.
                                   If expression, must follow the format '<field> <op> <value>', where:
                                   <field> : one of days, price, net, pct, div, size, value
@@ -54,7 +54,7 @@ OPTIONS:
                                   top   : Top/Bottom performing stocks
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
-                                  include stock and etf
+                                  include stock, etf and index
 ```
 
 ## Stock Portfolio Datastore Tool
@@ -99,7 +99,7 @@ OPTIONS:
     -e, --export <export_file>    Export symbol history and dividends to csv file. Required with export operation
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
-                                  include stock and etf
+                                  include stock, etf and index
     -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop, showh,
                                   showd, shows, and export operations
 ```

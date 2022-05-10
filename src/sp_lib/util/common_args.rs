@@ -25,7 +25,7 @@ pub fn ds_name_help() -> &'static str {
 
 pub fn stocks_file_help() -> &'static str {
     "CSV file containing stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price' including a header line. \
-     Supported type values include stock and etf"
+     Supported type values include stock, etf and index"
 }
 
 pub fn from_date_help() -> &'static str {
@@ -46,7 +46,7 @@ pub fn export_file_help() -> &'static str {
 
 pub fn filter_help() -> &'static str {
     "Filter stocks by type, symbols or expression;\n\
-     If type, must be one of 'stock' or 'etf'.\n\
+     If type, must be one of 'stock', 'etf', or 'index'.\n\
      If symbols, must be a comma separated list of symbol names.\n\
      If expression, must follow the format '<field> <op> <value>', where:\n\
      <field> : one of days, price, net, pct, div, size, value\n\
