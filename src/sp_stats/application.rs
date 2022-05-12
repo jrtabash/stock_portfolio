@@ -167,14 +167,25 @@ impl Application {
         }
     }
 
+    fn check_window(&self, min_window: usize) -> Result<(), Box<dyn Error>> {
+        if self.args.window() < min_window {
+            Err(format!("Window size {} less than required size {}", self.args.window(), min_window).into())
+        }
+        else {
+            Ok(())
+        }
+    }
+
     fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
+        self.check_window(1)?;
         let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
         Self::print_dp_list(&mvwap, MVWAP);
         Ok(())
     }
 
     fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
-        let roc = hist_ftns::hist_roc(&self.hist, self.args.window())?;
+        self.check_window(2)?;
+        let roc = hist_ftns::hist_roc(&self.hist, self.args.window() - 1)?;
         Self::print_dp_list(&roc, ROC);
         Ok(())
     }
@@ -186,6 +197,7 @@ impl Application {
     }
 
     fn calc_mvolat(&self) -> Result<(), Box<dyn Error>> {
+        self.check_window(1)?;
         let mvolat = hist_ftns::hist_mvolatility(&self.hist, self.args.window())?;
         Self::print_dp_list(&mvolat, MVOLAT);
         Ok(())

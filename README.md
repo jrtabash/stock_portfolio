@@ -139,7 +139,8 @@ OPTIONS:
     -r, --root <ds_root>      Datastore root path (default: value of HOME environment variable)
     -f, --from <from_date>    Start from date YYYY-MM-DD
     -y, --symbol <symbol>     Stock symbol
-    -w, --window <window>     Number of days window, required with mvwap, roc and mvolat calculations
+    -w, --window <window>     Number of days, required with mvwap, roc and mvolat calculations
+                              Required minimum: mvwap=1, roc=2, mvolat=1
 ```
 
 ## Stock Portfolio YHistory Tool
