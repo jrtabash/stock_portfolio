@@ -2,7 +2,7 @@ use std::error::Error;
 use std::path::Path;
 use std::fs;
 use std::collections::HashMap;
-use sp_lib::util::{datetime, misc};
+use sp_lib::util::{datetime, misc, common_app};
 use sp_lib::portfolio::{stocks_reader, algorithms};
 use sp_lib::yfinance::{types, query};
 use sp_lib::datastore::{datastore, history, dividends, splits, export};
@@ -35,8 +35,8 @@ pub struct Application {
     ds: datastore::DataStore
 }
 
-impl Application {
-    pub fn new() -> Self {
+impl common_app::AppTrait for Application {
+    fn new() -> Self {
         let args = Arguments::new();
         let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
         Application {
@@ -46,7 +46,7 @@ impl Application {
         }
     }
 
-    pub fn run(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn run(self: &mut Self) -> common_app::RunResult {
         if !self.ds.exists() && self.args.ds_operation() != CREATE {
             return Err(format!("Datastore {} does not exist", self.ds).into());
         }
@@ -77,10 +77,9 @@ impl Application {
 
         Ok(())
     }
+}
 
-    // --------------------------------------------------------------------------------
-    // Private
-
+impl Application {
     fn is_symbol_match(self: &Self, expr: &str) -> bool {
         match self.args.symbol() {
             Some(symbol) => expr.contains(symbol),

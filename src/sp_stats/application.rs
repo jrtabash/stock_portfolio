@@ -1,7 +1,7 @@
 use std::error::Error;
 use sp_lib::datastore::{datastore, history, dividends};
 use sp_lib::stats::{description, hist_desc, hist_ftns};
-use sp_lib::util::datetime;
+use sp_lib::util::{datetime, common_app};
 use crate::arguments::Arguments;
 
 const DESC: &str = "desc";
@@ -20,8 +20,8 @@ pub struct Application {
     div: dividends::Dividends,
 }
 
-impl Application {
-    pub fn new() -> Self {
+impl common_app::AppTrait for Application {
+    fn new() -> Self {
         let args = Arguments::new();
         let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
         Application {
@@ -32,7 +32,7 @@ impl Application {
         }
     }
 
-    pub fn run(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn run(self: &mut Self) -> common_app::RunResult {
         if !self.ds.exists() {
             return Err(format!("Datastore {} does not exist", self.ds).into());
         }
@@ -54,10 +54,9 @@ impl Application {
 
         Ok(())
     }
+}
 
-    // --------------------------------------------------------------------------------
-    // Private
-
+impl Application {
     fn date_range<Entry>(entries: &Vec<Entry>, extract_date: impl Fn (&Entry) -> datetime::LocalDate) -> (datetime::LocalDate, datetime::LocalDate) {
         if entries.len() > 0 {
             (extract_date(&entries[0]), extract_date(&entries[entries.len() - 1]))

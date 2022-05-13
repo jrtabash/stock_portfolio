@@ -2,6 +2,7 @@ use std::error::Error;
 use sp_lib::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms, report_type};
 use sp_lib::portfolio::report_type::ReportType;
 use sp_lib::datastore::datastore;
+use sp_lib::util::common_app;
 use crate::arguments::Arguments;
 
 pub struct Application {
@@ -11,8 +12,8 @@ pub struct Application {
     ds: datastore::DataStore
 }
 
-impl Application {
-    pub fn new() -> Application {
+impl common_app::AppTrait for Application {
+    fn new() -> Self {
         let args = Arguments::new();
         let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
         Application {
@@ -23,7 +24,7 @@ impl Application {
         }
     }
 
-    pub fn run(self: &mut Application) -> Result<(), Box<dyn Error>> {
+    fn run(self: &mut Self) -> common_app::RunResult {
         if !self.ds.exists() {
             return Err(format!("Datastore {} does not exist", self.ds).into());
         }
@@ -41,10 +42,9 @@ impl Application {
         self.export()?;
         Ok(())
     }
+}
 
-    // --------------------------------------------------------------------------------
-    // Private
-
+impl Application {
     fn read(self: &mut Application) -> Result<(), Box<dyn Error>> {
         let reader = stocks_reader::StocksReader::new(String::from(self.args.stocks_file()));
         self.stocks = reader.read()?;

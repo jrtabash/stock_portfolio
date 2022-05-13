@@ -1,5 +1,5 @@
 use std::error::Error;
-use sp_lib::util::datetime;
+use sp_lib::util::{datetime, common_app};
 use sp_lib::yfinance::{types, query};
 use crate::arguments::Arguments;
 
@@ -15,14 +15,14 @@ pub struct Application {
     args: Arguments
 }
 
-impl Application {
-    pub fn new() -> Self {
+impl common_app::AppTrait for Application {
+    fn new() -> Self {
         Application {
             args: Arguments::new()
         }
     }
 
-    pub fn run(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn run(self: &mut Self) -> common_app::RunResult {
         let from_date = self.args.from().unwrap_or_else(
             || datetime::today_plus_days(-7));
         let to_date = datetime::date_plus_days(
@@ -44,8 +44,10 @@ impl Application {
             Err(format!("To date is greater than from date").into())
         }
     }
+}
 
-    pub fn str2evts(estr: &str) -> Result<types::Events, Box<dyn Error>> {
+impl Application {
+    fn str2evts(estr: &str) -> Result<types::Events, Box<dyn Error>> {
         match estr {
             EVT_HISTORY => Ok(types::Events::History),
             EVT_DIVIDEND => Ok(types::Events::Dividend),
@@ -56,7 +58,7 @@ impl Application {
         }
     }
 
-    pub fn str2int(istr: &str) -> Result<types::Interval, Box<dyn Error>> {
+    fn str2int(istr: &str) -> Result<types::Interval, Box<dyn Error>> {
         match istr {
             INT_DAY => Ok(types::Interval::Daily),
             INT_WEEK => Ok(types::Interval::Weekly),
