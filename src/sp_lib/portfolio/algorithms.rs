@@ -21,9 +21,9 @@ pub fn cumulative_dividend(stocks: &StockList) -> Price {
 }
 
 pub fn pct_change(stocks: &StockList) -> f64 {
-    let base: Price = stocks.iter().map(|stock| stock.base_price).sum();
-    let net: Price = stocks.iter().map(|stock| stock.net_price()).sum();
-    100.0 * net / base
+    let base: Price = base_notional(stocks);
+    let latest: Price = latest_notional(stocks);
+    100.0 * (latest - base) / base
 }
 
 pub fn stock_groupby<T>(stocks: &StockList,
