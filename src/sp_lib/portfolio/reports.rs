@@ -4,23 +4,32 @@ use std::error::Error;
 use std::fs::File;
 
 use crate::util::{price_type, datetime};
+use crate::datastore::datastore::DataStore;
+use crate::datastore::history::History;
+use crate::stats::hist_ftns;
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::portfolio::algorithms;
 use crate::portfolio::report_type::ReportType;
 
-pub struct ReportParams<'a> {
+pub struct ReportParams<'a, 'b> {
     rtype: ReportType,
     stocks: &'a StockList,
+    ds: Option<&'b DataStore>,
     groupby: bool
 }
 
-impl<'a> ReportParams<'a> {
+impl<'a, 'b> ReportParams<'a, 'b> {
     pub fn new(rtype: ReportType, stocks: &'a StockList) -> Self {
-        ReportParams { rtype: rtype, stocks: stocks, groupby: false }
+        ReportParams { rtype: rtype, stocks: stocks, ds: None, groupby: false }
     }
 
     pub fn show_groupby(mut self, grpby: bool) -> Self {
         self.groupby = grpby;
+        self
+    }
+
+    pub fn with_datastore(mut self, ds: &'b DataStore) -> Self {
+        self.ds = Some(ds);
         self
     }
 
@@ -31,27 +40,35 @@ impl<'a> ReportParams<'a> {
     pub fn stocks(&self) -> &'a StockList { self.stocks }
 
     #[inline(always)]
+    pub fn datastore(&self) -> Option<&'b DataStore> { self.ds }
+
+    #[inline(always)]
     pub fn groupby(&self) -> bool { self.groupby }
 }
 
 pub fn print_report(params: ReportParams) {
     match params.rtype() {
-        ReportType::Value => value_report(params.stocks(), params.groupby()),
-        ReportType::Top => top_report(params.stocks(), params.groupby()),
+        ReportType::Value => value_report(&params),
+        ReportType::Top => top_report(&params),
+        ReportType::Volat => volat_report(&params)
     }
 }
 
 pub fn export_report(params: ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
     match params.rtype() {
-        ReportType::Value => value_export(params.stocks(), filename),
-        ReportType::Top => top_export(params.stocks(), filename),
+        ReportType::Value => value_export(&params, filename),
+        ReportType::Top => top_export(&params, filename),
+        ReportType::Volat => volat_export(&params, filename)
     }
 }
 
 // --------------------------------------------------------------------------------
 // Portfolio Value (Gain & Loss) Report and Export
 
-fn value_report(stocks: &StockList, groupby: bool) {
+fn value_report(params: &ReportParams) {
+    let stocks = params.stocks();
+    let groupby = params.groupby();
+
     println!("Stocks Value Report");
     println!("-------------------");
     println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
@@ -126,7 +143,8 @@ fn value_report(stocks: &StockList, groupby: bool) {
     }
 }
 
-fn value_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
+fn value_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+    let stocks = params.stocks();
     let mut file = File::create(&filename)?;
     write!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value,Cum Div\n")?;
     for stock in stocks.iter() {
@@ -184,10 +202,12 @@ fn tb_pct_chg_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_b
 fn tb_net_chg_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.5) }
 fn tb_cum_div_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.6) }
 
-fn top_report(stocks: &StockList, _groupby: bool) {
+fn top_report(params: &ReportParams) {
     fn print_row(name: &str, top_bottom: &TopBottom) {
         println!("{:18} {:8} {:8}", name, (*top_bottom).0, (*top_bottom).1);
     }
+
+    let stocks = params.stocks();
 
     println!("Stocks Top/Bottom Performing Report");
     println!("-----------------------------------");
@@ -215,12 +235,13 @@ fn top_report(stocks: &StockList, _groupby: bool) {
     }
 }
 
-fn top_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> {
+fn top_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
     fn write_row(file: &mut File, name: &str, top_bottom: &TopBottom) -> Result<(), Box<dyn Error>> {
         write!(file, "{},{},{}\n", name, (*top_bottom).0, (*top_bottom).1)?;
         Ok(())
     }
 
+    let stocks = params.stocks();
     let mut file = File::create(&filename)?;
     write!(file, "Category,Top,Bottom\n")?;
 
@@ -232,6 +253,81 @@ fn top_export(stocks: &StockList, filename: &str) -> Result<(), Box<dyn Error>> 
         write_row(&mut file, PCT_CHG_DAY, &tb_pct_chg_day(&mut data))?;
         write_row(&mut file, NET_CHG_DAY, &tb_net_chg_day(&mut data))?;
         write_row(&mut file, CUM_DIV_DAY, &tb_cum_div_day(&mut data))?;
+    }
+    Ok(())
+}
+
+// --------------------------------------------------------------------------------
+// Stocks Volatility Report and Export
+
+fn calc_volat(stock: &Stock, ds: &DataStore) -> Price {
+    if let Ok(hist) = History::ds_select_if(ds, &stock.symbol, |e| e.date >= stock.date) {
+        if let Ok(volat) = hist_ftns::hist_volatility(&hist) {
+            return volat
+        }
+    }
+    return 0.0
+}
+
+fn calc_volat22(stock: &Stock, ds: &DataStore) -> Price {
+    if let Ok(hist) = History::ds_select_if(ds, &stock.symbol, |e| e.date >= stock.date) {
+        if let Ok(volat) = hist_ftns::hist_mvolatility(&hist, 22) {
+            return volat[volat.len() - 1].1
+        }
+    }
+    return 0.00
+}
+
+fn volat_report(params: &ReportParams) {
+    let stocks = params.stocks();
+    let ds = params.datastore().expect("Volat report missing datastore");
+
+    println!("Stocks Volatility Report");
+    println!("------------------------");
+    println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
+    println!("Number of Stocks: {}", stocks.len());
+    println!("");
+
+    println!("{:8} {:10} {:10} {:6} {:8} {:10}",
+             "Symbol",
+             "Buy Date",
+             "Upd Date",
+             "Days",
+             "Volat",
+             "MVolat22");
+    println!("{:8} {:10} {:10} {:6} {:8} {:10}",
+             "------",
+             "--------",
+             "--------",
+             "----",
+             "-----",
+             "--------",);
+
+    for stock in stocks.iter() {
+        println!("{:8} {:10} {:10} {:6} {:8.2} {:10.2}",
+                 stock.symbol,
+                 stock.date.format("%Y-%m-%d"),
+                 stock.latest_date.format("%Y-%m-%d"),
+                 stock.days_held,
+                 calc_volat(stock, ds),
+                 calc_volat22(stock, ds));
+    }
+}
+
+fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+    let stocks = params.stocks();
+    let ds = params.datastore().expect("Volat export missing datastore");
+
+    let mut file = File::create(&filename)?;
+    write!(file, "Symbol,Buy Date,Upd Date,Days Held,Volat,MVolat22\n")?;
+    for stock in stocks.iter() {
+        write!(file, "{},{},{},{},{:.2},{:.2}\n",
+               stock.symbol,
+               stock.date.format("%Y-%m-%d"),
+               stock.latest_date.format("%Y-%m-%d"),
+               stock.days_held,
+               calc_volat(stock, ds),
+               calc_volat22(stock, ds))?;
     }
     Ok(())
 }

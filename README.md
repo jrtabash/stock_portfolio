@@ -12,7 +12,8 @@ Get latest close prices and dividends and generate report. Supported reports:
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
 get the latest close prices and dividends from the datastore and generate a report. The value report shows base,
 current and net prices and notional values, percent change, cumulative dividend, as well as cumulative dividends.
-The top report shows top and bottom performing stocks in several categories.
+The top report shows top and bottom performing stocks in several categories. The volatility report shows overall
+volatility and 22 day moving volatility per stock.
 
 The following features are supported:
 - **Group by**: Report quantities and current notional values grouped by symbol
@@ -49,9 +50,10 @@ OPTIONS:
                                   <op>    : one of =, !=, <, >, <=, >=
                                   Example : 'days > 365'
     -o, --orderby <order_by>      Order stocks by one of symbol, type, date, days, price, net, pct, div, size or value
-    -p, --type <report_type>      Report type, one of value, top (default: value)
+    -p, --type <report_type>      Report type, one of value, top, volat (default: value)
                                   value : stocks value (gains & losses)
                                   top   : Top/Bottom performing stocks
+                                  volat : Stocks volatility
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
                                   include stock, etf and index

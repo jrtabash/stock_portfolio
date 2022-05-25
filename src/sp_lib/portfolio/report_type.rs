@@ -5,13 +5,15 @@ use std::fmt;
 #[derive(PartialOrd, Ord, PartialEq, Eq)]
 pub enum ReportType {
     Value, // Value (Gains & Losses)
-    Top    // Top/Last Performing
+    Top,   // Top/Last Performing
+    Volat  // Volatility
 }
 
 pub fn reporttype2str(rt: ReportType) -> &'static str {
     match rt {
         ReportType::Value => "value",
-        ReportType::Top => "top"
+        ReportType::Top => "top",
+        ReportType::Volat => "volat"
     }
 }
 
@@ -19,6 +21,7 @@ pub fn str2reporttype(rtstr: &str) -> Result<ReportType, Box<dyn Error>> {
     match rtstr.to_lowercase().as_str() {
         "value" => Ok(ReportType::Value),
         "top" => Ok(ReportType::Top),
+        "volat" => Ok(ReportType::Volat),
         _ => Err(format!("Unknown report type '{}'", rtstr).into())
     }
 }
@@ -40,13 +43,17 @@ mod tests {
     fn test_report_type() {
         let value = ReportType::Value;
         let top = ReportType::Top;
+        let volat = ReportType::Volat;
         let value_str = "value";
         let top_str = "top";
+        let volat_str = "volat";
 
         assert_eq!(reporttype2str(value), value_str);
         assert_eq!(reporttype2str(top), top_str);
+        assert_eq!(reporttype2str(volat), volat_str);
         assert!(str2reporttype(&value_str).unwrap() == value);
         assert!(str2reporttype(&top_str).unwrap() == top);
+        assert!(str2reporttype(&volat_str).unwrap() == volat);
 
         match str2reporttype("foobar") {
             Ok(_) => assert!(false),

@@ -85,13 +85,15 @@ impl Application {
     fn report(self: &Application) {
         reports::print_report(
             reports::ReportParams::new(self.rtype, &self.stocks)
-                .show_groupby(self.args.show_groupby()));
+                .show_groupby(self.args.show_groupby())
+                .with_datastore(&self.ds));
     }
 
     fn export(self: &Application) -> Result<(), Box<dyn Error>> {
         if let Some(export_file) = self.args.export_file() {
             reports::export_report(
-                reports::ReportParams::new(self.rtype, &self.stocks),
+                reports::ReportParams::new(self.rtype, &self.stocks)
+                    .with_datastore(&self.ds),
                 &export_file)?;
         }
         Ok(())
