@@ -8,6 +8,7 @@
 Get latest close prices and dividends and generate report. Supported reports:
 - **Value**: Gains and losses of stocks in portfolio
 - **Top**: Top/bottom performers in portfolio
+- **Volat**: Volatility of stocks in portfolio
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
 get the latest close prices and dividends from the datastore and generate a report. The value report shows base,
