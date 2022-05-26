@@ -145,9 +145,9 @@ pub fn entries_mvolatility(entries: &[HistoryEntry], days: usize) -> Result<Date
         return Err(format!("entries_mvolatility: days > len").into())
     }
 
-    let mut mvols: DatePriceList = Vec::with_capacity(size - days);
-    for i in days..size {
-        mvols.push((entries[i].date.clone(), entries_volatility(&entries[(i-days)..(i+1)])?));
+    let mut mvols: DatePriceList = Vec::with_capacity(size - days + 1);
+    for i in days..(size+1) {
+        mvols.push((entries[i-1].date.clone(), entries_volatility(&entries[(i-days)..i])?));
     }
 
     Ok(mvols)
@@ -326,11 +326,11 @@ mod tests {
     }
 
     fn expect_mvolat() -> DatePriceList {
-        let date0 = make_date(2021, 10, 08);
-        let vols = vec![1.528584, 0.695163, 0.726726, 0.670060,
-                        1.134933, 1.149843, 1.192098, 0.925428,
-                        0.654103, 0.567547, 0.819173, 0.755081,
-                        0.385912, 0.385915, 1.221626, 1.559314];
+        let date0 = make_date(2021, 10, 07);
+        let vols = vec![1.753183, 0.707667, 0.559378, 0.753566, 0.360418,
+                        1.291692, 1.309645, 1.018621, 0.536507, 0.510151,
+                        0.654992, 0.847149, 0.371297, 0.412710, 0.426155,
+                        1.272074, 1.796263];
         make_date_prices(&vols, date0)
     }
 
