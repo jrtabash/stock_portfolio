@@ -260,6 +260,8 @@ fn top_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error
 // --------------------------------------------------------------------------------
 // Stocks Volatility Report and Export
 
+const VOLAT_WIN: usize = 22;
+
 fn calc_volat(stock: &Stock, ds: &DataStore) -> Price {
     if let Ok(hist) = History::ds_select_if(ds, &stock.symbol, |e| e.date >= stock.date) {
         if let Ok(volat) = hist_ftns::hist_volatility(&hist) {
@@ -271,11 +273,14 @@ fn calc_volat(stock: &Stock, ds: &DataStore) -> Price {
 
 fn calc_volat22(stock: &Stock, ds: &DataStore) -> Price {
     if let Ok(hist) = History::ds_select_if(ds, &stock.symbol, |e| e.date >= stock.date) {
-        if let Ok(volat) = hist_ftns::hist_mvolatility(&hist, 22) {
-            return volat[volat.len() - 1].1
+        if hist.count() >= VOLAT_WIN {
+            let start_idx = hist.count() - VOLAT_WIN;
+            if let Ok(volat) = hist_ftns::entries_volatility(&hist.entries()[start_idx..]) {
+                return volat
+            }
         }
     }
-    return 0.00
+    return 0.0
 }
 
 fn volat_report(params: &ReportParams) {
@@ -294,14 +299,14 @@ fn volat_report(params: &ReportParams) {
              "Upd Date",
              "Days",
              "Volat",
-             "MVolat22");
+             "Volat22");
     println!("{:8} {:10} {:10} {:6} {:8} {:10}",
              "------",
              "--------",
              "--------",
              "----",
              "-----",
-             "--------",);
+             "-------",);
 
     for stock in stocks.iter() {
         println!("{:8} {:10} {:10} {:6} {:8.2} {:10.2}",
@@ -319,7 +324,7 @@ fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
     let ds = params.datastore().expect("Volat export missing datastore");
 
     let mut file = File::create(&filename)?;
-    write!(file, "Symbol,Buy Date,Upd Date,Days Held,Volat,MVolat22\n")?;
+    write!(file, "Symbol,Buy Date,Upd Date,Days Held,Volat,Volat22\n")?;
     for stock in stocks.iter() {
         write!(file, "{},{},{},{},{:.2},{:.2}\n",
                stock.symbol,

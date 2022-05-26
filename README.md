@@ -14,7 +14,7 @@ Given a stocks file, containing symbol, type, date purchased, quantity purchased
 get the latest close prices and dividends from the datastore and generate a report. The value report shows base,
 current and net prices and notional values, percent change, cumulative dividend, as well as cumulative dividends.
 The top report shows top and bottom performing stocks in several categories. The volatility report shows overall
-volatility and 22 day moving volatility per stock.
+volatility and 22 day volatility per stock.
 
 The following features are supported:
 - **Group by**: Report quantities and current notional values grouped by symbol
