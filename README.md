@@ -5,7 +5,9 @@
 - sp_yhist: Stock Portfolio YFinance History Tool
 
 ## Stock Portfolio Report
-Get latest close prices and dividends and generate report. Supported reports:
+Generate reports for portfolio stocks.
+
+The following reports are supported:
 - **Value**: Gains and losses of stocks in portfolio
 - **Top**: Top/bottom performers in portfolio
 - **Volat**: Volatility of stocks in portfolio
