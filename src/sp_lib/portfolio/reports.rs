@@ -306,7 +306,7 @@ fn volat_report(params: &ReportParams) {
              "--------",
              "----",
              "-----",
-             "-------",);
+             "-------");
 
     for stock in stocks.iter() {
         println!("{:8} {:10} {:10} {:6} {:8.2} {:10.2}",
