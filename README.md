@@ -11,12 +11,14 @@ The following reports are supported:
 - **Value**: Gains and losses of stocks in portfolio
 - **Top**: Top/bottom performers in portfolio
 - **Volat**: Volatility of stocks in portfolio
+- **Daych**: Day change of stocks in portfolio
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
 get the latest close prices and dividends from the datastore and generate a report. The value report shows base,
 current and net prices and notional values, percent change, cumulative dividend, as well as cumulative dividends.
 The top report shows top and bottom performing stocks in several categories. The volatility report shows overall
-volatility and 22 day volatility per stock.
+volatility and 22 day volatility per stock. The day change report shows day price, change, percent change, open,
+low, high, close and volume.
 
 The following features are supported:
 - **Group by**: Report quantities and current notional values grouped by symbol
@@ -57,6 +59,7 @@ OPTIONS:
                                   value : stocks value (gains & losses)
                                   top   : Top/Bottom performing stocks
                                   volat : Stocks volatility
+                                  daych : Stocks day change
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
                                   include stock, etf and index

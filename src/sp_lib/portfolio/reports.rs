@@ -50,7 +50,8 @@ pub fn print_report(params: ReportParams) {
     match params.rtype() {
         ReportType::Value => value_report(&params),
         ReportType::Top => top_report(&params),
-        ReportType::Volat => volat_report(&params)
+        ReportType::Volat => volat_report(&params),
+        ReportType::Daych => daych_report(&params)
     }
 }
 
@@ -58,7 +59,8 @@ pub fn export_report(params: ReportParams, filename: &str) -> Result<(), Box<dyn
     match params.rtype() {
         ReportType::Value => value_export(&params, filename),
         ReportType::Top => top_export(&params, filename),
-        ReportType::Volat => volat_export(&params, filename)
+        ReportType::Volat => volat_export(&params, filename),
+        ReportType::Daych => daych_export(&params, filename)
     }
 }
 
@@ -333,6 +335,114 @@ fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
                stock.days_held,
                calc_volat(stock, ds),
                calc_volat22(stock, ds))?;
+    }
+    Ok(())
+}
+
+// --------------------------------------------------------------------------------
+// Stocks Day Change Report and Exporta
+
+type DayChange = (Price, Price, Price, Price, Price, Price, Price, u64);
+
+fn calc_daych(stock: &Stock, ds: &DataStore) -> Option<DayChange> {
+    if let Ok(hist) = History::ds_select_last_n(ds, &stock.symbol, 2) {
+        let entries = hist.entries();
+        if entries.len() == 2 {
+            let prev_price = entries[0].adj_close;
+            let delta = entries[1].adj_close - prev_price;
+            return Some((stock.latest_price,
+                         delta,
+                         100.0 * if prev_price > 0.0 { delta / prev_price } else { 0.00 },
+                         entries[1].open,
+                         entries[1].low,
+                         entries[1].high,
+                         entries[1].close,
+                         entries[1].volume))
+        }
+    }
+    return None
+}
+
+fn daych_report(params: &ReportParams) {
+    let stocks = params.stocks();
+    let ds = params.datastore().expect("Daych report missing datastore");
+
+    println!("Stocks Day Change Report");
+    println!("------------------------");
+    println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
+    println!("Number of Stocks: {}", stocks.len());
+    println!("");
+
+    println!("{:8} {:10} {:8} {:8} {:8} {:8} {:8} {:8} {:8} {:10}",
+             "Symbol",
+             "Upd Date",
+             "Price",
+             "Change",
+             "Pct Chg",
+             "Open",
+             "Low",
+             "High",
+             "Close",
+             "Volume");
+
+    println!("{:8} {:10} {:8} {:8} {:8} {:8} {:8} {:8} {:8} {:10}",
+             "------",
+             "--------",
+             "-----",
+             "------",
+             "-------",
+             "----",
+             "---",
+             "----",
+             "-----",
+             "------");
+
+    let mut seen = HashSet::new();
+    for stock in stocks.iter() {
+        if seen.contains(&stock.symbol) { continue; }
+
+        if let Some(chg) = calc_daych(stock, ds) {
+            seen.insert(&stock.symbol);
+            println!("{:8} {:10} {:8.2} {:8.2} {:8.2} {:8.2} {:8.2} {:8.2} {:8.2} {:10}",
+                     stock.symbol,
+                     stock.latest_date.format("%Y-%m-%d"),
+                     chg.0,
+                     chg.1,
+                     chg.2,
+                     chg.3,
+                     chg.4,
+                     chg.5,
+                     chg.6,
+                     chg.7);
+        }
+    }
+}
+
+fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+    let stocks = params.stocks();
+    let ds = params.datastore().expect("Daych report missing datastore");
+
+    let mut file = File::create(&filename)?;
+    write!(file, "Symbol,Upd Date,Price,Change,Pct Chg,Open,Low,High,Close,Volume\n")?;
+
+    let mut seen = HashSet::new();
+    for stock in stocks.iter() {
+        if seen.contains(&stock.symbol) { continue; }
+
+        if let Some(chg) = calc_daych(stock, ds) {
+            seen.insert(&stock.symbol);
+            write!(file, "{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{}\n",
+                   stock.symbol,
+                   stock.latest_date.format("%Y-%m-%d"),
+                   chg.0,
+                   chg.1,
+                   chg.2,
+                   chg.3,
+                   chg.4,
+                   chg.5,
+                   chg.6,
+                   chg.7)?;
+        }
     }
     Ok(())
 }

@@ -6,14 +6,16 @@ use std::fmt;
 pub enum ReportType {
     Value, // Value (Gains & Losses)
     Top,   // Top/Last Performing
-    Volat  // Volatility
+    Volat, // Volatility
+    Daych  // Day Change
 }
 
 pub fn reporttype2str(rt: ReportType) -> &'static str {
     match rt {
         ReportType::Value => "value",
         ReportType::Top => "top",
-        ReportType::Volat => "volat"
+        ReportType::Volat => "volat",
+        ReportType::Daych => "daych"
     }
 }
 
@@ -22,6 +24,7 @@ pub fn str2reporttype(rtstr: &str) -> Result<ReportType, Box<dyn Error>> {
         "value" => Ok(ReportType::Value),
         "top" => Ok(ReportType::Top),
         "volat" => Ok(ReportType::Volat),
+        "daych" => Ok(ReportType::Daych),
         _ => Err(format!("Unknown report type '{}'", rtstr).into())
     }
 }
@@ -44,16 +47,20 @@ mod tests {
         let value = ReportType::Value;
         let top = ReportType::Top;
         let volat = ReportType::Volat;
+        let daych = ReportType::Daych;
         let value_str = "value";
         let top_str = "top";
         let volat_str = "volat";
+        let daych_str = "daych";
 
         assert_eq!(reporttype2str(value), value_str);
         assert_eq!(reporttype2str(top), top_str);
         assert_eq!(reporttype2str(volat), volat_str);
+        assert_eq!(reporttype2str(daych), daych_str);
         assert!(str2reporttype(&value_str).unwrap() == value);
         assert!(str2reporttype(&top_str).unwrap() == top);
         assert!(str2reporttype(&volat_str).unwrap() == volat);
+        assert!(str2reporttype(&daych_str).unwrap() == daych);
 
         match str2reporttype("foobar") {
             Ok(_) => assert!(false),

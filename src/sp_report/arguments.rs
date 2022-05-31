@@ -20,7 +20,8 @@ impl Arguments {
     pub fn new() -> Arguments {
         let parsed_args = App::new("Stock Portfolio Report")
             .version(common_args::app_version())
-            .about("Get latest close prices and generate portfolio report. Supported reports include gains & losses, top/bottom performers, and volatility.")
+            .about("Get latest close prices and generate portfolio report.\n\
+                    Supported reports include gains & losses, top/bottom performers, volatility, and day change.")
 
             // Options
             .arg(common_args::stocks_file(true))
@@ -33,7 +34,8 @@ impl Arguments {
                  .help("Report type, one of value, top, volat (default: value)\n\
                         value : stocks value (gains & losses)\n\
                         top   : Top/Bottom performing stocks\n\
-                        volat : Stocks volatility")
+                        volat : Stocks volatility\n\
+                        daych : Stocks day change")
                  .takes_value(true))
             .arg(Arg::with_name("order_by")
                  .short("o")
