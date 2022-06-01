@@ -342,7 +342,8 @@ fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
 // --------------------------------------------------------------------------------
 // Stocks Day Change Report and Exporta
 
-type DayChange = (Price, Price, Price, Price, Price, Price, Price, u64);
+// (Prev Price, Price, Change, Percent Change, Low, High, Volume)
+type DayChange = (Price, Price, Price, Price, Price, Price, u64);
 
 fn calc_daych(stock: &Stock, ds: &DataStore) -> Option<DayChange> {
     if let Ok(hist) = History::ds_select_last_n(ds, &stock.symbol, 2) {
@@ -350,13 +351,12 @@ fn calc_daych(stock: &Stock, ds: &DataStore) -> Option<DayChange> {
         if entries.len() == 2 {
             let prev_price = entries[0].adj_close;
             let delta = entries[1].adj_close - prev_price;
-            return Some((stock.latest_price,
+            return Some((prev_price,
+                         entries[1].adj_close,
                          delta,
                          100.0 * if prev_price > 0.0 { delta / prev_price } else { 0.00 },
-                         entries[1].open,
                          entries[1].low,
                          entries[1].high,
-                         entries[1].close,
                          entries[1].volume))
         }
     }
@@ -373,28 +373,26 @@ fn daych_report(params: &ReportParams) {
     println!("Number of Stocks: {}", stocks.len());
     println!("");
 
-    println!("{:8} {:10} {:8} {:8} {:8} {:8} {:8} {:8} {:8} {:10}",
+    println!("{:8} {:10} {:8} {:8} {:8} {:8} {:8} {:8} {:10}",
              "Symbol",
              "Upd Date",
+             "Prev Pr",
              "Price",
              "Change",
              "Pct Chg",
-             "Open",
              "Low",
              "High",
-             "Close",
              "Volume");
 
-    println!("{:8} {:10} {:8} {:8} {:8} {:8} {:8} {:8} {:8} {:10}",
+    println!("{:8} {:10} {:8} {:8} {:8} {:8} {:8} {:8} {:10}",
              "------",
              "--------",
+             "-------",
              "-----",
              "------",
              "-------",
-             "----",
              "---",
              "----",
-             "-----",
              "------");
 
     let mut seen = HashSet::new();
@@ -403,7 +401,7 @@ fn daych_report(params: &ReportParams) {
 
         if let Some(chg) = calc_daych(stock, ds) {
             seen.insert(&stock.symbol);
-            println!("{:8} {:10} {:8.2} {:8.2} {:8.2} {:8.2} {:8.2} {:8.2} {:8.2} {:10}",
+            println!("{:8} {:10} {:8.2} {:8.2} {:8.2} {:8.2} {:8.2} {:8.2} {:10}",
                      stock.symbol,
                      stock.latest_date.format("%Y-%m-%d"),
                      chg.0,
@@ -412,8 +410,7 @@ fn daych_report(params: &ReportParams) {
                      chg.3,
                      chg.4,
                      chg.5,
-                     chg.6,
-                     chg.7);
+                     chg.6);
         }
     }
 }
@@ -423,7 +420,7 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
     let ds = params.datastore().expect("Daych report missing datastore");
 
     let mut file = File::create(&filename)?;
-    write!(file, "Symbol,Upd Date,Price,Change,Pct Chg,Open,Low,High,Close,Volume\n")?;
+    write!(file, "Symbol,Upd Date,Prev Pr,Price,Change,Pct Chg,Low,High,Volume\n")?;
 
     let mut seen = HashSet::new();
     for stock in stocks.iter() {
@@ -431,7 +428,7 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
 
         if let Some(chg) = calc_daych(stock, ds) {
             seen.insert(&stock.symbol);
-            write!(file, "{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{}\n",
+            write!(file, "{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{}\n",
                    stock.symbol,
                    stock.latest_date.format("%Y-%m-%d"),
                    chg.0,
@@ -440,8 +437,7 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
                    chg.3,
                    chg.4,
                    chg.5,
-                   chg.6,
-                   chg.7)?;
+                   chg.6)?;
         }
     }
     Ok(())
