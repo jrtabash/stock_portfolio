@@ -40,7 +40,16 @@ impl Arguments {
             .arg(Arg::with_name("order_by")
                  .short("o")
                  .long("orderby")
-                 .help("Order stocks by one of symbol, type, date, days, price, net, pct, div, size or value")
+                 .help("Order stocks by one of:\n\
+                        symbol : stock symbol        | type    : stock type\n\
+                        date   : base date           | days    : days held\n\
+                        price  : latest price        | size    : quantity\n\
+                        net    : net price           | pct     : percent change\n\
+                        value  : notional value      | div     : cumulative dividend\n\
+                        volat  : orderall volatility | volat22 : 22 day volatility\n\
+                        prevpr : previous day price  | volume  : day volume\n\
+                        change : day change          | pctchg  : day percent change\n\
+                        low    : day low price       | high    : day high price")
                  .takes_value(true))
             .arg(Arg::with_name("include")
                  .short("i")

@@ -185,6 +185,34 @@ fn test_sort_stocks() {
 }
 
 #[test]
+fn test_sort_stocks_by_extra_ftn() {
+    fn test_sort(stocks: &mut StockList, by_ftn: fn (&Stock) -> f64, desc: bool,
+                 first: &str, second: &str, third: &str) {
+        sort_stocks_by_extra_ftn(stocks, by_ftn, desc);
+        assert_eq!(&stocks[0].symbol, first);
+        assert_eq!(&stocks[1].symbol, second);
+        assert_eq!(&stocks[2].symbol, third);
+    }
+
+    let mut list = StockList::new();
+    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
+    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
+    list[0].cum_dividend = 0.0;
+    list[1].cum_dividend = 20.15;
+    list[2].cum_dividend = 15.25;
+
+    let asc = false;
+    let desc = true;
+
+    test_sort(&mut list, |s| s.cum_dividend as f64, asc, "DELL", "ICLN", "AAPL");
+    test_sort(&mut list, |s| s.cum_dividend as f64, desc, "AAPL", "ICLN", "DELL");
+
+    test_sort(&mut list, |s| (300 - s.quantity) as f64, asc, "ICLN", "AAPL", "DELL");
+    test_sort(&mut list, |s| (300 - s.quantity) as f64, desc, "DELL", "AAPL", "ICLN");
+}
+
+#[test]
 fn test_filter_stocks() {
     fn test_filter(expr: &str, keep: bool, symbols: &Vec<&str>) {
         let mut list = StockList::new();

@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::error::Error;
 use crate::portfolio::stock::{Price, Stock, StockList};
@@ -83,6 +84,25 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         _ => return Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }
     Ok(())
+}
+
+pub fn sort_stocks_by_extra_ftn(stocks: &mut StockList, extra_ftn: impl Fn(&Stock) -> f64, desc: bool) {
+    fn user_data_cmp(lhs: &Stock, rhs: &Stock) -> Ordering {
+        if      lhs.user_data < rhs.user_data { Ordering::Less }
+        else if lhs.user_data > rhs.user_data { Ordering::Greater }
+        else                                  { Ordering::Equal }
+    }
+
+    for s in stocks.iter_mut() {
+        s.user_data = extra_ftn(s);
+    }
+
+    if desc {
+        stocks.sort_by(|lhs, rhs| user_data_cmp(rhs, lhs));
+    }
+    else {
+        stocks.sort_by(|lhs, rhs| user_data_cmp(lhs, rhs));
+    }
 }
 
 pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) -> Result<(), Box<dyn Error>> {

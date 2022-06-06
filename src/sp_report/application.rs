@@ -1,5 +1,13 @@
 use std::error::Error;
-use sp_lib::portfolio::{stock, reports, stocks_reader, stocks_update, algorithms, report_type};
+use sp_lib::portfolio::{
+    stock,
+    reports,
+    stocks_reader,
+    stocks_update,
+    algorithms,
+    report_type,
+    extra_sort_ftns
+};
 use sp_lib::portfolio::report_type::ReportType;
 use sp_lib::datastore::datastore;
 use sp_lib::util::common_app;
@@ -77,7 +85,12 @@ impl Application {
 
     fn sort(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if let Some(order_by) = self.args.order_by() {
-            algorithms::sort_stocks(&mut self.stocks, &order_by, self.args.desc())?;
+            if let Some(extra_sort) = extra_sort_ftns::extra_sort_ftn(&order_by) {
+                extra_sort(&self.ds, &mut self.stocks, self.args.desc());
+            }
+            else {
+                algorithms::sort_stocks(&mut self.stocks, &order_by, self.args.desc())?;
+            }
         }
         Ok(())
     }

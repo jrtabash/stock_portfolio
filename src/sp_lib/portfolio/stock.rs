@@ -16,7 +16,10 @@ pub struct Stock {
     pub cum_dividend: Price,     // Cumulative Dividend
     pub latest_price: Price,     // Latest Price
     pub latest_date: LocalDate,  // Latest Date
-    pub days_held: i64           // Days Held
+    pub days_held: i64,          // Days Held
+
+    // For temporary use with extra sorting and other algorithms
+    pub user_data: f64
 }
 
 pub type StockList = Vec<Stock>;
@@ -36,7 +39,8 @@ impl Stock {
             cum_dividend: 0.0,
             latest_price: 0.0,
             latest_date: datetime::earliest_date(),
-            days_held: 0
+            days_held: 0,
+            user_data: 0.0
         }
     }
 
