@@ -5,15 +5,17 @@ use crate::portfolio::algorithms;
 use crate::portfolio::stock::StockList;
 
 pub fn extra_sort_ftn(order_by: &str) -> Option<fn(&DataStore, &mut StockList, bool)> {
-    if      order_by == "volat"   { Some(extra_sort_by_volat) }    // orderall volatility
-    else if order_by == "volat22" { Some(extra_sort_by_volat22) }  // 22 day volatility
-    else if order_by == "change"  { Some(extra_sort_by_change) }   // day change
-    else if order_by == "pctchg"  { Some(extra_sort_by_pctchg) }   // day percent change
-    else if order_by == "prevpr"  { Some(extra_sort_by_prevpr) }   // previous day price
-    else if order_by == "low"     { Some(extra_sort_by_low) }      // day low price
-    else if order_by == "high"    { Some(extra_sort_by_high) }     // day high price
-    else if order_by == "volume"  { Some(extra_sort_by_volume) }   // day volume
-    else                          { None }
+    match order_by {
+        "volat"   => Some(extra_sort_by_volat),    // orderall volatility
+        "volat22" => Some(extra_sort_by_volat22),  // 22 day volatility
+        "change"  => Some(extra_sort_by_change),   // day change
+        "pctchg"  => Some(extra_sort_by_pctchg),   // day percent change
+        "prevpr"  => Some(extra_sort_by_prevpr),   // previous day price
+        "low"     => Some(extra_sort_by_low),      // day low price
+        "high"    => Some(extra_sort_by_high),     // day high price
+        "volume"  => Some(extra_sort_by_volume),   // day volume
+        _ => None
+    }
 }
 
 pub fn extra_sort_by_volat(ds: &DataStore, stocks: &mut StockList, desc: bool) {
