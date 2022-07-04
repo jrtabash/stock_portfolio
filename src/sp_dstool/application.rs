@@ -10,6 +10,7 @@ use crate::arguments::Arguments;
 
 const UPDATE: &str = "update";
 const DROP: &str = "drop";
+const RESET: &str = "reset";
 const CHECK: &str = "check";
 const CREATE: &str = "create";
 const DELETE: &str = "delete";
@@ -64,6 +65,7 @@ impl common_app::AppTrait for Application {
         match self.args.ds_operation().as_str() {
             UPDATE => self.update()?,
             DROP => self.drop()?,
+            RESET => self.reset()?,
             CHECK => self.check()?,
             CREATE => self.create()?,
             DELETE => self.delete()?,
@@ -269,6 +271,18 @@ impl Application {
             count += 1;
         }
         Ok(count)
+    }
+
+    fn reset(self: &Self) -> Result<(), Box<dyn Error>> {
+        if self.args.is_verbose() { println!("Reset symbol"); }
+
+        if self.args.symbol().is_none() {
+            return Err("Missing symbol for reset operation".into());
+        }
+
+        self.drop()?;
+        self.update()?;
+        Ok(())
     }
 
     fn show_data(self: &Self, tag: &str) -> Result<(), Box<dyn Error>> {
