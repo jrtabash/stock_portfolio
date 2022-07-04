@@ -82,6 +82,7 @@ The following operations are supported:
 - **Delete**: Delete datastore
 - **Update**: Update history, dividend and split data
 - **Drop**: Drop symbol
+- **Reset**: Reset symbol, equivalent to drop + update
 - **Showh**: Show symbol history
 - **Showd**: Show symbol dividends
 - **Shows**: Show symbol splits
@@ -100,12 +101,13 @@ FLAGS:
 
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
-    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, showh, showd, shows,
-                                  export, check, stat.
+    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, reset, showh, showd,
+                                  shows, export, check, stat.
                                   create : create empty datastore
                                   delete : delete existing datastore
                                   update : update history, dividend and split data
                                   drop   : drop a symbol
+                                  reset  : Reset a symbol. Equivalent to drop + update
                                   showh  : show history for symbol
                                   showd  : show dividends for symbol
                                   shows  : show splits for symbol
@@ -117,8 +119,8 @@ OPTIONS:
     -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
                                   'symbol,type,date,quantity,base_price' including a header line. Supported type values
                                   include stock, etf and index
-    -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop, showh,
-                                  showd, shows, and export operations
+    -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop, reset,
+                                  showh, showd, shows, and export operations
 ```
 
 ## Stock Portfolio Stats Tool
