@@ -59,6 +59,10 @@ run_dstool -o stat
 run_dstool -o stat -y AAPL
 run_dstool -o export -y AAPL -e ${DS_EXPORT}
 run_dstool -o export -y DELL -e ${DS_EXPORT}
+run_dstool -o showh -y DELL
+run_dstool -o showd -y AAPL
+run_dstool -o shows -y DELL
+run_dstool -o reset -y DELL -s ${DS_STOCKS}
 run_dstool -o drop -y DELL
 run_dstool -o delete
 
