@@ -95,9 +95,10 @@ USAGE:
     sp_dstool [FLAGS] [OPTIONS] --dsop <ds_operation>
 
 FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-    -v, --verbose    Verbose mode
+    -a, --auto-reset    Auto reset stocks on dividend and split updates
+    -h, --help          Prints help information
+    -V, --version       Prints version information
+    -v, --verbose       Verbose mode
 
 OPTIONS:
     -n, --name <ds_name>          Datastore name (default: sp_datastore)
