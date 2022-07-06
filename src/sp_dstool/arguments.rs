@@ -10,7 +10,8 @@ pub struct Arguments {
     stocks_file: Option<String>,
     symbol: Option<String>,
     export_file: Option<String>,
-    verbose: bool
+    verbose: bool,
+    auto_reset: bool
 }
 
 impl Arguments {
@@ -51,6 +52,10 @@ impl Arguments {
                  .short("v")
                  .long("verbose")
                  .help("Verbose mode"))
+            .arg(Arg::with_name("auto_reset")
+                 .short("a")
+                 .long("auto-reset")
+                 .help("Auto reset stocks on dividend and split updates"))
 
             .get_matches();
 
@@ -61,7 +66,8 @@ impl Arguments {
             stocks_file: common_args::parsed_stocks_file(&parsed_args),
             symbol: common_args::parsed_symbol(&parsed_args),
             export_file: common_args::parsed_export_file(&parsed_args),
-            verbose: parsed_args.is_present("verbose")
+            verbose: parsed_args.is_present("verbose"),
+            auto_reset: parsed_args.is_present("auto_reset")
         }
     }
 
@@ -91,5 +97,9 @@ impl Arguments {
 
     pub fn is_verbose(self: &Self) -> bool {
         self.verbose
+    }
+
+    pub fn is_auto_reset(self: &Self) -> bool {
+        self.auto_reset
     }
 }

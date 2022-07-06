@@ -89,6 +89,10 @@ impl Application {
         }
     }
 
+    fn is_dsop_reset(self: &Self) -> bool {
+        self.args.ds_operation().as_str() == RESET
+    }
+
     fn read_stocks(self: &mut Self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() { println!("Read stocks file"); }
 
@@ -135,10 +139,22 @@ impl Application {
         }
     }
 
-    fn update_stock_data(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
+    fn perform_update(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<bool, Box<dyn Error>> {
         self.update_stock_history(symbol, base_date)?;
-        self.update_stock_dividends(symbol, base_date)?;
-        self.update_stock_splits(symbol, base_date)?;
+        let need_div_reset = self.update_stock_dividends(symbol, base_date)?;
+        let need_slt_reset = self.update_stock_splits(symbol, base_date)?;
+        Ok(need_div_reset || need_slt_reset)
+    }
+
+    fn update_stock_data(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
+        let need_reset = self.perform_update(symbol, base_date)?;
+        if need_reset && self.args.is_auto_reset() {
+            let count = self.perform_drop(symbol)?;
+            println!("Auto Reset: dropped {} for symbol {}", misc::count_format(count, "file"), symbol);
+
+            self.perform_update(symbol, base_date)?;
+            println!("Auto Reset: Updated {}", symbol);
+        }
         Ok(())
     }
 
@@ -176,7 +192,9 @@ impl Application {
         Ok(())
     }
 
-    fn update_stock_dividends(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
+    fn update_stock_dividends(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<bool, Box<dyn Error>> {
+        let mut result = false;
+
         let div =
             if self.ds.symbol_exists(dividends::tag(), symbol) {
                 dividends::Dividends::ds_select_last(&self.ds, symbol)?
@@ -206,13 +224,23 @@ impl Application {
 
             query.execute()?;
             if self.ds.insert_symbol(dividends::tag(), symbol, &query.result)? > 0 {
-                println!("Dividends updated, check if {} data reset is needed", symbol);
+                if !self.is_dsop_reset() {
+                    if self.args.is_auto_reset() {
+                        result = true;
+                    }
+                    else {
+                        println!("Dividends updated, check if {} data reset is needed", symbol);
+                    }
+                }
             }
         }
-        Ok(())
+
+        Ok(result)
     }
 
-    fn update_stock_splits(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
+    fn update_stock_splits(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<bool, Box<dyn Error>> {
+        let mut result = false;
+
         let splt =
             if self.ds.symbol_exists(splits::tag(), symbol) {
                 splits::Splits::ds_select_last(&self.ds, symbol)?
@@ -242,10 +270,18 @@ impl Application {
 
             query.execute()?;
             if self.ds.insert_symbol(splits::tag(), symbol, &query.result)? > 0 {
-                println!("Splits updated, check if {} data reset is needed", symbol);
+                if !self.is_dsop_reset() {
+                    if self.args.is_auto_reset() {
+                        result = true;
+                    }
+                    else {
+                        println!("Splits updated, check if {} data reset is needed", symbol);
+                    }
+                }
             }
         }
-        Ok(())
+
+        Ok(result)
     }
 
     fn drop(self: &Self) -> Result<(), Box<dyn Error>> {
@@ -256,12 +292,17 @@ impl Application {
         }
 
         let symbol = self.args.symbol().unwrap();
-        let mut count = 0;
-        count += self.drop_symbol(history::tag(), &symbol)?;
-        count += self.drop_symbol(dividends::tag(), &symbol)?;
-        count += self.drop_symbol(splits::tag(), &symbol)?;
+        let count = self.perform_drop(&symbol)?;
         println!("Dropped {} for symbol {}", misc::count_format(count, "file"), symbol);
         Ok(())
+    }
+
+    fn perform_drop(self: &Self, symbol: &str) -> Result<usize, Box<dyn Error>> {
+        let mut count: usize = 0;
+        count += self.drop_symbol(history::tag(), symbol)?;
+        count += self.drop_symbol(dividends::tag(), symbol)?;
+        count += self.drop_symbol(splits::tag(), symbol)?;
+        Ok(count)
     }
 
     fn drop_symbol(self: &Self, tag: &str, symbol: &str) -> Result<usize, Box<dyn Error>> {
