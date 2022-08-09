@@ -129,8 +129,8 @@ fn test_stocks_update() {
     assert_eq!(cnt, 2);
     assert_eq!(stocks[0].latest_date, dt);
     assert_eq!(stocks[1].latest_date, dt);
-    assert!((stocks[0].latest_price - 58.847775).abs() < 0.0001);
-    assert!((stocks[1].latest_price - 168.632233).abs() < 0.0001);
+    assert!((stocks[0].latest_price - 58.3951).abs() < 0.0001);
+    assert!((stocks[1].latest_price - 168.398315).abs() < 0.0001);
 }
 
 #[test]
