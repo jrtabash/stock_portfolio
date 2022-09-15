@@ -137,6 +137,10 @@ impl Description {
     fn calc_median(values: &[f64]) -> f64 {
         // Assume values are ordered
         let size = values.len();
+        if size == 0 {
+            return 0.0;
+        }
+
         let idx = size / 2;
         if size % 2 == 0 {
             (values[idx] + values[idx - 1]) / 2.0
