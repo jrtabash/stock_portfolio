@@ -1,7 +1,7 @@
 extern crate clap;
 
+use clap::{App, Arg};
 use sp_lib::util::{common_args, datetime};
-use clap::{Arg, App};
 
 pub struct Arguments {
     events: String,
@@ -13,6 +13,7 @@ pub struct Arguments {
 
 impl Arguments {
     pub fn new() -> Self {
+        #[rustfmt::skip]
         let parsed_args = App::new("YFinance History Tool")
             .version(common_args::app_version())
             .about("Yhist tool - Query yfinance history")

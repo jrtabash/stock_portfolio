@@ -1,7 +1,7 @@
-use std::error::Error;
-use sp_lib::util::{datetime, common_app};
-use sp_lib::yfinance::{types, query};
 use crate::arguments::Arguments;
+use sp_lib::util::{common_app, datetime};
+use sp_lib::yfinance::{query, types};
+use std::error::Error;
 
 const EVT_HISTORY: &str = "history";
 const EVT_DIVIDEND: &str = "dividend";
@@ -17,17 +17,12 @@ pub struct Application {
 
 impl common_app::AppTrait for Application {
     fn new() -> Self {
-        Application {
-            args: Arguments::new()
-        }
+        Application { args: Arguments::new() }
     }
 
     fn run(self: &mut Self) -> common_app::RunResult {
-        let from_date = self.args.from().unwrap_or_else(
-            || datetime::today_plus_days(-7));
-        let to_date = datetime::date_plus_days(
-            &self.args.to().unwrap_or_else(datetime::today),
-            1);
+        let from_date = self.args.from().unwrap_or_else(|| datetime::today_plus_days(-7));
+        let to_date = datetime::date_plus_days(&self.args.to().unwrap_or_else(datetime::today), 1);
 
         if from_date <= to_date {
             let mut query = query::HistoryQuery::new(
@@ -35,12 +30,12 @@ impl common_app::AppTrait for Application {
                 from_date,
                 to_date,
                 Self::str2int(self.args.interval())?,
-                Self::str2evts(self.args.events())?);
+                Self::str2evts(self.args.events())?
+            );
             query.execute()?;
             println!("{}", query.result);
             Ok(())
-        }
-        else {
+        } else {
             Err(format!("To date is greater than from date").into())
         }
     }
@@ -52,9 +47,7 @@ impl Application {
             EVT_HISTORY => Ok(types::Events::History),
             EVT_DIVIDEND => Ok(types::Events::Dividend),
             EVT_SPLIT => Ok(types::Events::Split),
-            _ => {
-                Err(format!("Invalid events").into())
-            }
+            _ => Err(format!("Invalid events").into())
         }
     }
 
@@ -63,9 +56,7 @@ impl Application {
             INT_DAY => Ok(types::Interval::Daily),
             INT_WEEK => Ok(types::Interval::Weekly),
             INT_MONTH => Ok(types::Interval::Monthly),
-            _ => {
-                Err(format!("Invalid interval").into())
-            }
+            _ => Err(format!("Invalid interval").into())
         }
     }
 }
