@@ -1,7 +1,7 @@
 extern crate clap;
 
+use clap::{App, Arg};
 use sp_lib::util::{common_args, datetime};
-use clap::{Arg, App};
 
 pub struct Arguments {
     calculate: String,
@@ -14,6 +14,7 @@ pub struct Arguments {
 
 impl Arguments {
     pub fn new() -> Self {
+        #[rustfmt::skip]
         let parsed_args = App::new("Stock Portfolio Stats Tool")
             .version(common_args::app_version())
             .about("Stats tool - describe and calculate")
