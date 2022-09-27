@@ -1,7 +1,7 @@
 extern crate clap;
 
+use clap::{App, Arg};
 use sp_lib::util::common_args;
-use clap::{Arg, App};
 
 pub struct Arguments {
     ds_operation: String,
@@ -16,6 +16,7 @@ pub struct Arguments {
 
 impl Arguments {
     pub fn new() -> Self {
+        #[rustfmt::skip]
         let parsed_args = App::new("Stock Portfolio Datastore Tool")
             .version(common_args::app_version())
             .about("Datastore tool - create, delete, update, drop, showh, showd, shows, export, check or stat.")
