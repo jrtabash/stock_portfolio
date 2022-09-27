@@ -1,8 +1,8 @@
-pub mod arguments;
 pub mod application;
+pub mod arguments;
 
-use sp_lib::util::common_app::app_main;
 use crate::application::Application;
+use sp_lib::util::common_app::app_main;
 
 fn main() {
     app_main::<Application>()

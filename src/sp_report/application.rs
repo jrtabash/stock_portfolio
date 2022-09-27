@@ -1,17 +1,9 @@
-use std::error::Error;
-use sp_lib::portfolio::{
-    stock,
-    reports,
-    stocks_reader,
-    stocks_update,
-    algorithms,
-    report_type,
-    extra_sort_ftns
-};
-use sp_lib::portfolio::report_type::ReportType;
-use sp_lib::datastore::datastore;
-use sp_lib::util::common_app;
 use crate::arguments::Arguments;
+use sp_lib::datastore::datastore;
+use sp_lib::portfolio::report_type::ReportType;
+use sp_lib::portfolio::{algorithms, extra_sort_ftns, report_type, reports, stock, stocks_reader, stocks_update};
+use sp_lib::util::common_app;
+use std::error::Error;
 
 pub struct Application {
     args: Arguments,
@@ -77,7 +69,7 @@ impl Application {
         let count = stocks_update::update_stocks_from_ds(&mut self.stocks, &self.ds)?;
 
         if count != self.stocks.len() {
-            return Err(format!("update stocks failed; updated={} expected={}", count, self.stocks.len()).into())
+            return Err(format!("update stocks failed; updated={} expected={}", count, self.stocks.len()).into());
         }
 
         Ok(())
@@ -87,8 +79,7 @@ impl Application {
         if let Some(order_by) = self.args.order_by() {
             if let Some(extra_sort) = extra_sort_ftns::extra_sort_ftn(&order_by) {
                 extra_sort(&self.ds, &mut self.stocks, self.args.desc());
-            }
-            else {
+            } else {
                 algorithms::sort_stocks(&mut self.stocks, &order_by, self.args.desc())?;
             }
         }
@@ -99,15 +90,14 @@ impl Application {
         reports::print_report(
             reports::ReportParams::new(self.rtype, &self.stocks)
                 .show_groupby(self.args.show_groupby())
-                .with_datastore(&self.ds));
+                .with_datastore(&self.ds)
+        );
     }
 
     fn export(self: &Application) -> Result<(), Box<dyn Error>> {
         if let Some(export_file) = self.args.export_file() {
-            reports::export_report(
-                reports::ReportParams::new(self.rtype, &self.stocks)
-                    .with_datastore(&self.ds),
-                &export_file)?;
+            let report_params = reports::ReportParams::new(self.rtype, &self.stocks).with_datastore(&self.ds);
+            reports::export_report(report_params, &export_file)?;
         }
         Ok(())
     }

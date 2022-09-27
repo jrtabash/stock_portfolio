@@ -1,7 +1,7 @@
 extern crate clap;
 
+use clap::{App, Arg};
 use sp_lib::util::common_args;
-use clap::{Arg, App};
 
 pub struct Arguments {
     stocks_file: String,
@@ -18,6 +18,7 @@ pub struct Arguments {
 
 impl Arguments {
     pub fn new() -> Arguments {
+        #[rustfmt::skip]
         let parsed_args = App::new("Stock Portfolio Report")
             .version(common_args::app_version())
             .about("Get latest close prices and generate portfolio report.\n\
