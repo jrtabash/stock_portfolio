@@ -164,7 +164,7 @@ impl Application {
 
     pub fn print_dp_list(dps: &hist_ftns::DatePriceList, name: &str) {
         println!(" field: adj_close");
-        println!(" {:>5}: ", name);
+        println!("{:>6}: ", name);
         for (date, price) in dps.iter() {
             println!("{} {:.4}", date.format("%Y-%m-%d"), price);
         }
