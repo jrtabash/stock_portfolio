@@ -25,6 +25,20 @@ pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
     entries_vwap(hist.entries())
 }
 
+// Simple Average Price
+pub fn entries_sa(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+    if entries.len() > 0 {
+        reduce_ftns::mean(entries, |e| e.adj_close)
+    } else {
+        Ok(0.0)
+    }
+}
+
+#[inline(always)]
+pub fn hist_sa(hist: &History) -> Result<Price, Box<dyn Error>> {
+    entries_sa(hist.entries())
+}
+
 // Volatility
 pub fn entries_volatility(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
     let roc = entries_roc(entries, 1)?;
@@ -76,6 +90,49 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceL
 #[inline(always)]
 pub fn hist_mvwap(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     entries_mvwap(hist.entries(), days)
+}
+
+// Simple Moving Average Price
+pub fn entries_sma(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    if days < 1 {
+        return Err(format!("entries_sma: days < 1").into())
+    }
+    if days > entries.len() {
+        return Err(format!("entries_sma: days > len").into())
+    }
+
+    let base = days - 1;
+    let size = entries.len();
+
+    let mut sum: Price = 0.0;
+    let mut cnt: u64 = 0;
+    for i in 0..base {
+        sum += entries[i].adj_close;
+        cnt += 1;
+    }
+
+    let mut prices: DatePriceList = Vec::with_capacity(size - base);
+    for i in base..size {
+        sum += entries[i].adj_close;
+        cnt += 1;
+
+        if cnt == 0 {
+            return Err(format!("entries_sma: Cannot divide by zero total count").into())
+        }
+
+        prices.push((entries[i].date.clone(), sum / cnt as Price));
+
+        let i0 = i - base;
+        sum -= entries[i0].adj_close;
+        cnt -= 1;
+    }
+
+    Ok(prices)
+}
+
+#[inline(always)]
+pub fn hist_sma(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_sma(hist.entries(), days)
 }
 
 // Rate of Change
@@ -182,6 +239,20 @@ mod tests {
     }
 
     #[test]
+    fn test_entries_sa() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        assert!(price_eql(entries_sa(&entries).unwrap(), 145.351675));
+        assert!(price_eql(entries_sa(&entries[3..8]).unwrap(), 142.294326));
+    }
+
+    #[test]
+    fn test_hist_sa() {
+        let hist = hist_data();
+        assert!(price_eql(hist_sa(&hist).unwrap(), 145.351675));
+    }
+
+    #[test]
     fn test_entries_volatility() {
         let hist = hist_data();
         let entries = hist.entries();
@@ -212,6 +283,26 @@ mod tests {
         let hist = hist_data();
         let expect = expect_mvwap();
         let actual = hist_mvwap(&hist, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
+    fn test_entries_sma() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_sma();
+        let actual = entries_sma(&entries, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+
+        let actual = entries_sma(&entries[3..10], 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect[3..6]));
+    }
+
+    #[test]
+    fn test_hist_sma() {
+        let hist = hist_data();
+        let expect = expect_sma();
+        let actual = hist_sma(&hist, 5).unwrap();
         assert!(date_prices_eql(&actual, &expect));
     }
 
@@ -295,6 +386,15 @@ mod tests {
                           142.101272, 142.488000, 143.346371, 144.789113, 146.380997,
                           147.452895, 148.191956, 148.749638, 148.877932, 148.796869,
                           149.797197, 149.927214];
+        make_date_prices(&prices, date0)
+    }
+
+    fn expect_sma() -> DatePriceList {
+        let date0 = make_date(2021, 10, 07);
+        let prices = vec![141.4315856, 141.4815124, 142.214444 , 142.2943268, 142.076645,
+                          142.1705078, 142.5579438, 143.3048524, 144.7527376, 146.4203034,
+                          147.5626344, 148.3315124, 148.7489044, 148.8607452, 148.7788666,
+                          149.3959686, 149.6176454];
         make_date_prices(&prices, date0)
     }
 
