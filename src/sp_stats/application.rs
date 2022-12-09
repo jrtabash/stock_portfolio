@@ -6,8 +6,10 @@ use std::error::Error;
 
 const DESC: &str = "desc";
 const DIVDESC: &str = "divdesc";
+const SA: &str = "sa";
 const VWAP: &str = "vwap";
 const VOLAT: &str = "volat";
+const SMA: &str = "sma";
 const MVWAP: &str = "mvwap";
 const ROC: &str = "roc";
 const PCTCH: &str = "pctch";
@@ -43,8 +45,10 @@ impl common_app::AppTrait for Application {
         match self.args.calculate().as_str() {
             DESC => self.describe()?,
             DIVDESC => self.div_describe()?,
+            SA => self.calc_sa()?,
             VWAP => self.calc_vwap()?,
             VOLAT => self.calc_volat()?,
+            SMA => self.calc_sma()?,
             MVWAP => self.calc_mvwap()?,
             ROC => self.calc_roc()?,
             PCTCH => self.calc_pctch()?,
@@ -155,6 +159,13 @@ impl Application {
         Ok(())
     }
 
+    fn calc_sa(&self) -> Result<(), Box<dyn Error>> {
+        let sa = hist_ftns::hist_sa(&self.hist)?;
+        println!(" field: adj_close");
+        println!("    sa: {:.4}", sa);
+        Ok(())
+    }
+
     fn calc_volat(&self) -> Result<(), Box<dyn Error>> {
         let volat = hist_ftns::hist_volatility(&self.hist)?;
         println!(" field: adj_close");
@@ -182,6 +193,13 @@ impl Application {
         self.check_window(1)?;
         let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
         Self::print_dp_list(&mvwap, MVWAP);
+        Ok(())
+    }
+
+    fn calc_sma(&self) -> Result<(), Box<dyn Error>> {
+        self.check_window(1)?;
+        let sma = hist_ftns::hist_sma(&self.hist, self.args.window())?;
+        Self::print_dp_list(&sma, SMA);
         Ok(())
     }
 
