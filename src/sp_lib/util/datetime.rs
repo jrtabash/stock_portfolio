@@ -30,12 +30,12 @@ pub fn date_plus_days(date: &LocalDate, days: i64) -> LocalDate {
 
 #[inline(always)]
 pub fn earliest_date() -> LocalDate {
-    chrono::Local.ymd(1970, 1, 1)
+    make_date(1970, 1, 1)
 }
 
 pub fn parse_date(date_str: &str) -> Result<LocalDate, Box<dyn Error>> {
     match NaiveDate::parse_from_str(&date_str, "%Y-%m-%d") {
-        Ok(dt) => Ok(chrono::Local.ymd(dt.year(), dt.month(), dt.day())),
+        Ok(dt) => Ok(make_date(dt.year(), dt.month(), dt.day())),
         Err(e) => Err(format!("parse_date: {}", e).into())
     }
 }
