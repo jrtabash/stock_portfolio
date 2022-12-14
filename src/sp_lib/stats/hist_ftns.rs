@@ -1,10 +1,10 @@
 use std::error::Error;
 use crate::datastore::history::{History, HistoryEntry, Price};
-use crate::util::datetime::LocalDate;
+use crate::util::datetime::SPDate;
 use crate::util::price_type::price_zero;
 use crate::stats::reduce_ftns;
 
-pub type DatePriceList = Vec<(LocalDate, Price)>;
+pub type DatePriceList = Vec<(SPDate, Price)>;
 
 // Volume Weighted Average Price
 pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
@@ -434,7 +434,7 @@ mod tests {
         make_date_prices(&vols, date0)
     }
 
-    fn make_date_prices(prices: &Vec<Price>, date0: LocalDate) -> DatePriceList {
+    fn make_date_prices(prices: &Vec<Price>, date0: SPDate) -> DatePriceList {
         let mut days: i64 = 0;
         prices
             .iter()
@@ -450,7 +450,7 @@ mod tests {
             .collect()
     }
 
-    fn date_prices_eql(actual: &[(LocalDate, Price)], expect: &[(LocalDate, Price)]) -> bool {
+    fn date_prices_eql(actual: &[(SPDate, Price)], expect: &[(SPDate, Price)]) -> bool {
         if actual.len() != expect.len() {
             return false
         }

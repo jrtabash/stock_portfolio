@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::util::datetime;
-use crate::util::datetime::LocalDate;
+use crate::util::datetime::SPDate;
 use crate::util::price_type::PriceType;
 use crate::datastore::datastore::DataStore;
 
@@ -19,7 +19,7 @@ pub fn tag() -> &'static str {
 // History Entry
 
 pub struct HistoryEntry {
-    pub date: LocalDate,
+    pub date: SPDate,
     pub open: Price,
     pub high: Price,
     pub low: Price,
@@ -29,7 +29,7 @@ pub struct HistoryEntry {
 }
 
 impl HistoryEntry {
-    pub fn new(date: LocalDate,
+    pub fn new(date: SPDate,
                open: Price,
                high: Price,
                low: Price,
@@ -297,7 +297,7 @@ mod tests {
     }
 
     fn check_entry(entry: &HistoryEntry,
-                   date: LocalDate,
+                   date: SPDate,
                    open: Price,
                    high: Price,
                    low: Price,

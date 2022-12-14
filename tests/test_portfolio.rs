@@ -358,7 +358,7 @@ fn test_stock_reader() {
                vec!["AAPL", "AAPL", "DELL"]);
     assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
                vec![StockType::Stock, StockType::Stock, StockType::Stock]);
-    assert_eq!(list.iter().map(|s| s.date).collect::<Vec<LocalDate>>(),
+    assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
                vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
     assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
                vec![100, 100, 100]);
@@ -371,7 +371,7 @@ fn test_stock_reader() {
 // --------------------------------------------------------------------------------
 // Helpers
 
-fn make_stock(sym: &str, stype: StockType, date: LocalDate, qty: u32, base: Price, latest: Price) -> Stock {
+fn make_stock(sym: &str, stype: StockType, date: SPDate, qty: u32, base: Price, latest: Price) -> Stock {
     let symbol = String::from(sym);
     let mut stock = Stock::new(symbol, stype, date, qty, base);
     stock.set_latest_price(latest, today_plus_days(0));

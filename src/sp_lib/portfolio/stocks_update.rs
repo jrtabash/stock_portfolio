@@ -19,7 +19,7 @@ pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<d
     Ok(false)
 }
 
-pub fn update_stock(stock: &mut Stock, opt_day: Option<datetime::LocalDate>) -> Result<bool, Box<dyn Error>> {
+pub fn update_stock(stock: &mut Stock, opt_day: Option<datetime::SPDate>) -> Result<bool, Box<dyn Error>> {
     let day = opt_day.unwrap_or_else(datetime::today);
     let back_delta =
         if datetime::is_monday(&day) {
@@ -62,7 +62,7 @@ pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, B
     Ok(false)
 }
 
-pub fn update_stocks(stocks: &mut StockList, opt_day: Option<datetime::LocalDate>) -> Result<usize, Box<dyn Error>> {
+pub fn update_stocks(stocks: &mut StockList, opt_day: Option<datetime::SPDate>) -> Result<usize, Box<dyn Error>> {
     let mut count: usize = 0;
     for stock in stocks.iter_mut() {
         if update_stock(stock, opt_day)? {

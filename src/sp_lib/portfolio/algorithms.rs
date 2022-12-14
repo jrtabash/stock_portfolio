@@ -111,7 +111,7 @@ pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) -> R
     Ok(())
 }
 
-pub fn stock_base_dates(stocks: &StockList) -> HashMap<String, datetime::LocalDate> {
+pub fn stock_base_dates(stocks: &StockList) -> HashMap<String, datetime::SPDate> {
     stock_groupby(
         stocks,
         |stock| stock.date.clone(),

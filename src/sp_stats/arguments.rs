@@ -9,7 +9,7 @@ pub struct Arguments {
     ds_name: String,
     symbol: String,
     window: usize,
-    from: Option<datetime::LocalDate>
+    from: Option<datetime::SPDate>
 }
 
 impl Arguments {
@@ -81,7 +81,7 @@ impl Arguments {
         self.window
     }
 
-    pub fn from(&self) -> Option<datetime::LocalDate> {
+    pub fn from(&self) -> Option<datetime::SPDate> {
         self.from
     }
 }

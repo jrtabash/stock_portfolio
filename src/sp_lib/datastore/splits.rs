@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::util::datetime;
-use crate::util::datetime::LocalDate;
+use crate::util::datetime::SPDate;
 use crate::datastore::datastore::DataStore;
 
 // --------------------------------------------------------------------------------
@@ -16,12 +16,12 @@ pub fn tag() -> &'static str {
 // Splits Entry
 
 pub struct SplitEntry {
-    pub date: LocalDate,
+    pub date: SPDate,
     pub split: String
 }
 
 impl SplitEntry {
-    pub fn new(date: LocalDate, split: String) -> Self {
+    pub fn new(date: SPDate, split: String) -> Self {
         SplitEntry {
             date: date,
             split: split
@@ -272,7 +272,7 @@ mod tests {
         };
     }
 
-    fn check_split(entry: &SplitEntry, date: LocalDate, split: &str) {
+    fn check_split(entry: &SplitEntry, date: SPDate, split: &str) {
         assert_eq!(entry.date, date);
         assert_eq!(entry.split, split);
     }

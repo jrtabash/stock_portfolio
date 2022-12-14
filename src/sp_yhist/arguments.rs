@@ -7,8 +7,8 @@ pub struct Arguments {
     events: String,
     interval: String,
     symbol: String,
-    from: Option<datetime::LocalDate>,
-    to: Option<datetime::LocalDate>
+    from: Option<datetime::SPDate>,
+    to: Option<datetime::SPDate>
 }
 
 impl Arguments {
@@ -49,11 +49,11 @@ impl Arguments {
         &self.symbol
     }
 
-    pub fn from(&self) -> Option<datetime::LocalDate> {
+    pub fn from(&self) -> Option<datetime::SPDate> {
         self.from
     }
 
-    pub fn to(&self) -> Option<datetime::LocalDate> {
+    pub fn to(&self) -> Option<datetime::SPDate> {
         self.to
     }
 

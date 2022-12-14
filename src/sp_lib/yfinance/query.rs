@@ -5,15 +5,15 @@ use curl::easy;
 use crate::yfinance::types;
 use crate::yfinance::types::{Interval, Events};
 use crate::util::datetime;
-use crate::util::datetime::LocalDate;
+use crate::util::datetime::SPDate;
 
 // --------------------------------------------------------------------------------
 // HistoryQuery
 
 pub struct HistoryQuery {
     symbol: String,
-    from_date: LocalDate,
-    to_date: LocalDate,
+    from_date: SPDate,
+    to_date: SPDate,
     interval: Interval,
     events: Events,
     pub result: String
@@ -21,8 +21,8 @@ pub struct HistoryQuery {
 
 impl HistoryQuery {
     pub fn new(symbol: String,
-               from_date: LocalDate,
-               to_date: LocalDate,
+               from_date: SPDate,
+               to_date: SPDate,
                interval: Interval,
                events: Events) -> HistoryQuery {
         HistoryQuery {

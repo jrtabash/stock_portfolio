@@ -32,7 +32,7 @@ struct StatAgg {
 
 pub struct Application {
     args: Arguments,
-    sym_dates: HashMap<String, datetime::LocalDate>,
+    sym_dates: HashMap<String, datetime::SPDate>,
     ds: datastore::DataStore
 }
 
@@ -144,14 +144,14 @@ impl Application {
         }
     }
 
-    fn perform_update(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<bool, Box<dyn Error>> {
+    fn perform_update(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
         self.update_stock_history(symbol, base_date)?;
         let need_div_reset = self.update_stock_dividends(symbol, base_date)?;
         let need_slt_reset = self.update_stock_splits(symbol, base_date)?;
         Ok(need_div_reset || need_slt_reset)
     }
 
-    fn update_stock_data(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
+    fn update_stock_data(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<(), Box<dyn Error>> {
         let need_reset = self.perform_update(symbol, base_date)?;
         if need_reset && self.args.is_auto_reset() {
             let count = self.perform_drop(symbol)?;
@@ -163,7 +163,7 @@ impl Application {
         Ok(())
     }
 
-    fn update_stock_history(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<(), Box<dyn Error>> {
+    fn update_stock_history(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<(), Box<dyn Error>> {
         let hist = if self.ds.symbol_exists(history::tag(), symbol) {
             history::History::ds_select_last(&self.ds, symbol)?
         } else {
@@ -196,7 +196,7 @@ impl Application {
         Ok(())
     }
 
-    fn update_stock_dividends(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<bool, Box<dyn Error>> {
+    fn update_stock_dividends(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
         let mut result = false;
 
         let div = if self.ds.symbol_exists(dividends::tag(), symbol) {
@@ -240,7 +240,7 @@ impl Application {
         Ok(result)
     }
 
-    fn update_stock_splits(self: &Self, symbol: &str, base_date: &datetime::LocalDate) -> Result<bool, Box<dyn Error>> {
+    fn update_stock_splits(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
         let mut result = false;
 
         let splt = if self.ds.symbol_exists(splits::tag(), symbol) {

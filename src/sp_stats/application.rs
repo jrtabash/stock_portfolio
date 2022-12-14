@@ -61,7 +61,7 @@ impl common_app::AppTrait for Application {
 }
 
 impl Application {
-    fn date_range<Entry>(entries: &Vec<Entry>, extract_date: impl Fn(&Entry) -> datetime::LocalDate) -> (datetime::LocalDate, datetime::LocalDate) {
+    fn date_range<Entry>(entries: &Vec<Entry>, extract_date: impl Fn(&Entry) -> datetime::SPDate) -> (datetime::SPDate, datetime::SPDate) {
         if entries.len() > 0 {
             (extract_date(&entries[0]), extract_date(&entries[entries.len() - 1]))
         } else {

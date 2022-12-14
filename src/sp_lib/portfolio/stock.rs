@@ -1,7 +1,7 @@
 use std::fmt;
 
 use crate::util::datetime;
-use crate::util::datetime::LocalDate;
+use crate::util::datetime::SPDate;
 use crate::util::price_type::PriceType;
 use crate::portfolio::stock_type::StockType;
 
@@ -10,12 +10,12 @@ pub type Price = PriceType;
 pub struct Stock {
     pub symbol: String,          // Name
     pub stype: StockType,        // Stock Type
-    pub date: LocalDate,         // Buy Date
+    pub date: SPDate,            // Buy Date
     pub quantity: u32,           // Buy Quantity
     pub base_price: Price,       // Buy Price
     pub cum_dividend: Price,     // Cumulative Dividend
     pub latest_price: Price,     // Latest Price
-    pub latest_date: LocalDate,  // Latest Date
+    pub latest_date: SPDate,     // Latest Date
     pub days_held: i64,          // Days Held
 
     // For temporary use with extra sorting and other algorithms
@@ -27,7 +27,7 @@ pub type StockList = Vec<Stock>;
 impl Stock {
     pub fn new(symbol: String,
                stype: StockType,
-               date: LocalDate,
+               date: SPDate,
                quantity: u32,
                base_price: Price) -> Stock {
         Stock {
@@ -45,7 +45,7 @@ impl Stock {
     }
 
     #[inline(always)]
-    pub fn set_latest_price(self: &mut Stock, price: Price, date: LocalDate) {
+    pub fn set_latest_price(self: &mut Stock, price: Price, date: SPDate) {
         self.latest_price = price;
         self.latest_date = date;
         self.days_held = datetime::count_days(&self.date, &self.latest_date)

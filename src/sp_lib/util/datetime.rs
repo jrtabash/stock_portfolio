@@ -1,39 +1,39 @@
 use std::error::Error;
-use chrono::{Date, Local, Duration, NaiveDate, Datelike, TimeZone, Weekday};
+use chrono::{Local, Duration, NaiveDate, NaiveDateTime, Datelike, Weekday};
 
-pub type LocalDate = Date<Local>;
+pub type SPDate = NaiveDate;
 
 #[inline(always)]
-pub fn date2timestamp(date: &LocalDate) -> i64 {
-    date.and_hms(0, 0, 0).timestamp()
+pub fn date2timestamp(date: &SPDate) -> i64 {
+    date.and_hms_opt(0, 0, 0).unwrap_or(NaiveDateTime::MIN).timestamp()
 }
 
 #[inline(always)]
-pub fn make_date(year: i32, month: u32, day: u32) -> LocalDate {
-    chrono::Local.ymd(year, month, day)
+pub fn make_date(year: i32, month: u32, day: u32) -> SPDate {
+    NaiveDate::from_ymd_opt(year, month, day).unwrap_or(NaiveDate::MIN)
 }
 
 #[inline(always)]
-pub fn today() -> LocalDate {
-    Local::today()
+pub fn today() -> SPDate {
+    Local::now().date_naive()
 }
 
 #[inline(always)]
-pub fn today_plus_days(days: i64) -> LocalDate {
-    Local::today() + Duration::days(days)
+pub fn today_plus_days(days: i64) -> SPDate {
+    today() + Duration::days(days)
 }
 
 #[inline(always)]
-pub fn date_plus_days(date: &LocalDate, days: i64) -> LocalDate {
+pub fn date_plus_days(date: &SPDate, days: i64) -> SPDate {
     *date + Duration::days(days)
 }
 
 #[inline(always)]
-pub fn earliest_date() -> LocalDate {
+pub fn earliest_date() -> SPDate {
     make_date(1970, 1, 1)
 }
 
-pub fn parse_date(date_str: &str) -> Result<LocalDate, Box<dyn Error>> {
+pub fn parse_date(date_str: &str) -> Result<SPDate, Box<dyn Error>> {
     match NaiveDate::parse_from_str(&date_str, "%Y-%m-%d") {
         Ok(dt) => Ok(make_date(dt.year(), dt.month(), dt.day())),
         Err(e) => Err(format!("parse_date: {}", e).into())
@@ -41,26 +41,26 @@ pub fn parse_date(date_str: &str) -> Result<LocalDate, Box<dyn Error>> {
 }
 
 #[inline(always)]
-pub fn is_monday(date: &LocalDate) -> bool {
+pub fn is_monday(date: &SPDate) -> bool {
     date.weekday() == Weekday::Mon
 }
 
 #[inline(always)]
-pub fn is_friday(date: &LocalDate) -> bool {
+pub fn is_friday(date: &SPDate) -> bool {
     date.weekday() == Weekday::Fri
 }
 
 #[inline(always)]
-pub fn is_weekend(date: &LocalDate) -> bool {
+pub fn is_weekend(date: &SPDate) -> bool {
     date.weekday() == Weekday::Sat || date.weekday() == Weekday::Sun
 }
 
 #[inline(always)]
-pub fn count_days(from_date: &LocalDate, to_date: &LocalDate) -> i64 {
+pub fn count_days(from_date: &SPDate, to_date: &SPDate) -> i64 {
     to_date.signed_duration_since(from_date.clone()).num_days()
 }
 
-pub fn check_dup_or_back_gap(old_date: &LocalDate, new_date: &LocalDate) -> Result<(), Box<dyn Error>> {
+pub fn check_dup_or_back_gap(old_date: &SPDate, new_date: &SPDate) -> Result<(), Box<dyn Error>> {
     if old_date == new_date {
         return Err(format!("Duplicate date {}", new_date.format("%Y-%m-%d")).into())
     }
@@ -80,7 +80,7 @@ mod tests {
     #[test]
     fn test_today() {
         let date = today();
-        assert_eq!(date, Local::today());
+        assert_eq!(date, Local::now().date_naive());
     }
 
     #[test]
@@ -94,7 +94,7 @@ mod tests {
     #[test]
     fn test_date2timestamp() {
         let date = make_date(2021, 2, 17);
-        assert_eq!(date2timestamp(&date), 1613541600);
+        assert_eq!(date2timestamp(&date), 1613520000);
     }
 
     #[test]
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn test_parse_date() {
-        fn test(date: LocalDate) {
+        fn test(date: SPDate) {
             let date_str = format!("{:04}-{:02}-{:02}", date.year(), date.month(), date.day());
             match parse_date(&date_str) {
                 Ok(dt) => assert_eq!(dt, date),

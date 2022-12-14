@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::util::datetime;
-use crate::util::datetime::LocalDate;
+use crate::util::datetime::SPDate;
 use crate::util::price_type::PriceType;
 use crate::datastore::datastore::DataStore;
 
@@ -19,12 +19,12 @@ pub fn tag() -> &'static str {
 // Dividend Entry
 
 pub struct DividendEntry {
-    pub date: LocalDate,
+    pub date: SPDate,
     pub price: Price
 }
 
 impl DividendEntry {
-    pub fn new(date: LocalDate, price: Price) -> Self {
+    pub fn new(date: SPDate, price: Price) -> Self {
         DividendEntry {
             date: date,
             price: price
@@ -276,7 +276,7 @@ mod tests {
         };
     }
 
-    fn check_dividend(entry: &DividendEntry, date: LocalDate, price: Price) {
+    fn check_dividend(entry: &DividendEntry, date: SPDate, price: Price) {
         assert_eq!(entry.date, date);
         assert_eq!(entry.price, price);
     }

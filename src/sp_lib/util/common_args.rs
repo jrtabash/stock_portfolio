@@ -142,14 +142,14 @@ pub fn parsed_stocks_file(parsed_args: &ArgMatches) -> Option<String> {
     }
 }
 
-pub fn parsed_from_date(parsed_args: &ArgMatches) -> Option<datetime::LocalDate> {
+pub fn parsed_from_date(parsed_args: &ArgMatches) -> Option<datetime::SPDate> {
     match parsed_args.value_of("from_date") {
         Some(date) => Some(datetime::parse_date(date).expect("Invalid from date")),
         None => None
     }
 }
 
-pub fn parsed_to_date(parsed_args: &ArgMatches) -> Option<datetime::LocalDate> {
+pub fn parsed_to_date(parsed_args: &ArgMatches) -> Option<datetime::SPDate> {
     match parsed_args.value_of("to_date") {
         Some(date) => Some(datetime::parse_date(date).expect("Invalid to date")),
         None => None
