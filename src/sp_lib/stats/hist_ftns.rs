@@ -215,6 +215,44 @@ pub fn hist_mvolatility(hist: &History, days: usize) -> Result<DatePriceList, Bo
     entries_mvolatility(hist.entries(), days)
 }
 
+// Relative Strength Index
+pub fn entries_rsi(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    fn calc_rsi(mean_gain: Price, mean_loss: Price) -> Price { 100.0 - (100.0 / (1.0 + mean_gain / mean_loss)) }
+    fn pct2gain(p: &Price) -> Price { if *p > 0.0 { *p } else { 0.0 } }
+    fn pct2loss(p: &Price) -> Price { if *p < 0.0 { *p * -1.0 } else { 0.0 } }
+
+    if days < 1 {
+        return Err(format!("entries_rsi: days < 1").into())
+    }
+
+    if days > entries.len() {
+        return Err(format!("entries_rsi: days > len").into())
+    }
+
+    let size = entries.len();
+    let days_1 = (days - 1) as Price;
+    let pct: Vec<Price> = entries.iter().map(|e| (e.close - e.open) / e.open).collect();
+
+    let mut rsi: DatePriceList = Vec::with_capacity(size - days + 1);
+    let mut gain = pct[0..days].iter().map(pct2gain).sum::<Price>() / days as Price;
+    let mut loss = pct[0..days].iter().map(pct2loss).sum::<Price>() / days as Price;
+
+    rsi.push((entries[days - 1].date.clone(), calc_rsi(gain, loss)));
+
+    for i in days..size {
+        gain = (gain * days_1) + pct2gain(&pct[i]);
+        loss = (loss * days_1) + pct2loss(&pct[i]);
+        rsi.push((entries[i].date.clone(), calc_rsi(gain, loss)));
+    }
+
+    Ok(rsi)
+}
+
+#[inline(always)]
+pub fn hist_rsi(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_rsi(hist.entries(), days)
+}
+
 // --------------------------------------------------------------------------------
 // Unit Tests
 
@@ -354,6 +392,27 @@ mod tests {
         assert!(date_prices_eql(&actual, &expect));
     }
 
+    #[test]
+    fn test_entries_rsi() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_rsi();
+        let actual = entries_rsi(&entries, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+
+        let actual = entries_rsi(&entries[3..10], 5).unwrap();
+        let expect = expect_rsi_short();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
+    fn test_hist_rsi() {
+        let hist = hist_data();
+        let expect = expect_rsi();
+        let actual = hist_rsi(&hist, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
     fn hist_data() -> History {
         History::parse_csv(
             "AAPL",
@@ -432,6 +491,21 @@ mod tests {
                         0.654992, 0.847149, 0.371297, 0.412710, 0.426155,
                         1.272074, 1.796263];
         make_date_prices(&vols, date0)
+    }
+
+    fn expect_rsi() -> DatePriceList {
+        let date0 = make_date(2021, 10, 07);
+        let rsi = vec![66.475035, 56.435547, 57.217017, 56.416546, 56.378181,
+                       56.415003, 56.420898, 56.425176, 56.425765, 56.425812,
+                       56.425826, 56.425819, 56.425819, 56.425819, 56.425819,
+                       56.425819, 56.425819];
+        make_date_prices(&rsi, date0)
+    }
+
+    fn expect_rsi_short() -> DatePriceList {
+        let date0 = make_date(2021, 10, 12);
+        let rsi = vec![54.250287, 50.829563, 54.401522];
+        make_date_prices(&rsi, date0)
     }
 
     fn make_date_prices(prices: &Vec<Price>, date0: SPDate) -> DatePriceList {
