@@ -14,6 +14,7 @@ const MVWAP: &str = "mvwap";
 const ROC: &str = "roc";
 const PCTCH: &str = "pctch";
 const MVOLAT: &str = "mvolat";
+const RSI: &str = "rsi";
 
 pub struct Application {
     args: Arguments,
@@ -53,6 +54,7 @@ impl common_app::AppTrait for Application {
             ROC => self.calc_roc()?,
             PCTCH => self.calc_pctch()?,
             MVOLAT => self.calc_mvolat()?,
+            RSI => self.calc_rsi()?,
             _ => return Err(format!("Invalid calculate option - '{}'", self.args.calculate()).into())
         };
 
@@ -173,8 +175,10 @@ impl Application {
         Ok(())
     }
 
-    pub fn print_dp_list(dps: &hist_ftns::DatePriceList, name: &str) {
-        println!(" field: adj_close");
+    pub fn print_dp_list(dps: &hist_ftns::DatePriceList, name: &str, show_field: bool) {
+        if show_field {
+            println!(" field: adj_close");
+        }
         println!("{:>6}: ", name);
         for (date, price) in dps.iter() {
             println!("{} {:.4}", date.format("%Y-%m-%d"), price);
@@ -192,34 +196,41 @@ impl Application {
     fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(1)?;
         let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
-        Self::print_dp_list(&mvwap, MVWAP);
+        Self::print_dp_list(&mvwap, MVWAP, true);
         Ok(())
     }
 
     fn calc_sma(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(1)?;
         let sma = hist_ftns::hist_sma(&self.hist, self.args.window())?;
-        Self::print_dp_list(&sma, SMA);
+        Self::print_dp_list(&sma, SMA, true);
         Ok(())
     }
 
     fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(2)?;
         let roc = hist_ftns::hist_roc(&self.hist, self.args.window() - 1)?;
-        Self::print_dp_list(&roc, ROC);
+        Self::print_dp_list(&roc, ROC, true);
         Ok(())
     }
 
     fn calc_pctch(&self) -> Result<(), Box<dyn Error>> {
         let pctch = hist_ftns::hist_pctch(&self.hist)?;
-        Self::print_dp_list(&pctch, PCTCH);
+        Self::print_dp_list(&pctch, PCTCH, true);
         Ok(())
     }
 
     fn calc_mvolat(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(1)?;
         let mvolat = hist_ftns::hist_mvolatility(&self.hist, self.args.window())?;
-        Self::print_dp_list(&mvolat, MVOLAT);
+        Self::print_dp_list(&mvolat, MVOLAT, true);
+        Ok(())
+    }
+
+    fn calc_rsi(&self) -> Result<(), Box<dyn Error>> {
+        self.check_window(2)?;
+        let rsi = hist_ftns::hist_rsi(&self.hist, self.args.window())?;
+        Self::print_dp_list(&rsi, RSI, false);
         Ok(())
     }
 }

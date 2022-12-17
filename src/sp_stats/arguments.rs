@@ -27,7 +27,7 @@ impl Arguments {
             .arg(Arg::with_name("calculate")
                  .short("c")
                  .long("calc")
-                 .help("Calculate stats, one of desc, divdesc, sa, vwap, volat, sma, mvwap, roc, pctch, mvolat.\n\
+                 .help("Calculate stats, one of desc, divdesc, sa, vwap, volat, sma, mvwap, roc, pctch, mvolat, rsi.\n\
                         desc    : describe symbol history\n\
                         divdesc : describe symbol dividends\n\
                         sa      : calculate symbol adjusted close simple average price\n\
@@ -37,14 +37,15 @@ impl Arguments {
                         mvwap   : calculate symbol adjusted close moving volume weighted average price\n\
                         roc     : calculate symbol adjusted close rate of change\n\
                         pctch   : calculate symbol adjusted close percent change relative to from date\n\
-                        mvolat  : calculate symbol adjusted close moving volatility")
+                        mvolat  : calculate symbol adjusted close moving volatility\n\
+                        rsi     : Calculate symbol Relative Strength Index")
                  .required(true)
                  .takes_value(true))
             .arg(Arg::with_name("window")
                  .short("w")
                  .long("window")
-                 .help("Number of days, required with sma, mvwap, roc and mvolat calculations\n\
-                        Required minimum: sma=1, mvwap=1, roc=2, mvolat=1")
+                 .help("Number of days, required with sma, mvwap, roc, mvolat and rsi calculations\n\
+                        Required minimum: sma=1, mvwap=1, roc=2, mvolat=1, rsi=2")
                  .takes_value(true))
             .get_matches();
 

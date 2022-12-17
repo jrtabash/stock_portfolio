@@ -138,6 +138,7 @@ The following calculations are supported:
 - **roc**: Calculate symbol adjusted close rate of change
 - **pctch**: Calculate symbol adjusted close percent change relative to from date
 - **mvolat**: Calculate symbol adjusted close moving volatility
+- **rsi**: Calculate symbol Relative Strength Index
 
 ```bash
 USAGE:
@@ -148,7 +149,8 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, sa, vwap, volat, sma, mvwap, roc, pctch, mvolat.
+    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, sa, vwap, volat, sma, mvwap, roc, pctch, mvolat,
+                              rsi.
                               desc    : describe symbol history
                               divdesc : describe symbol dividends
                               sa      : calculate symbol adjusted close simple average price
@@ -159,12 +161,13 @@ OPTIONS:
                               roc     : calculate symbol adjusted close rate of change
                               pctch   : calculate symbol adjusted close percent change relative to from date
                               mvolat  : calculate symbol adjusted close moving volatility
+                              rsi     : Calculate symbol Relative Strength Index
     -n, --name <ds_name>      Datastore name (default: sp_datastore)
     -r, --root <ds_root>      Datastore root path (default: value of HOME environment variable)
     -f, --from <from_date>    Start from date YYYY-MM-DD
     -y, --symbol <symbol>     Stock symbol
-    -w, --window <window>     Number of days, required with sma, mvwap, roc and mvolat calculations
-                              Required minimum: sma=1, mvwap=1, roc=2, mvolat=1
+    -w, --window <window>     Number of days, required with sma, mvwap, roc, mvolat and rsi calculations
+                              Required minimum: sma=1, mvwap=1, roc=2, mvolat=1, rsi=2
 ```
 
 ## Stock Portfolio YHistory Tool
