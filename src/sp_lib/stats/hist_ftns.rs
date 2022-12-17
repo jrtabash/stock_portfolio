@@ -221,8 +221,8 @@ pub fn entries_rsi(entries: &[HistoryEntry], days: usize) -> Result<DatePriceLis
     fn pct2gain(p: &Price) -> Price { if *p > 0.0 { *p } else { 0.0 } }
     fn pct2loss(p: &Price) -> Price { if *p < 0.0 { *p * -1.0 } else { 0.0 } }
 
-    if days < 1 {
-        return Err(format!("entries_rsi: days < 1").into())
+    if days < 2 {
+        return Err(format!("entries_rsi: days < 2").into())
     }
 
     if days > entries.len() {
