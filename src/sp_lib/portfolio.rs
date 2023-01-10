@@ -3,6 +3,7 @@ pub mod report_type;
 pub mod stock;
 pub mod algorithms;
 pub mod extra_sort_ftns;
+pub mod stocks_config;
 pub mod stocks_filter;
 pub mod stocks_reader;
 pub mod stocks_update;

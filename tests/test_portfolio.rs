@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
+use std::env;
 use sp_lib::util::datetime::*;
 use sp_lib::util::temp_file;
 use sp_lib::util::price_type::price_eql;
@@ -7,6 +8,7 @@ use sp_lib::portfolio::stock_type::*;
 use sp_lib::portfolio::stock::*;
 use sp_lib::portfolio::algorithms::*;
 use sp_lib::portfolio::stocks_update::*;
+use sp_lib::portfolio::stocks_config::*;
 use sp_lib::portfolio::stocks_reader::*;
 use sp_lib::portfolio::report_type::ReportType;
 use sp_lib::portfolio::reports;
@@ -366,6 +368,113 @@ fn test_stock_reader() {
                vec![115.0, 118.50, 75.50]);
 
     assert!(temp_file::remove_file(&temp_name));
+}
+
+#[test]
+fn test_stock_config_from_file() {
+    let temp_name = "sp_test_stocks_config.cfg";
+    let config_filename = temp_file::make_path(&temp_name);
+
+    assert!(temp_file::create_file(&temp_name,
+                                   "root: sp_root\n\
+                                    name: sp_name\n\
+                                    stocks: csv{\n\
+                                    symbol,type,date,quantity,base_price\n\
+                                    AAPL,stock,2020-09-20,100,115.00\n\
+                                    AAPL,stock,2020-11-12,100,118.50\n\
+                                    DELL,stock,2021-02-10,100,75.50\n\
+                                    }\n"));
+
+    let cfg = StocksConfig::from_file(config_filename.to_str().unwrap()).unwrap();
+    assert_eq!(cfg.root(), "sp_root");
+    assert_eq!(cfg.name(), "sp_name");
+    assert_eq!(cfg.stocks().len(), 3);
+
+    let list = cfg.stocks();
+    assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
+               vec!["AAPL", "AAPL", "DELL"]);
+    assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
+               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+    assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
+               vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
+    assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
+               vec![100, 100, 100]);
+    assert_eq!(list.iter().map(|s| s.base_price).collect::<Vec<f64>>(),
+               vec![115.0, 118.50, 75.50]);
+
+    assert!(temp_file::remove_file(&temp_name));
+}
+
+#[test]
+fn test_stock_config_from_str() {
+    let content: &str = "root: sp_root\n\
+                         name: sp_name\n\
+                         stocks: csv{\n\
+                         symbol,type,date,quantity,base_price\n\
+                         AAPL,stock,2020-09-20,100,115.00\n\
+                         AAPL,stock,2020-11-12,100,118.50\n\
+                         DELL,stock,2021-02-10,100,75.50\n\
+                         }\n";
+
+    let cfg = StocksConfig::from_str(content).unwrap();
+    assert_eq!(cfg.root(), "sp_root");
+    assert_eq!(cfg.name(), "sp_name");
+    assert_eq!(cfg.stocks().len(), 3);
+
+    let list = cfg.stocks();
+    assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
+               vec!["AAPL", "AAPL", "DELL"]);
+    assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
+               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+    assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
+               vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
+    assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
+               vec![100, 100, 100]);
+    assert_eq!(list.iter().map(|s| s.base_price).collect::<Vec<f64>>(),
+               vec![115.0, 118.50, 75.50]);
+}
+
+#[test]
+fn test_stock_config_mut() {
+    let mut cfg = StocksConfig::new();
+    assert_eq!(cfg.root(), "");
+    assert_eq!(cfg.name(), "");
+    assert_eq!(cfg.stocks().len(), 0);
+
+    let stocks = cfg.stocks_mut();
+    stocks.push(make_stock("AAPL", StockType::Stock, make_date(2020, 9, 20), 100, 120.25, 125.25));
+
+    assert_eq!(cfg.root(), "");
+    assert_eq!(cfg.name(), "");
+    assert_eq!(cfg.stocks().len(), 1);
+
+    let list = cfg.stocks();
+    assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(), vec!["AAPL"]);
+    assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(), vec![StockType::Stock]);
+    assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(), vec![make_date(2020, 9, 20)]);
+    assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(), vec![100]);
+    assert_eq!(list.iter().map(|s| s.base_price).collect::<Vec<f64>>(), vec![120.25]);
+}
+
+#[test]
+fn test_stock_config_default() {
+    fn check(c: &StocksConfig) {
+        assert_eq!(c.root(), env::var("HOME").unwrap());
+        assert_eq!(c.name(), "sp_datastore");
+        assert_eq!(c.stocks().len(), 0);
+    }
+
+    let content: &str = "root: $default\n\
+                         name: $default\n\
+                         stocks: csv{\n\
+                         }\n";
+    let cfg = StocksConfig::from_str(content).unwrap();
+    check(&cfg);
+
+    let content: &str = "stocks: csv{\n\
+                         }\n";
+    let cfg = StocksConfig::from_str(content).unwrap();
+    check(&cfg);
 }
 
 // --------------------------------------------------------------------------------

@@ -24,7 +24,7 @@ impl StocksReader {
                 let mut reader = BufReader::new(file);
                 let mut content = String::new();
                 match reader.read_to_string(&mut content) {
-                    Ok(_) => self.parse_content(&content),
+                    Ok(_) => Self::parse_content(&content),
                     Err(e) => Err(format!("StocksReader::read - {}", e).into())
                 }
             },
@@ -32,10 +32,7 @@ impl StocksReader {
         }
     }
 
-    // --------------------------------------------------------------------------------
-    // Private
-
-    fn parse_content(self: &StocksReader, content: &String) -> Result<StockList, Box<dyn Error>> {
+    pub fn parse_content(content: &String) -> Result<StockList, Box<dyn Error>> {
         let mut stocks = StockList::new();
 
         let mut skip_header: bool = true;
