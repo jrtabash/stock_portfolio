@@ -477,6 +477,25 @@ fn test_stock_config_default() {
     check(&cfg);
 }
 
+#[test]
+fn test_stock_config_errors() {
+    fn check(cfg: &str, err: &str) {
+        match StocksConfig::from_str(cfg) {
+            Ok(_) => assert!(false),
+            Err(e) => assert_eq!(err, format!("{}", e))
+        };
+    }
+
+    fn cfg(csv: &str) -> String {
+        let mut base = String::from("root: $default\nname: $default\nstocks: ");
+        base.push_str(csv);
+        base
+    }
+
+    check(&cfg("csv:{\n}\n"), "StocksConfig::parse - Invalid line 'stocks: csv:{'");
+    check(&cfg("csv[\n]\n"), "StocksConfig::parse - unsupported block type 'csv['");
+}
+
 // --------------------------------------------------------------------------------
 // Helpers
 

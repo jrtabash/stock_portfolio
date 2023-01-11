@@ -83,7 +83,12 @@ impl StocksConfig {
             match tokens[0] {
                 "root" => if value != "$default" { root = String::from(value) },
                 "name" => if value != "$default" { name = String::from(value) },
-                "stocks" => collect_scontent = true,
+                "stocks" => {
+                    if value != "csv{" {
+                        return Err(format!("StocksConfig::parse - unsupported block type '{}'", value).into());
+                    }
+                    collect_scontent = true;
+                },
                 _ => (),
             };
         }
