@@ -5,8 +5,7 @@ use sp_lib::util::{common_args, datetime};
 
 pub struct Arguments {
     calculate: String,
-    ds_root: String,
-    ds_name: String,
+    config_file: String,
     symbol: String,
     window: usize,
     from: Option<datetime::SPDate>
@@ -20,8 +19,7 @@ impl Arguments {
             .about("Stats tool - describe and calculate")
 
             // Options
-            .arg(common_args::ds_root())
-            .arg(common_args::ds_name())
+            .arg(common_args::stocks_config())
             .arg(common_args::from_date(false, Some("Start from date YYYY-MM-DD")))
             .arg(common_args::symbol(true, None))
             .arg(Arg::with_name("calculate")
@@ -51,8 +49,7 @@ impl Arguments {
 
         Arguments {
             calculate: String::from(parsed_args.value_of("calculate").unwrap()),
-            ds_root: common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root"),
-            ds_name: common_args::parsed_ds_name(&parsed_args),
+            config_file: common_args::parsed_stocks_config(&parsed_args),
             symbol: common_args::parsed_symbol(&parsed_args).unwrap(),
             window: match parsed_args.value_of("window") {
                 Some(win) => win.parse::<usize>().expect("Invalid calculation window"),
@@ -66,12 +63,8 @@ impl Arguments {
         &self.calculate
     }
 
-    pub fn ds_root(&self) -> &String {
-        &self.ds_root
-    }
-
-    pub fn ds_name(&self) -> &String {
-        &self.ds_name
+    pub fn config_file(&self) -> &String {
+        &self.config_file
     }
 
     pub fn symbol(&self) -> &String {

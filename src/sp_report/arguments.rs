@@ -4,14 +4,12 @@ use clap::{App, Arg};
 use sp_lib::util::common_args;
 
 pub struct Arguments {
-    stocks_file: String,
+    config_file: String,
     report_type: Option<String>,
     order_by: Option<String>,
     include: Option<String>,
     exclude: Option<String>,
     export_file: Option<String>,
-    ds_root: String,
-    ds_name: String,
     show_groupby: bool,
     desc: bool
 }
@@ -25,9 +23,7 @@ impl Arguments {
                     Supported reports include gains & losses, top/bottom performers, volatility, and day change.")
 
             // Options
-            .arg(common_args::stocks_file(true))
-            .arg(common_args::ds_root())
-            .arg(common_args::ds_name())
+            .arg(common_args::stocks_config())
             .arg(common_args::export_file(Some("Export gains and losses table to a csv file")))
             .arg(Arg::with_name("report_type")
                  .short("p")
@@ -74,7 +70,7 @@ impl Arguments {
                  .help("Used with order by option to sort in descending order"))
             .get_matches();
 
-        let stocks_file = common_args::parsed_stocks_file(&parsed_args).unwrap();
+        let config_file = common_args::parsed_stocks_config(&parsed_args);
         let report_type = match parsed_args.value_of("report_type") {
             Some(value) => Some(String::from(value)),
             None => None
@@ -92,27 +88,23 @@ impl Arguments {
             None => None
         };
         let export_file = common_args::parsed_export_file(&parsed_args);
-        let ds_root = common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root");
-        let ds_name = common_args::parsed_ds_name(&parsed_args);
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");
 
         Arguments {
-            stocks_file,
+            config_file,
             report_type,
             order_by,
             include,
             exclude,
             export_file,
-            ds_root,
-            ds_name,
             show_groupby,
             desc
         }
     }
 
-    pub fn stocks_file(self: &Arguments) -> &String {
-        &self.stocks_file
+    pub fn config_file(self: &Arguments) -> &String {
+        &self.config_file
     }
 
     pub fn report_type(self: &Arguments) -> Option<&String> {
@@ -133,14 +125,6 @@ impl Arguments {
 
     pub fn export_file(self: &Arguments) -> Option<&String> {
         self.export_file.as_ref()
-    }
-
-    pub fn ds_root(self: &Self) -> &String {
-        &self.ds_root
-    }
-
-    pub fn ds_name(self: &Self) -> &String {
-        &self.ds_name
     }
 
     pub fn show_groupby(self: &Arguments) -> bool {

@@ -5,9 +5,7 @@ use sp_lib::util::common_args;
 
 pub struct Arguments {
     ds_operation: String,
-    ds_root: String,
-    ds_name: String,
-    stocks_file: Option<String>,
+    config_file: String,
     symbol: Option<String>,
     export_file: Option<String>,
     verbose: bool,
@@ -22,9 +20,7 @@ impl Arguments {
             .about("Datastore tool - create, delete, update, drop, showh, showd, shows, export, check or stat.")
 
             // Options
-            .arg(common_args::ds_root())
-            .arg(common_args::ds_name())
-            .arg(common_args::stocks_file(false))
+            .arg(common_args::stocks_config())
             .arg(common_args::symbol(
                 false,
                 Some("Stock symbol. Optional with update and check operations. Required with drop, reset, showh, showd, shows, and export operations")))
@@ -62,9 +58,7 @@ impl Arguments {
 
         Arguments {
             ds_operation: String::from(parsed_args.value_of("ds_operation").unwrap()),
-            ds_root: common_args::parsed_ds_root(&parsed_args).expect("Missing datastore root"),
-            ds_name: common_args::parsed_ds_name(&parsed_args),
-            stocks_file: common_args::parsed_stocks_file(&parsed_args),
+            config_file: common_args::parsed_stocks_config(&parsed_args),
             symbol: common_args::parsed_symbol(&parsed_args),
             export_file: common_args::parsed_export_file(&parsed_args),
             verbose: parsed_args.is_present("verbose"),
@@ -76,16 +70,8 @@ impl Arguments {
         &self.ds_operation
     }
 
-    pub fn ds_root(self: &Self) -> &String {
-        &self.ds_root
-    }
-
-    pub fn ds_name(self: &Self) -> &String {
-        &self.ds_name
-    }
-
-    pub fn stocks_file(self: &Self) -> Option<&String> {
-        self.stocks_file.as_ref()
+    pub fn config_file(self: &Self) -> &String {
+        &self.config_file
     }
 
     pub fn symbol(self: &Self) -> Option<&String> {

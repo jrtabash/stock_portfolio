@@ -1,6 +1,6 @@
 use crate::arguments::Arguments;
 use sp_lib::datastore::{datastore, dividends, export, history, splits};
-use sp_lib::portfolio::{algorithms, stocks_reader};
+use sp_lib::portfolio::{algorithms, stocks_config};
 use sp_lib::util::{common_app, datetime, misc};
 use sp_lib::yfinance::{query, types};
 use std::collections::HashMap;
@@ -33,16 +33,19 @@ struct StatAgg {
 pub struct Application {
     args: Arguments,
     sym_dates: HashMap<String, datetime::SPDate>,
+    config: stocks_config::StocksConfig,
     ds: datastore::DataStore
 }
 
 impl common_app::AppTrait for Application {
     fn new() -> Self {
         let args = Arguments::new();
-        let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
+        let config = stocks_config::StocksConfig::from_file(args.config_file()).expect("Missing config file");
+        let ds = datastore::DataStore::new(config.root(), config.name());
         Application {
             args: args,
             sym_dates: HashMap::new(),
+            config: config,
             ds: ds
         }
     }
@@ -54,13 +57,13 @@ impl common_app::AppTrait for Application {
 
         println!("Run {} on {}", self.args.ds_operation(), self.ds);
         if self.args.is_verbose() {
-            println!("stocks: {}", if let Some(file) = self.args.stocks_file() { file } else { "" });
+            println!("config: {}", self.args.config_file());
             println!("symbol: {}", if let Some(symbol) = self.args.symbol() { symbol } else { "" });
             println!("export: {}", if let Some(export) = self.args.export_file() { export } else { "" });
             println!("----------");
         }
 
-        self.read_stocks()?;
+        self.set_symbol_dates();
 
         match self.args.ds_operation().as_str() {
             UPDATE => self.update()?,
@@ -93,25 +96,17 @@ impl Application {
         self.args.ds_operation().as_str() == RESET
     }
 
-    fn read_stocks(self: &mut Self) -> Result<(), Box<dyn Error>> {
+    fn set_symbol_dates(self: &mut Self) {
         if self.args.is_verbose() {
-            println!("Read stocks file");
+            println!("Set symbol dates");
         }
 
-        if let Some(file) = self.args.stocks_file() {
-            let reader = stocks_reader::StocksReader::new(String::from(file));
-            self.sym_dates = algorithms::stock_base_dates(&reader.read()?);
-        }
-        Ok(())
+        self.sym_dates = algorithms::stock_base_dates(self.config.stocks());
     }
 
     fn update(self: &Self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Update stocks");
-        }
-
-        if self.args.stocks_file().is_none() {
-            return Err("Missing stocks file for update operation".into());
         }
 
         let sym_count = self.sym_dates.len();

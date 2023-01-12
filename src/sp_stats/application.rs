@@ -1,6 +1,7 @@
 use crate::arguments::Arguments;
 use sp_lib::datastore::{datastore, dividends, history};
 use sp_lib::stats::{description, hist_desc, hist_ftns};
+use sp_lib::portfolio::stocks_config;
 use sp_lib::util::{common_app, datetime};
 use std::error::Error;
 
@@ -26,7 +27,8 @@ pub struct Application {
 impl common_app::AppTrait for Application {
     fn new() -> Self {
         let args = Arguments::new();
-        let ds = datastore::DataStore::new(args.ds_root(), args.ds_name());
+        let config = stocks_config::StocksConfig::from_file(args.config_file()).expect("Missing config file");
+        let ds = datastore::DataStore::new(config.root(), config.name());
         Application {
             args: args,
             ds: ds,

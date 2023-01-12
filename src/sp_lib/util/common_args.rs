@@ -28,6 +28,20 @@ pub fn stocks_file_help() -> &'static str {
      Supported type values include stock, etf and index"
 }
 
+pub fn stocks_config_help() -> &'static str {
+    "Config file containing datastore root and name, as well as stocks in portfolio.\n\
+     Both root and name can be set to \"$default\" which will use home path for root and sp_datastore for name.\n\
+     The CSV block should contain stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price' including a header line. \
+     Supported type values include stock, etf and index.\n\
+     Sample config:\n\
+     \troot: $default\n\
+     \tname: my_datastore\n\
+     \tstocks: csv{\n\
+     \t  symbol,type,date,quantity,base_price\n\
+     \t  AAPL,stock,2020-09-20,100,115.00\n\
+     \t}\n"
+}
+
 pub fn from_date_help() -> &'static str {
     "Start date YYYY-MM-DD"
 }
@@ -79,6 +93,15 @@ pub fn stocks_file(required: bool) -> Arg<'static, 'static> {
         .long("stocks")
         .help(stocks_file_help())
         .required(required)
+        .takes_value(true)
+}
+
+pub fn stocks_config() -> Arg<'static, 'static> {
+    Arg::with_name("stocks_config")
+        .short("l")
+        .long("config")
+        .help(stocks_config_help())
+        .required(true)
         .takes_value(true)
 }
 
@@ -140,6 +163,10 @@ pub fn parsed_stocks_file(parsed_args: &ArgMatches) -> Option<String> {
         Some(value) => Some(String::from(value)),
         None => None
     }
+}
+
+pub fn parsed_stocks_config(parsed_args: &ArgMatches) -> String {
+    String::from(parsed_args.value_of("stocks_config").unwrap())
 }
 
 pub fn parsed_from_date(parsed_args: &ArgMatches) -> Option<datetime::SPDate> {
