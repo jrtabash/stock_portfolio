@@ -6,7 +6,7 @@
 DS_TOOL=sp_dstool
 DS_ROOT=/tmp/
 DS_NAME=test_dstool
-DS_STOCKS=/tmp/test_dstool_stocks.csv
+DS_CONFIG=/tmp/test_dstool_config.cfg
 DS_EXPORT=/tmp/test_dstool_export.csv
 
 VERBOSE=0
@@ -18,7 +18,7 @@ fi
 # Functions
 
 function run_dstool() {
-    command="${DS_TOOL} -r ${DS_ROOT} -n ${DS_NAME} $@"
+    command="${DS_TOOL} -l ${DS_CONFIG} $@"
     if [ ${VERBOSE} -eq 1 ]; then
         echo "${command}"
     fi
@@ -31,18 +31,22 @@ function run_dstool() {
 
 function initialize() {
     rm -rf ${DS_ROOT}/${DS_NAME}/
-    rm -f ${DS_STOCKS}
+    rm -f ${DS_CONFIG}
     rm -f ${DS_EXPORT}
 
     dt=$(date --date "last week" +"%Y-%m-%d")
-    echo "symbol,type,date,quantity,base_price" > ${DS_STOCKS}
-    echo "AAPL,stock,${dt},100,115.50" >> ${DS_STOCKS}
-    echo "DELL,stock,${dt},100,50.25" >> ${DS_STOCKS}
+    echo "root: ${DS_ROOT}" > ${DS_CONFIG}
+    echo "name: ${DS_NAME}" >> ${DS_CONFIG}
+    echo "stocks: csv{" >> ${DS_CONFIG}
+    echo "  symbol,type,date,quantity,base_price" >> ${DS_CONFIG}
+    echo "  AAPL,stock,${dt},100,115.50" >> ${DS_CONFIG}
+    echo "  DELL,stock,${dt},100,50.25" >> ${DS_CONFIG}
+    echo "}" >> ${DS_CONFIG}
 }
 
 function cleanup() {
     rm -rf ${DS_ROOT}/${DS_NAME}/
-    rm -f ${DS_STOCKS}
+    rm -f ${DS_CONFIG}
     rm -f ${DS_EXPORT}
 }
 
@@ -52,7 +56,7 @@ function cleanup() {
 initialize
 
 run_dstool -o create
-run_dstool -o update -s ${DS_STOCKS}
+run_dstool -o update
 run_dstool -o check
 run_dstool -o check -y AAPL
 run_dstool -o stat
@@ -62,7 +66,7 @@ run_dstool -o export -y DELL -e ${DS_EXPORT}
 run_dstool -o showh -y DELL
 run_dstool -o showd -y AAPL
 run_dstool -o shows -y DELL
-run_dstool -o reset -y DELL -s ${DS_STOCKS}
+run_dstool -o reset -y DELL
 run_dstool -o drop -y DELL
 run_dstool -o delete
 
