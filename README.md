@@ -28,7 +28,7 @@ The following features are supported:
 
 ```bash
 USAGE:
-    sp_report [FLAGS] [OPTIONS] --stocks <stocks_file>
+    sp_report [FLAGS] [OPTIONS] --config <stocks_config>
 
 FLAGS:
     -d, --desc            Used with order by option to sort in descending order
@@ -37,41 +37,49 @@ FLAGS:
     -V, --version         Prints version information
 
 OPTIONS:
-    -n, --name <ds_name>          Datastore name (default: sp_datastore)
-    -r, --root <ds_root>          Datastore root path (default: value of HOME environment variable)
-    -x, --exclude <exclude>       Filter stocks by type, symbols or expression;
-                                  If type, must be one of 'stock', 'etf', or 'index'.
-                                  If symbols, must be a comma separated list of symbol names.
-                                  If expression, must follow the format '<field> <op> <value>', where:
-                                  <field> : one of days, price, net, pct, div, size, value
-                                  <op>    : one of =, !=, <, >, <=, >=
-                                  Example : 'days > 365'
-    -e, --export <export_file>    Export gains and losses table to a csv file
-    -i, --include <include>       Filter stocks by type, symbols or expression;
-                                  If type, must be one of 'stock', 'etf', or 'index'.
-                                  If symbols, must be a comma separated list of symbol names.
-                                  If expression, must follow the format '<field> <op> <value>', where:
-                                  <field> : one of days, price, net, pct, div, size, value
-                                  <op>    : one of =, !=, <, >, <=, >=
-                                  Example : 'days > 365'
-    -o, --orderby <order_by>      Order stocks by one of:
-                                  symbol : stock symbol        | type    : stock type
-                                  date   : base date           | days    : days held
-                                  price  : latest price        | size    : quantity
-                                  net    : net price           | pct     : percent change
-                                  value  : notional value      | div     : cumulative dividend
-                                  volat  : orderall volatility | volat22 : 22 day volatility
-                                  prevpr : previous day price  | volume  : day volume
-                                  change : day change          | pctchg  : day percent change
-                                  low    : day low price       | high    : day high price
-    -p, --type <report_type>      Report type, one of value, top, volat (default: value)
-                                  value : stocks value (gains & losses)
-                                  top   : Top/Bottom performing stocks
-                                  volat : Stocks volatility
-                                  daych : Stocks day change
-    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
-                                  'symbol,type,date,quantity,base_price' including a header line. Supported type values
-                                  include stock, etf and index
+    -x, --exclude <exclude>         Filter stocks by type, symbols or expression;
+                                    If type, must be one of 'stock', 'etf', or 'index'.
+                                    If symbols, must be a comma separated list of symbol names.
+                                    If expression, must follow the format '<field> <op> <value>', where:
+                                    <field> : one of days, price, net, pct, div, size, value
+                                    <op>    : one of =, !=, <, >, <=, >=
+                                    Example : 'days > 365'
+    -e, --export <export_file>      Export gains and losses table to a csv file
+    -i, --include <include>         Filter stocks by type, symbols or expression;
+                                    If type, must be one of 'stock', 'etf', or 'index'.
+                                    If symbols, must be a comma separated list of symbol names.
+                                    If expression, must follow the format '<field> <op> <value>', where:
+                                    <field> : one of days, price, net, pct, div, size, value
+                                    <op>    : one of =, !=, <, >, <=, >=
+                                    Example : 'days > 365'
+    -o, --orderby <order_by>        Order stocks by one of:
+                                    symbol : stock symbol        | type    : stock type
+                                    date   : base date           | days    : days held
+                                    price  : latest price        | size    : quantity
+                                    net    : net price           | pct     : percent change
+                                    value  : notional value      | div     : cumulative dividend
+                                    volat  : orderall volatility | volat22 : 22 day volatility
+                                    prevpr : previous day price  | volume  : day volume
+                                    change : day change          | pctchg  : day percent change
+                                    low    : day low price       | high    : day high price
+    -p, --type <report_type>        Report type, one of value, top, volat (default: value)
+                                    value : stocks value (gains & losses)
+                                    top   : Top/Bottom performing stocks
+                                    volat : Stocks volatility
+                                    daych : Stocks day change
+    -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
+                                    Both root and name can be set to "$default" which will use home path for root and
+                                    sp_datastore for name.
+                                    The CSV block should contain stocks in portfolio, formatted as
+                                    'symbol,type,date,quantity,base_price' including a header line. Supported type
+                                    values include stock, etf and index.
+                                    Sample config:
+                                        root: $default
+                                        name: my_datastore
+                                        stocks: csv{
+                                          symbol,type,date,quantity,base_price
+                                          AAPL,stock,2020-09-20,100,115.00
+                                        }
 ```
 
 ## Stock Portfolio Datastore Tool
@@ -92,7 +100,7 @@ The following operations are supported:
 
 ```bash
 USAGE:
-    sp_dstool [FLAGS] [OPTIONS] --dsop <ds_operation>
+    sp_dstool [FLAGS] [OPTIONS] --dsop <ds_operation> --config <stocks_config>
 
 FLAGS:
     -a, --auto-reset    Auto reset stocks on dividend and split updates
@@ -101,27 +109,35 @@ FLAGS:
     -v, --verbose       Verbose mode
 
 OPTIONS:
-    -n, --name <ds_name>          Datastore name (default: sp_datastore)
-    -o, --dsop <ds_operation>     Datastore tool operation, one of create, delete, update, drop, reset, showh, showd,
-                                  shows, export, check, stat.
-                                  create : create empty datastore
-                                  delete : delete existing datastore
-                                  update : update history, dividend and split data
-                                  drop   : drop a symbol
-                                  reset  : Reset a symbol. Equivalent to drop + update
-                                  showh  : show history for symbol
-                                  showd  : show dividends for symbol
-                                  shows  : show splits for symbol
-                                  export : export symbol history and dividends
-                                  check  : check history, dividend and split data
-                                  stat   : calculate files count and size
-    -r, --root <ds_root>          Datastore root path (default: value of HOME environment variable)
-    -e, --export <export_file>    Export symbol history and dividends to csv file. Required with export operation
-    -s, --stocks <stocks_file>    CSV file containing stocks in portfolio, formatted as
-                                  'symbol,type,date,quantity,base_price' including a header line. Supported type values
-                                  include stock, etf and index
-    -y, --symbol <symbol>         Stock symbol. Optional with update and check operations. Required with drop, reset,
-                                  showh, showd, shows, and export operations
+    -o, --dsop <ds_operation>       Datastore tool operation, one of create, delete, update, drop, reset, showh, showd,
+                                    shows, export, check, stat.
+                                    create : create empty datastore
+                                    delete : delete existing datastore
+                                    update : update history, dividend and split data
+                                    drop   : drop a symbol
+                                    reset  : Reset a symbol. Equivalent to drop + update
+                                    showh  : show history for symbol
+                                    showd  : show dividends for symbol
+                                    shows  : show splits for symbol
+                                    export : export symbol history and dividends
+                                    check  : check history, dividend and split data
+                                    stat   : calculate files count and size
+    -e, --export <export_file>      Export symbol history and dividends to csv file. Required with export operation
+    -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
+                                    Both root and name can be set to "$default" which will use home path for root and
+                                    sp_datastore for name.
+                                    The CSV block should contain stocks in portfolio, formatted as
+                                    'symbol,type,date,quantity,base_price' including a header line. Supported type
+                                    values include stock, etf and index.
+                                    Sample config:
+                                        root: $default
+                                        name: my_datastore
+                                        stocks: csv{
+                                          symbol,type,date,quantity,base_price
+                                          AAPL,stock,2020-09-20,100,115.00
+                                        }
+    -y, --symbol <symbol>           Stock symbol. Optional with update and check operations. Required with drop, reset,
+                                    showh, showd, shows, and export operations
 ```
 
 ## Stock Portfolio Stats Tool
@@ -142,32 +158,43 @@ The following calculations are supported:
 
 ```bash
 USAGE:
-    sp_stats [OPTIONS] --calc <calculate> --symbol <symbol>
+    sp_stats [OPTIONS] --calc <calculate> --config <stocks_config> --symbol <symbol>
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
-    -c, --calc <calculate>    Calculate stats, one of desc, divdesc, sa, vwap, volat, sma, mvwap, roc, pctch, mvolat,
-                              rsi.
-                              desc    : describe symbol history
-                              divdesc : describe symbol dividends
-                              sa      : calculate symbol adjusted close simple average price
-                              vwap    : calculate symbol adjusted close volume weighted average price
-                              volat   : calculate symbol adjusted close volatility
-                              sma     : calculate symbol adjusted close simple moving average price
-                              mvwap   : calculate symbol adjusted close moving volume weighted average price
-                              roc     : calculate symbol adjusted close rate of change
-                              pctch   : calculate symbol adjusted close percent change relative to from date
-                              mvolat  : calculate symbol adjusted close moving volatility
-                              rsi     : Calculate symbol Relative Strength Index
-    -n, --name <ds_name>      Datastore name (default: sp_datastore)
-    -r, --root <ds_root>      Datastore root path (default: value of HOME environment variable)
-    -f, --from <from_date>    Start from date YYYY-MM-DD
-    -y, --symbol <symbol>     Stock symbol
-    -w, --window <window>     Number of days, required with sma, mvwap, roc, mvolat and rsi calculations
-                              Required minimum: sma=1, mvwap=1, roc=2, mvolat=1, rsi=2
+    -c, --calc <calculate>          Calculate stats, one of desc, divdesc, sa, vwap, volat, sma, mvwap, roc, pctch,
+                                    mvolat, rsi.
+                                    desc    : describe symbol history
+                                    divdesc : describe symbol dividends
+                                    sa      : calculate symbol adjusted close simple average price
+                                    vwap    : calculate symbol adjusted close volume weighted average price
+                                    volat   : calculate symbol adjusted close volatility
+                                    sma     : calculate symbol adjusted close simple moving average price
+                                    mvwap   : calculate symbol adjusted close moving volume weighted average price
+                                    roc     : calculate symbol adjusted close rate of change
+                                    pctch   : calculate symbol adjusted close percent change relative to from date
+                                    mvolat  : calculate symbol adjusted close moving volatility
+                                    rsi     : Calculate symbol Relative Strength Index
+    -f, --from <from_date>          Start from date YYYY-MM-DD
+    -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
+                                    Both root and name can be set to "$default" which will use home path for root and
+                                    sp_datastore for name.
+                                    The CSV block should contain stocks in portfolio, formatted as
+                                    'symbol,type,date,quantity,base_price' including a header line. Supported type
+                                    values include stock, etf and index.
+                                    Sample config:
+                                        root: $default
+                                        name: my_datastore
+                                        stocks: csv{
+                                          symbol,type,date,quantity,base_price
+                                          AAPL,stock,2020-09-20,100,115.00
+                                        }
+    -y, --symbol <symbol>           Stock symbol
+    -w, --window <window>           Number of days, required with sma, mvwap, roc, mvolat and rsi calculations
+                                    Required minimum: sma=1, mvwap=1, roc=2, mvolat=1, rsi=2
 ```
 
 ## Stock Portfolio YHistory Tool
@@ -199,17 +226,21 @@ OPTIONS:
     -t, --to <to_date>           Stop date YYYY-MM-DD (default: today)
 ```
 
-## Sample Stocks File
-```csv
-symbol,type,date,quantity,base_price
-AAPL,stock,2020-09-20,100,115.00
-AAPL,stock,2020-11-12,100,118.50
-DELL,stock,2021-02-10,100,75.50
+## Sample config file
+```
+root: $default
+name: sp_sample
+stocks: csv{
+  symbol,type,date,quantity,base_price
+  AAPL,stock,2020-09-20,100,115.00
+  AAPL,stock,2020-11-12,100,118.50
+  DELL,stock,2021-02-10,100,75.50
+}
 ```
 
 ## Example Report 1
 ```bash
-$ sp_report --root ~/ --name sp_sample --stocks sample.csv
+$ sp_report --config ~/sp_sample.cfg
 
 Stocks Value Report
 -------------------
@@ -230,7 +261,7 @@ DELL     2021-02-10 2021-11-16    279      100    75.50    56.70   -18.80   -24.
 
 ## Example Report 2
 ```bash
-$ sp_report --root ~/ --name sp_sample --stocks sample.csv --show-groupby
+$ sp_report --config ~/sp_sample.cfg --show-groupby
 
 Stocks Value Report
 -------------------
@@ -256,7 +287,7 @@ DELL          100      5670.00
 
 ## Example Report 3
 ```bash
-$ sp_report --root ~/ --name sp_sample --stocks sample.csv --show-groupby --orderby date --desc
+$ sp_report --config ~/sp_sample.cfg --show-groupby --orderby date --desc
 
 Stocks Value Report
 -------------------
@@ -282,7 +313,7 @@ AAPL          200     30200.00
 
 ## Example Report 4
 ```bash
-$ sp_report --root ~/ --name sp_sample --stocks sample.csv --include AAPL
+$ sp_report --config ~/sp_sample.cfg --include AAPL
 
 Stocks Value Report
 -------------------
@@ -302,7 +333,7 @@ AAPL     2020-11-12 2021-11-16    369      100   118.50   151.00    32.50    27.
 
 ## Example Report 5
 ```bash
-$ sp_report --name sp_sample --stocks sample.csv --include 'pct > 0.0' --orderby pct --desc
+$ sp_report --config ~/sp_sample.cfg --include 'pct > 0.0' --orderby pct --desc
 Stocks Value Report
 -------------------
             Date: 2022-01-10
@@ -321,7 +352,7 @@ AAPL     2020-11-12 2022-01-10    424      100   118.50   172.19    53.69    45.
 
 ## Example Report 6
 ```bash
-$ sp_report --name sp_sample --stocks sample.csv -i 'days < 365'
+$ sp_report --config ~/sp_sample.cfg -i 'days < 365'
 Stocks Value Report
 -------------------
             Date: 2022-01-10
@@ -339,7 +370,7 @@ DELL     2021-02-10 2022-01-10    334      100    75.50    59.88   -15.62   -20.
 
 ## Example Stats 1
 ```bash
-$ sp_stats -n sp_research -c desc -y MSFT -f 2021-11-22
+$ sp_stats -l ~/sp_research.cfg -c desc -y MSFT -f 2021-11-22
   from: 2021-11-22
     to: 2021-12-10
 symbol: MSFT
@@ -356,7 +387,7 @@ symbol: MSFT
 
 ## Example Stats 2
 ```bash
-$ sp_stats -n sp_research -c mvwap -y MSFT -f 2021-11-22 -w 5
+$ sp_stats -l ~/sp_research.cfg -c mvwap -y MSFT -f 2021-11-22 -w 5
   from: 2021-11-22
     to: 2021-12-10
 symbol: MSFT
