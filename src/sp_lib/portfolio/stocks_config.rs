@@ -7,16 +7,16 @@ use crate::portfolio::stock::StockList;
 use crate::portfolio::stocks_reader::StocksReader;
 
 pub struct StocksConfig {
-    root: String,
-    name: String,
+    ds_root: String,
+    ds_name: String,
     stocks: StockList
 }
 
 impl StocksConfig {
     pub fn new() -> Self {
         StocksConfig {
-            root: String::new(),
-            name: String::new(),
+            ds_root: String::new(),
+            ds_name: String::new(),
             stocks: StockList::new()
         }
     }
@@ -39,8 +39,8 @@ impl StocksConfig {
         Self::parse(config_str)
     }
 
-    #[inline(always)] pub fn root(&self) -> &str { &self.root }
-    #[inline(always)] pub fn name(&self) -> &str { &self.name }
+    #[inline(always)] pub fn ds_root(&self) -> &str { &self.ds_root }
+    #[inline(always)] pub fn ds_name(&self) -> &str { &self.ds_name }
 
     #[inline(always)] pub fn stocks(&self) -> &StockList { &self.stocks }
     #[inline(always)] pub fn stocks_mut(&mut self) -> &mut StockList { &mut self.stocks }
@@ -81,8 +81,8 @@ impl StocksConfig {
 
             let value: &str = tokens[1];
             match tokens[0] {
-                "root" => if value != "$default" { root = String::from(value) },
-                "name" => if value != "$default" { name = String::from(value) },
+                "ds_root" => if value != "$default" { root = String::from(value) },
+                "ds_name" => if value != "$default" { name = String::from(value) },
                 "stocks" => {
                     if value != "csv{" {
                         return Err(format!("StocksConfig::parse - unsupported block type '{}'", value).into());
@@ -94,8 +94,8 @@ impl StocksConfig {
         }
 
         Ok(StocksConfig {
-            root: root,
-            name: name,
+            ds_root: root,
+            ds_name: name,
             stocks: stocks.unwrap_or(StockList::new())
         })
     }

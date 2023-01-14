@@ -376,8 +376,8 @@ fn test_stock_config_from_file() {
     let config_filename = temp_file::make_path(&temp_name);
 
     assert!(temp_file::create_file(&temp_name,
-                                   "root: sp_root\n\
-                                    name: sp_name\n\
+                                   "ds_root: sp_root\n\
+                                    ds_name: sp_name\n\
                                     stocks: csv{\n\
                                     symbol,type,date,quantity,base_price\n\
                                     AAPL,stock,2020-09-20,100,115.00\n\
@@ -386,8 +386,8 @@ fn test_stock_config_from_file() {
                                     }\n"));
 
     let cfg = StocksConfig::from_file(config_filename.to_str().unwrap()).unwrap();
-    assert_eq!(cfg.root(), "sp_root");
-    assert_eq!(cfg.name(), "sp_name");
+    assert_eq!(cfg.ds_root(), "sp_root");
+    assert_eq!(cfg.ds_name(), "sp_name");
     assert_eq!(cfg.stocks().len(), 3);
 
     let list = cfg.stocks();
@@ -407,8 +407,8 @@ fn test_stock_config_from_file() {
 
 #[test]
 fn test_stock_config_from_str() {
-    let content: &str = "root: sp_root\n\
-                         name: sp_name\n\
+    let content: &str = "ds_root: sp_root\n\
+                         ds_name: sp_name\n\
                          stocks: csv{\n\
                          symbol,type,date,quantity,base_price\n\
                          AAPL,stock,2020-09-20,100,115.00\n\
@@ -417,8 +417,8 @@ fn test_stock_config_from_str() {
                          }\n";
 
     let cfg = StocksConfig::from_str(content).unwrap();
-    assert_eq!(cfg.root(), "sp_root");
-    assert_eq!(cfg.name(), "sp_name");
+    assert_eq!(cfg.ds_root(), "sp_root");
+    assert_eq!(cfg.ds_name(), "sp_name");
     assert_eq!(cfg.stocks().len(), 3);
 
     let list = cfg.stocks();
@@ -437,15 +437,15 @@ fn test_stock_config_from_str() {
 #[test]
 fn test_stock_config_mut() {
     let mut cfg = StocksConfig::new();
-    assert_eq!(cfg.root(), "");
-    assert_eq!(cfg.name(), "");
+    assert_eq!(cfg.ds_root(), "");
+    assert_eq!(cfg.ds_name(), "");
     assert_eq!(cfg.stocks().len(), 0);
 
     let stocks = cfg.stocks_mut();
     stocks.push(make_stock("AAPL", StockType::Stock, make_date(2020, 9, 20), 100, 120.25, 125.25));
 
-    assert_eq!(cfg.root(), "");
-    assert_eq!(cfg.name(), "");
+    assert_eq!(cfg.ds_root(), "");
+    assert_eq!(cfg.ds_name(), "");
     assert_eq!(cfg.stocks().len(), 1);
 
     let list = cfg.stocks();
@@ -459,13 +459,13 @@ fn test_stock_config_mut() {
 #[test]
 fn test_stock_config_default() {
     fn check(c: &StocksConfig) {
-        assert_eq!(c.root(), env::var("HOME").unwrap());
-        assert_eq!(c.name(), "sp_datastore");
+        assert_eq!(c.ds_root(), env::var("HOME").unwrap());
+        assert_eq!(c.ds_name(), "sp_datastore");
         assert_eq!(c.stocks().len(), 0);
     }
 
-    let content: &str = "root: $default\n\
-                         name: $default\n\
+    let content: &str = "ds_root: $default\n\
+                         ds_name: $default\n\
                          stocks: csv{\n\
                          }\n";
     let cfg = StocksConfig::from_str(content).unwrap();
@@ -487,7 +487,7 @@ fn test_stock_config_errors() {
     }
 
     fn cfg(csv: &str) -> String {
-        let mut base = String::from("root: $default\nname: $default\nstocks: ");
+        let mut base = String::from("ds_root: $default\nds_name: $default\nstocks: ");
         base.push_str(csv);
         base
     }

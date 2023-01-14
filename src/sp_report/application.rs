@@ -16,7 +16,7 @@ impl common_app::AppTrait for Application {
     fn new() -> Self {
         let args = Arguments::new();
         let config = stocks_config::StocksConfig::from_file(args.config_file()).expect("Missing config file");
-        let ds = datastore::DataStore::new(config.root(), config.name());
+        let ds = datastore::DataStore::new(config.ds_root(), config.ds_name());
         Application {
             args: args,
             rtype: ReportType::Value,
