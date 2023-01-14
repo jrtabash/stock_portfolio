@@ -35,8 +35,8 @@ function initialize() {
     rm -f ${DS_EXPORT}
 
     dt=$(date --date "last week" +"%Y-%m-%d")
-    echo "root: ${DS_ROOT}" > ${DS_CONFIG}
-    echo "name: ${DS_NAME}" >> ${DS_CONFIG}
+    echo "ds_root: ${DS_ROOT}" > ${DS_CONFIG}
+    echo "ds_name: ${DS_NAME}" >> ${DS_CONFIG}
     echo "stocks: csv{" >> ${DS_CONFIG}
     echo "  symbol,type,date,quantity,base_price" >> ${DS_CONFIG}
     echo "  AAPL,stock,${dt},100,115.50" >> ${DS_CONFIG}
