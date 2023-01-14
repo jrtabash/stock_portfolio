@@ -46,9 +46,9 @@ def parse_args():
         raise Exception("Missing date")
 
     ns.ds_name = f"sp_{ns.name}"
-    ns.ds_stocks = f"{ns.name}.csv"
     ns.base_date = date.fromisoformat(ns.base_date)
     ns.symbols = [s.strip() for s in ns.symbols.split(',')]
+    ns.config_filename = os.path.join(ns.ds_root, f"{ns.name}.cfg")
 
     return ns
 
@@ -57,14 +57,14 @@ class MakeDSProcessor:
         self.parsed_args = parsed_args
 
     def run(self):
-        stocks_file = os.path.join(self.parsed_args.ds_root, self.parsed_args.ds_stocks)
-        self.create_stocks_file(stocks_file)
-        self.sp_dstool("create", None)
+        self.create_stocks_config()
+        self.sp_dstool("create")
         if self.parsed_args.update:
-            self.sp_dstool("update", stocks_file)
+            self.sp_dstool("update")
             self.sp_dstool("check")
 
-    def create_stocks_file(self, filename):
+    def create_stocks_config(self):
+        filename = self.parsed_args.config_filename
         if self.parsed_args.verbose:
             print(f"Create file: {filename}")
 
@@ -72,18 +72,19 @@ class MakeDSProcessor:
             raise Exception(f"File {filename} already exists")
 
         with open(filename, "w") as fd:
-            fd.write("symbol,type,date,quantity,base_price\n")
+            fd.write(f"ds_root: {self.parsed_args.ds_root}\n")
+            fd.write(f"ds_name: {self.parsed_args.ds_name}\n")
+            fd.write("stocks: csv{\n");
+            fd.write("  symbol,type,date,quantity,base_price\n")
             base_date = self.parsed_args.base_date
             for sym in self.parsed_args.symbols:
-                fd.write(f"{sym},stock,{base_date},100,0.00\n")
+                fd.write(f"  {sym},stock,{base_date},100,0.00\n")
+            fd.write("}\n")
 
-    def sp_dstool(self, dsop, stocks=None):
+    def sp_dstool(self, dsop):
         command = ["sp_dstool"]
-        command.append(f"--root={self.parsed_args.ds_root}")
-        command.append(f"--name={self.parsed_args.ds_name}")
+        command.append(f"--config={self.parsed_args.config_filename}")
         command.append(f"--dsop={dsop}")
-        if stocks is not None:
-            command.append(f"--stocks={stocks}")
         self.run_command(command)
 
     def run_command(self, command):
