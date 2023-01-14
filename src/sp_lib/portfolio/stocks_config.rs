@@ -85,11 +85,13 @@ impl StocksConfig {
                 "ds_name" => if value != "$default" { name = String::from(value) },
                 "stocks" => {
                     if value != "csv{" {
-                        return Err(format!("StocksConfig::parse - unsupported block type '{}'", value).into());
+                        return Err(format!("StocksConfig::parse - Unsupported block type '{}'", value).into());
                     }
                     collect_scontent = true;
                 },
-                _ => (),
+                _ => {
+                    return Err(format!("StocksConfig::parse - Unknown config name '{}'", tokens[0]).into());
+                }
             };
         }
 

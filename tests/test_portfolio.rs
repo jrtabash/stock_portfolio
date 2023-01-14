@@ -493,7 +493,8 @@ fn test_stock_config_errors() {
     }
 
     check(&cfg("csv:{\n}\n"), "StocksConfig::parse - Invalid line 'stocks: csv:{'");
-    check(&cfg("csv[\n]\n"), "StocksConfig::parse - unsupported block type 'csv['");
+    check(&cfg("csv[\n]\n"), "StocksConfig::parse - Unsupported block type 'csv['");
+    check(&cfg("csv{\n}\nwhat: who\n"), "StocksConfig::parse - Unknown config name 'what'");
 }
 
 // --------------------------------------------------------------------------------
