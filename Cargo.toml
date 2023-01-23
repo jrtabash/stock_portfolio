@@ -1,6 +1,6 @@
 [package]
 name = "stock_portfolio"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["jrtabash"]
 edition = "2018"
 
