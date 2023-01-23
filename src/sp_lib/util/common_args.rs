@@ -31,14 +31,22 @@ pub fn stocks_file_help() -> &'static str {
 pub fn stocks_config_help() -> &'static str {
     "Config file containing datastore root and name, as well as stocks in portfolio.\n\
      Both root and name can be set to \"$default\" which will use home path for root and sp_datastore for name.\n\
-     The CSV block should contain stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price' including a header line. \
+     The CSV block \"csv{\" should contain stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price' including a header line. \
      Supported type values include stock, etf and index.\n\
-     Sample config:\n\
+     A CSV file block \"csv_file{\" can be used instead of a CSV block. It should contain the path to a CSV file. \
+     The file should contain the CSV symbol data.\n\
+     Sample config 1:\n\
      \troot: $default\n\
      \tname: my_datastore\n\
      \tstocks: csv{\n\
      \t  symbol,type,date,quantity,base_price\n\
      \t  AAPL,stock,2020-09-20,100,115.00\n\
+     \t}\n\
+     Sample config 2:\n\
+     \troot: $default\n\
+     \tname: my_datastore\n\
+     \tstocks: csv_file{\n\
+     \t  /path/to/my/stocks.csv\n\
      \t}\n"
 }
 

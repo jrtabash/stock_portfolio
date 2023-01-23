@@ -6,6 +6,13 @@ use std::io::BufReader;
 use crate::portfolio::stock::StockList;
 use crate::portfolio::stocks_reader::StocksReader;
 
+#[derive(Copy, Clone, PartialEq)]
+enum SContentType {
+    None,
+    CSV,
+    CSVFile,
+}
+
 pub struct StocksConfig {
     ds_root: String,
     ds_name: String,
@@ -54,13 +61,19 @@ impl StocksConfig {
         let mut stocks: Option<StockList> = None;
 
         let mut collect_scontent = false;
+        let mut scontent_type = SContentType::None;
         let mut scontent = String::new();
 
         for line in content.lines() {
             if line == "" { continue; }
 
             if line.trim() == "}" {
-                stocks = Some(StocksReader::parse_content(&scontent)?);
+                stocks = Some(
+                    match scontent_type {
+                        SContentType::CSV => StocksReader::parse_content(&scontent)?,
+                        SContentType::CSVFile => StocksReader::new(scontent.trim().to_string()).read()?,
+                        SContentType::None => return Err("StocksConfig::parse - Unexpected scontent type None".into())
+                    });
                 collect_scontent = false;
                 continue;
             }
@@ -84,10 +97,17 @@ impl StocksConfig {
                 "ds_root" => if value != "$default" { root = String::from(value) },
                 "ds_name" => if value != "$default" { name = String::from(value) },
                 "stocks" => {
-                    if value != "csv{" {
-                        return Err(format!("StocksConfig::parse - Unsupported block type '{}'", value).into());
+                    if scontent_type != SContentType::None {
+                        // We have already parsed a stocks entry, there shouldn't be another one.
+                        return Err("StocksConfig::parse - Unsupported multiple stocks entries".into());
                     }
+
                     collect_scontent = true;
+                    match value {
+                        "csv{" => scontent_type = SContentType::CSV,
+                        "csv_file{" => scontent_type = SContentType::CSVFile,
+                        _ => return Err(format!("StocksConfig::parse - Unsupported block type '{}'", value).into())
+                    };
                 },
                 _ => {
                     return Err(format!("StocksConfig::parse - Unknown config name '{}'", tokens[0]).into());

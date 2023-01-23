@@ -406,6 +406,47 @@ fn test_stock_config_from_file() {
 }
 
 #[test]
+fn test_stock_config_from_file2() {
+    let csv_file = "test_stock_config_from_file2.csv";
+    let cfg_file = "test_stock_config_from_file2.cfg";
+    let csv_filename = temp_file::make_path(&csv_file);
+    let cfg_filename = temp_file::make_path(&cfg_file);
+
+    assert!(temp_file::create_file(&csv_file,
+                                   "symbol,type,date,quantity,base_price\n\
+                                    AAPL,stock,2020-09-20,100,115.00\n\
+                                    AAPL,stock,2020-11-12,100,118.50\n\
+                                    DELL,stock,2021-02-10,100,75.50\n"));
+    assert!(temp_file::create_file(&cfg_file,
+                                   &format!("ds_root: sp_root\n\
+                                             ds_name: sp_name\n\
+                                             stocks: csv_file{{\n\
+                                             {}\n\
+                                             }}\n",
+                                            csv_filename.to_str().unwrap())));
+
+    let cfg = StocksConfig::from_file(cfg_filename.to_str().unwrap()).unwrap();
+    assert_eq!(cfg.ds_root(), "sp_root");
+    assert_eq!(cfg.ds_name(), "sp_name");
+    assert_eq!(cfg.stocks().len(), 3);
+
+    let list = cfg.stocks();
+    assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
+               vec!["AAPL", "AAPL", "DELL"]);
+    assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
+               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+    assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
+               vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
+    assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
+               vec![100, 100, 100]);
+    assert_eq!(list.iter().map(|s| s.base_price).collect::<Vec<f64>>(),
+               vec![115.0, 118.50, 75.50]);
+
+    assert!(temp_file::remove_file(&cfg_file));
+    assert!(temp_file::remove_file(&csv_file));
+}
+
+#[test]
 fn test_stock_config_from_str() {
     let content: &str = "ds_root: sp_root\n\
                          ds_name: sp_name\n\
@@ -495,6 +536,7 @@ fn test_stock_config_errors() {
     check(&cfg("csv:{\n}\n"), "StocksConfig::parse - Invalid line 'stocks: csv:{'");
     check(&cfg("csv[\n]\n"), "StocksConfig::parse - Unsupported block type 'csv['");
     check(&cfg("csv{\n}\nwhat: who\n"), "StocksConfig::parse - Unknown config name 'what'");
+    check(&cfg("csv{\n}\nstocks: csv{\n"), "StocksConfig::parse - Unsupported multiple stocks entries");
 }
 
 // --------------------------------------------------------------------------------

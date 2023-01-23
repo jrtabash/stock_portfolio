@@ -70,15 +70,23 @@ OPTIONS:
     -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
                                     Both root and name can be set to "$default" which will use home path for root and
                                     sp_datastore for name.
-                                    The CSV block should contain stocks in portfolio, formatted as
+                                    The CSV block "csv{" should contain stocks in portfolio, formatted as
                                     'symbol,type,date,quantity,base_price' including a header line. Supported type
                                     values include stock, etf and index.
-                                    Sample config:
+                                    A CSV file block "csv_file{" can be used instead of a CSV block. It should contain
+                                    the path to a CSV file. The file should contain the CSV symbol data.
+                                    Sample config 1:
                                         root: $default
                                         name: my_datastore
                                         stocks: csv{
                                           symbol,type,date,quantity,base_price
                                           AAPL,stock,2020-09-20,100,115.00
+                                        }
+                                    Sample config 2:
+                                        root: $default
+                                        name: my_datastore
+                                        stocks: csv_file{
+                                          /path/to/my/stocks.csv
                                         }
 ```
 
@@ -126,15 +134,23 @@ OPTIONS:
     -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
                                     Both root and name can be set to "$default" which will use home path for root and
                                     sp_datastore for name.
-                                    The CSV block should contain stocks in portfolio, formatted as
+                                    The CSV block "csv{" should contain stocks in portfolio, formatted as
                                     'symbol,type,date,quantity,base_price' including a header line. Supported type
                                     values include stock, etf and index.
-                                    Sample config:
+                                    A CSV file block "csv_file{" can be used instead of a CSV block. It should contain
+                                    the path to a CSV file. The file should contain the CSV symbol data.
+                                    Sample config 1:
                                         root: $default
                                         name: my_datastore
                                         stocks: csv{
                                           symbol,type,date,quantity,base_price
                                           AAPL,stock,2020-09-20,100,115.00
+                                        }
+                                    Sample config 2:
+                                        root: $default
+                                        name: my_datastore
+                                        stocks: csv_file{
+                                          /path/to/my/stocks.csv
                                         }
     -y, --symbol <symbol>           Stock symbol. Optional with update and check operations. Required with drop, reset,
                                     showh, showd, shows, and export operations
@@ -182,15 +198,23 @@ OPTIONS:
     -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
                                     Both root and name can be set to "$default" which will use home path for root and
                                     sp_datastore for name.
-                                    The CSV block should contain stocks in portfolio, formatted as
+                                    The CSV block "csv{" should contain stocks in portfolio, formatted as
                                     'symbol,type,date,quantity,base_price' including a header line. Supported type
                                     values include stock, etf and index.
-                                    Sample config:
+                                    A CSV file block "csv_file{" can be used instead of a CSV block. It should contain
+                                    the path to a CSV file. The file should contain the CSV symbol data.
+                                    Sample config 1:
                                         root: $default
                                         name: my_datastore
                                         stocks: csv{
                                           symbol,type,date,quantity,base_price
                                           AAPL,stock,2020-09-20,100,115.00
+                                        }
+                                    Sample config 2:
+                                        root: $default
+                                        name: my_datastore
+                                        stocks: csv_file{
+                                          /path/to/my/stocks.csv
                                         }
     -y, --symbol <symbol>           Stock symbol
     -w, --window <window>           Number of days, required with sma, mvwap, roc, mvolat and rsi calculations
