@@ -6,6 +6,7 @@ edition = "2018"
 
 [profile.release]
 lto = "thin"
+panic = "abort"
 
 [[bin]]
 name = "sp_report"
