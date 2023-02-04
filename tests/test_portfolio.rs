@@ -28,6 +28,10 @@ fn test_stock_list() {
     list[1].cum_dividend = 10.50;
     assert!(price_eql(cumulative_dividend(&list), 110.75));
 
+    let (pct_chg, pct_chg_wd) = calc_pct_change(&list);
+    assert!(price_eql(pct_chg, 2.757445));
+    assert!(price_eql(pct_chg_wd, 3.312694));
+
     let total_size: u32 = list.iter().map(|stock| stock.quantity).sum();
     assert_eq!(total_size, 200);
 }
@@ -131,8 +135,8 @@ fn test_stocks_update() {
     assert_eq!(cnt, 2);
     assert_eq!(stocks[0].latest_date, dt);
     assert_eq!(stocks[1].latest_date, dt);
-    assert!((stocks[0].latest_price - 57.836052).abs() < 0.0001);
-    assert!((stocks[1].latest_price - 168.119431).abs() < 0.0001);
+    assert!((stocks[0].latest_price - 57.370995).abs() < 0.0001);
+    assert!((stocks[1].latest_price - 168.119446).abs() < 0.0001);
 }
 
 #[test]

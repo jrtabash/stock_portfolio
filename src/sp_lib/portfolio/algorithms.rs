@@ -22,9 +22,17 @@ pub fn cumulative_dividend(stocks: &StockList) -> Price {
 }
 
 pub fn pct_change(stocks: &StockList) -> f64 {
-    let base: Price = base_notional(stocks);
-    let latest: Price = latest_notional(stocks);
+    let base = base_notional(stocks);
+    let latest = latest_notional(stocks);
     100.0 * (latest - base) / base
+}
+
+// Return (pct_change, pct_change_with_dividend)
+pub fn calc_pct_change(stocks: &StockList) -> (f64, f64) {
+    let base = base_notional(stocks);
+    let net = latest_notional(stocks) - base;
+    let div = cumulative_dividend(stocks);
+    (100.0 * net / base, 100.0 * (net + div) / base)
 }
 
 pub fn stock_groupby<T>(stocks: &StockList,
