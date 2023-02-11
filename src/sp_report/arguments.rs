@@ -103,34 +103,42 @@ impl Arguments {
         }
     }
 
+    #[inline(always)]
     pub fn config_file(self: &Arguments) -> &String {
         &self.config_file
     }
 
+    #[inline(always)]
     pub fn report_type(self: &Arguments) -> Option<&String> {
         self.report_type.as_ref()
     }
 
+    #[inline(always)]
     pub fn order_by(self: &Arguments) -> Option<&String> {
         self.order_by.as_ref()
     }
 
+    #[inline(always)]
     pub fn include(self: &Arguments) -> Option<&String> {
         self.include.as_ref()
     }
 
+    #[inline(always)]
     pub fn exclude(self: &Arguments) -> Option<&String> {
         self.exclude.as_ref()
     }
 
+    #[inline(always)]
     pub fn export_file(self: &Arguments) -> Option<&String> {
         self.export_file.as_ref()
     }
 
+    #[inline(always)]
     pub fn show_groupby(self: &Arguments) -> bool {
         self.show_groupby
     }
 
+    #[inline(always)]
     pub fn desc(self: &Arguments) -> bool {
         self.desc
     }

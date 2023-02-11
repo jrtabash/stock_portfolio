@@ -45,22 +45,27 @@ impl Arguments {
         }
     }
 
+    #[inline(always)]
     pub fn symbol(&self) -> &String {
         &self.symbol
     }
 
+    #[inline(always)]
     pub fn from(&self) -> Option<datetime::SPDate> {
         self.from
     }
 
+    #[inline(always)]
     pub fn to(&self) -> Option<datetime::SPDate> {
         self.to
     }
 
+    #[inline(always)]
     pub fn events(&self) -> &String {
         &self.events
     }
 
+    #[inline(always)]
     pub fn interval(&self) -> &String {
         &self.interval
     }

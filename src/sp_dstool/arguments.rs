@@ -66,26 +66,32 @@ impl Arguments {
         }
     }
 
+    #[inline(always)]
     pub fn ds_operation(self: &Self) -> &String {
         &self.ds_operation
     }
 
+    #[inline(always)]
     pub fn config_file(self: &Self) -> &String {
         &self.config_file
     }
 
+    #[inline(always)]
     pub fn symbol(self: &Self) -> Option<&String> {
         self.symbol.as_ref()
     }
 
+    #[inline(always)]
     pub fn export_file(self: &Arguments) -> Option<&String> {
         self.export_file.as_ref()
     }
 
+    #[inline(always)]
     pub fn is_verbose(self: &Self) -> bool {
         self.verbose
     }
 
+    #[inline(always)]
     pub fn is_auto_reset(self: &Self) -> bool {
         self.auto_reset
     }
