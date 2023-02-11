@@ -162,14 +162,14 @@ Describe and calculate symbol stats.
 The following calculations are supported:
 - **desc**: Describe symbol history
 - **divdesc**: Describe symbol dividends
-- **sa**: Calculate symbol adjusted close simple average price
-- **vwap**: Calculate symbol adjusted close volume weighted average price
-- **volat**: Calculate symbol adjusted close volatility
-- **sma**: Calculate symbol adjusted close simple moving average price
-- **mvwap**: Calculate symbol adjusted close moving volume weighted average price
-- **roc**: Calculate symbol adjusted close rate of change
-- **pctch**: Calculate symbol adjusted close percent change relative to from date
-- **mvolat**: Calculate symbol adjusted close moving volatility
+- **sa**: Calculate symbol simple average price
+- **vwap**: Calculate symbol volume weighted average price
+- **volat**: Calculate symbol volatility
+- **sma**: Calculate symbol simple moving average price
+- **mvwap**: Calculate symbol moving volume weighted average price
+- **roc**: Calculate symbol rate of change
+- **pctch**: Calculate symbol percent change relative to from date
+- **mvolat**: Calculate symbol moving volatility
 - **rsi**: Calculate symbol Relative Strength Index
 
 ```bash
