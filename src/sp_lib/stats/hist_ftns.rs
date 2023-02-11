@@ -4,14 +4,29 @@ use crate::util::datetime::SPDate;
 use crate::util::price_type::price_zero;
 use crate::stats::reduce_ftns;
 
+const DEFAULT_FIELD: &str = "adj_close";
+
 pub type DatePriceList = Vec<(SPDate, Price)>;
 
+fn field_to_ftn(field: &str) -> impl Fn(&HistoryEntry) -> Price {
+    match field {
+        "open" => |e: &HistoryEntry| e.open,
+        "high" => |e: &HistoryEntry| e.high,
+        "low" => |e: &HistoryEntry| e.low,
+        "close" => |e: &HistoryEntry| e.close,
+        _ => |e: &HistoryEntry| e.adj_close
+    }
+}
+
+// --------------------------------------------------------------------------------
 // Volume Weighted Average Price
-pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+
+pub fn entries_field_vwap(entries: &[HistoryEntry], field: &str) -> Result<Price, Box<dyn Error>> {
     let mut notional: Price = 0.0;
     let mut volume: u64 = 0;
+    let field_ftn = field_to_ftn(field);
     for h in entries {
-        notional += h.adj_close * h.volume as Price;
+        notional += field_ftn(h) * h.volume as Price;
         volume += h.volume;
     }
     if volume == 0 {
@@ -21,37 +36,73 @@ pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
 }
 
 #[inline(always)]
-pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
-    entries_vwap(hist.entries())
+pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+    entries_field_vwap(entries, DEFAULT_FIELD)
 }
 
+#[inline(always)]
+pub fn hist_field_vwap(hist: &History, field: &str) -> Result<Price, Box<dyn Error>> {
+    entries_field_vwap(hist.entries(), field)
+}
+
+#[inline(always)]
+pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
+    entries_field_vwap(hist.entries(), DEFAULT_FIELD)
+}
+
+// --------------------------------------------------------------------------------
 // Simple Average Price
-pub fn entries_sa(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+
+pub fn entries_field_sa(entries: &[HistoryEntry], field: &str) -> Result<Price, Box<dyn Error>> {
     if entries.len() > 0 {
-        reduce_ftns::mean(entries, |e| e.adj_close)
+        reduce_ftns::mean(entries, field_to_ftn(field))
     } else {
         Ok(0.0)
     }
 }
 
 #[inline(always)]
-pub fn hist_sa(hist: &History) -> Result<Price, Box<dyn Error>> {
-    entries_sa(hist.entries())
+pub fn entries_sa(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+    entries_field_sa(entries, DEFAULT_FIELD)
 }
 
+#[inline(always)]
+pub fn hist_field_sa(hist: &History, field: &str) -> Result<Price, Box<dyn Error>> {
+    entries_field_sa(hist.entries(), field)
+}
+
+#[inline(always)]
+pub fn hist_sa(hist: &History) -> Result<Price, Box<dyn Error>> {
+    entries_field_sa(hist.entries(), DEFAULT_FIELD)
+}
+
+// --------------------------------------------------------------------------------
 // Volatility
-pub fn entries_volatility(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
-    let roc = entries_roc(entries, 1)?;
+
+pub fn entries_field_volatility(entries: &[HistoryEntry], field: &str) -> Result<Price, Box<dyn Error>> {
+    let roc = entries_field_roc(entries, field, 1)?;
     reduce_ftns::stddev(&roc, |r| r.1)
 }
 
 #[inline(always)]
-pub fn hist_volatility(hist: &History) -> Result<Price, Box<dyn Error>> {
-    entries_volatility(hist.entries())
+pub fn entries_volatility(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+    entries_field_volatility(entries, DEFAULT_FIELD)
 }
 
+#[inline(always)]
+pub fn hist_field_volatility(hist: &History, field: &str) -> Result<Price, Box<dyn Error>> {
+    entries_field_volatility(hist.entries(), field)
+}
+
+#[inline(always)]
+pub fn hist_volatility(hist: &History) -> Result<Price, Box<dyn Error>> {
+    entries_field_volatility(hist.entries(), DEFAULT_FIELD)
+}
+
+// --------------------------------------------------------------------------------
 // Moving Volume Weighted Average Price
-pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+
+pub fn entries_field_mvwap(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     if days < 1 {
         return Err(format!("entries_mvwap: days < 1").into())
     }
@@ -64,14 +115,15 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceL
 
     let mut notional: Price = 0.0;
     let mut volume: u64 = 0;
+    let field_ftn = field_to_ftn(field);
     for i in 0..base {
-        notional += entries[i].adj_close * entries[i].volume as Price;
+        notional += field_ftn(&entries[i]) * entries[i].volume as Price;
         volume += entries[i].volume;
     }
 
     let mut prices: DatePriceList = Vec::with_capacity(size - base);
     for i in base..size {
-        notional += entries[i].adj_close * entries[i].volume as Price;
+        notional += field_ftn(&entries[i]) * entries[i].volume as Price;
         volume += entries[i].volume;
         if volume == 0 {
             return Err(format!("entries_mvwap: Cannot divide by zero total volume").into())
@@ -80,7 +132,7 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceL
         prices.push((entries[i].date.clone(), notional / volume as Price));
 
         let i0 = i - base;
-        notional -= entries[i0].adj_close * entries[i0].volume as Price;
+        notional -= field_ftn(&entries[i0]) * entries[i0].volume as Price;
         volume -= entries[i0].volume;
     }
 
@@ -88,12 +140,24 @@ pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceL
 }
 
 #[inline(always)]
-pub fn hist_mvwap(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
-    entries_mvwap(hist.entries(), days)
+pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_mvwap(entries, DEFAULT_FIELD, days)
 }
 
+#[inline(always)]
+pub fn hist_field_mvwap(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_mvwap(hist.entries(), field, days)
+}
+
+#[inline(always)]
+pub fn hist_mvwap(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_mvwap(hist.entries(), DEFAULT_FIELD, days)
+}
+
+// --------------------------------------------------------------------------------
 // Simple Moving Average Price
-pub fn entries_sma(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+
+pub fn entries_field_sma(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     if days < 1 {
         return Err(format!("entries_sma: days < 1").into())
     }
@@ -106,14 +170,15 @@ pub fn entries_sma(entries: &[HistoryEntry], days: usize) -> Result<DatePriceLis
 
     let mut sum: Price = 0.0;
     let mut cnt: u64 = 0;
+    let field_ftn = field_to_ftn(field);
     for i in 0..base {
-        sum += entries[i].adj_close;
+        sum += field_ftn(&entries[i]);
         cnt += 1;
     }
 
     let mut prices: DatePriceList = Vec::with_capacity(size - base);
     for i in base..size {
-        sum += entries[i].adj_close;
+        sum += field_ftn(&entries[i]);
         cnt += 1;
 
         if cnt == 0 {
@@ -123,7 +188,7 @@ pub fn entries_sma(entries: &[HistoryEntry], days: usize) -> Result<DatePriceLis
         prices.push((entries[i].date.clone(), sum / cnt as Price));
 
         let i0 = i - base;
-        sum -= entries[i0].adj_close;
+        sum -= field_ftn(&entries[i0]);
         cnt -= 1;
     }
 
@@ -131,12 +196,24 @@ pub fn entries_sma(entries: &[HistoryEntry], days: usize) -> Result<DatePriceLis
 }
 
 #[inline(always)]
-pub fn hist_sma(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
-    entries_sma(hist.entries(), days)
+pub fn entries_sma(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_sma(entries, DEFAULT_FIELD, days)
 }
 
+#[inline(always)]
+pub fn hist_field_sma(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_sma(hist.entries(), field, days)
+}
+
+#[inline(always)]
+pub fn hist_sma(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_sma(hist.entries(), DEFAULT_FIELD, days)
+}
+
+// --------------------------------------------------------------------------------
 // Rate of Change
-pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+
+pub fn entries_field_roc(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     if days < 1 {
         return Err(format!("entries_roc: days < 1").into())
     }
@@ -145,51 +222,78 @@ pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<DatePriceLis
     }
 
     let size = entries.len();
+    let field_ftn = field_to_ftn(field);
     let mut rocs: DatePriceList = Vec::with_capacity(size - days);
     for i in days..size {
-        let p0 = entries[i - days].adj_close;
+        let p0 = field_ftn(&entries[i - days]);
         if price_zero(p0) {
             return Err(format!("entries_roc: Cannot divide by zero price").into())
         }
-        rocs.push((entries[i].date.clone(), 100.0 * (entries[i].adj_close - p0) / p0));
+        rocs.push((entries[i].date.clone(), 100.0 * (field_ftn(&entries[i]) - p0) / p0));
     }
 
     Ok(rocs)
 }
 
 #[inline(always)]
-pub fn hist_roc(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
-    entries_roc(hist.entries(), days)
+pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_roc(entries, DEFAULT_FIELD, days)
 }
 
+#[inline(always)]
+pub fn hist_field_roc(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_roc(hist.entries(), field, days)
+}
+
+#[inline(always)]
+pub fn hist_roc(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_roc(hist.entries(), DEFAULT_FIELD, days)
+}
+
+// --------------------------------------------------------------------------------
 // Percent change relative to first history point
-pub fn entries_pctch(entries: &[HistoryEntry]) -> Result<DatePriceList, Box<dyn Error>> {
+
+pub fn entries_field_pctch(entries: &[HistoryEntry], field: &str) -> Result<DatePriceList, Box<dyn Error>> {
     let size = entries.len();
 
     if size < 2 {
         return Err(format!("entries_pctch: len < 2").into())
     }
 
-    let p0 = entries[0].adj_close;
+    let field_ftn = field_to_ftn(field);
+
+    let p0 = field_ftn(&entries[0]);
     if price_zero(p0) {
         return Err(format!("entries_pctch: Cannot divide by zero price").into())
     }
 
     let mut pctch: DatePriceList = Vec::with_capacity(entries.len() - 1);
     for i in 1..size {
-        pctch.push((entries[i].date.clone(), 100.0 * (entries[i].adj_close - p0) / p0));
+        pctch.push((entries[i].date.clone(), 100.0 * (field_ftn(&entries[i]) - p0) / p0));
     }
 
     Ok(pctch)
 }
 
 #[inline(always)]
-pub fn hist_pctch(hist: &History) -> Result<DatePriceList, Box<dyn Error>> {
-    entries_pctch(hist.entries())
+pub fn entries_pctch(entries: &[HistoryEntry]) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_pctch(entries, DEFAULT_FIELD)
 }
 
+#[inline(always)]
+pub fn hist_field_pctch(hist: &History, field: &str) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_pctch(hist.entries(), field)
+}
+
+#[inline(always)]
+pub fn hist_pctch(hist: &History) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_pctch(hist.entries(), DEFAULT_FIELD)
+}
+
+// --------------------------------------------------------------------------------
 // Moving Volatility
-pub fn entries_mvolatility(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+
+pub fn entries_field_mvolatility(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     let size = entries.len();
     if size < 2 {
         return Err(format!("entries_mvolatility: len < 2").into())
@@ -204,18 +308,30 @@ pub fn entries_mvolatility(entries: &[HistoryEntry], days: usize) -> Result<Date
 
     let mut mvols: DatePriceList = Vec::with_capacity(size - days + 1);
     for i in days..(size+1) {
-        mvols.push((entries[i-1].date.clone(), entries_volatility(&entries[(i-days)..i])?));
+        mvols.push((entries[i-1].date.clone(), entries_field_volatility(&entries[(i-days)..i], field)?));
     }
 
     Ok(mvols)
 }
 
 #[inline(always)]
-pub fn hist_mvolatility(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
-    entries_mvolatility(hist.entries(), days)
+pub fn entries_mvolatility(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_mvolatility(entries, DEFAULT_FIELD, days)
 }
 
+#[inline(always)]
+pub fn hist_field_mvolatility(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_mvolatility(hist.entries(), field, days)
+}
+
+#[inline(always)]
+pub fn hist_mvolatility(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+    entries_field_mvolatility(hist.entries(), DEFAULT_FIELD, days)
+}
+
+// --------------------------------------------------------------------------------
 // Relative Strength Index
+
 pub fn entries_rsi(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     fn calc_rsi(mean_gain: Price, mean_loss: Price) -> Price { 100.0 - (100.0 / (1.0 + mean_gain / mean_loss)) }
     fn pct2gain(p: &Price) -> Price { if *p > 0.0 { *p } else { 0.0 } }
@@ -277,6 +393,14 @@ mod tests {
     }
 
     #[test]
+    fn test_field_vwap() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        assert!(price_eql(hist_field_vwap(&hist, DEFAULT_FIELD).unwrap(), 145.282762));
+        assert!(price_eql(entries_field_vwap(&entries, DEFAULT_FIELD).unwrap(), 145.282762));
+    }
+
+    #[test]
     fn test_entries_sa() {
         let hist = hist_data();
         let entries = hist.entries();
@@ -291,6 +415,14 @@ mod tests {
     }
 
     #[test]
+    fn test_field_sa() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        assert!(price_eql(hist_field_sa(&hist, DEFAULT_FIELD).unwrap(), 145.351675));
+        assert!(price_eql(entries_field_sa(&entries, DEFAULT_FIELD).unwrap(), 145.351675));
+    }
+
+    #[test]
     fn test_entries_volatility() {
         let hist = hist_data();
         let entries = hist.entries();
@@ -302,6 +434,14 @@ mod tests {
     fn test_hist_volatility() {
         let hist = hist_data();
         assert!(price_eql(hist_volatility(&hist).unwrap(), 1.207204));
+    }
+
+    #[test]
+    fn test_field_volatility() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        assert!(price_eql(hist_field_volatility(&hist, DEFAULT_FIELD).unwrap(), 1.207204));
+        assert!(price_eql(entries_field_volatility(&entries, DEFAULT_FIELD).unwrap(), 1.207204));
     }
 
     #[test]
@@ -325,6 +465,19 @@ mod tests {
     }
 
     #[test]
+    fn test_field_mvwap() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_mvwap();
+
+        let actual = hist_field_mvwap(&hist, DEFAULT_FIELD, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+
+        let actual = entries_field_mvwap(&entries, DEFAULT_FIELD, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
     fn test_entries_sma() {
         let hist = hist_data();
         let entries = hist.entries();
@@ -341,6 +494,19 @@ mod tests {
         let hist = hist_data();
         let expect = expect_sma();
         let actual = hist_sma(&hist, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
+    fn test_field_sma() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_sma();
+
+        let actual = hist_field_sma(&hist, DEFAULT_FIELD, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+
+        let actual = entries_field_sma(&entries, DEFAULT_FIELD, 5).unwrap();
         assert!(date_prices_eql(&actual, &expect));
     }
 
@@ -377,6 +543,28 @@ mod tests {
     }
 
     #[test]
+    fn test_field_roc() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_roc1();
+
+        let actual = hist_field_roc(&hist, DEFAULT_FIELD, 1).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+
+        let actual = entries_field_roc(&entries, DEFAULT_FIELD, 1).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
+    fn test_entries_pctch() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_pctch();
+        let actual = entries_pctch(&entries).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
     fn test_hist_pctch() {
         let hist = hist_data();
         let expect = expect_pctch();
@@ -385,10 +573,45 @@ mod tests {
     }
 
     #[test]
+    fn test_field_pctch() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_pctch();
+
+        let actual = hist_field_pctch(&hist, DEFAULT_FIELD).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+
+        let actual = entries_field_pctch(&entries, DEFAULT_FIELD).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
+    fn test_entries_mvolatility() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_mvolat();
+        let actual = entries_mvolatility(&entries, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
     fn test_hist_mvolatility() {
         let hist = hist_data();
         let expect = expect_mvolat();
         let actual = hist_mvolatility(&hist, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+    }
+
+    #[test]
+    fn test_field_mvolatility() {
+        let hist = hist_data();
+        let entries = hist.entries();
+        let expect = expect_mvolat();
+
+        let actual = hist_field_mvolatility(&hist, DEFAULT_FIELD, 5).unwrap();
+        assert!(date_prices_eql(&actual, &expect));
+
+        let actual = entries_field_mvolatility(&entries, DEFAULT_FIELD, 5).unwrap();
         assert!(date_prices_eql(&actual, &expect));
     }
 
