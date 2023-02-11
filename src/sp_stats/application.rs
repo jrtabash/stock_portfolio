@@ -3,6 +3,7 @@ use sp_lib::datastore::{datastore, dividends, history};
 use sp_lib::stats::{description, hist_desc, hist_ftns};
 use sp_lib::portfolio::stocks_config;
 use sp_lib::util::{common_app, datetime};
+use std::collections::HashSet;
 use std::error::Error;
 
 const DESC: &str = "desc";
@@ -40,6 +41,11 @@ impl common_app::AppTrait for Application {
     fn run(self: &mut Self) -> common_app::RunResult {
         if !self.ds.exists() {
             return Err(format!("Datastore {} does not exist", self.ds).into());
+        }
+
+        let allowed_fields = HashSet::from(["open", "low", "high", "close", "adj_close"]);
+        if !allowed_fields.contains(self.args.field().as_str()) {
+            return Err(format!("Field {} is not allowed", self.args.field()).into());
         }
 
         self.load_data()?;
@@ -157,29 +163,29 @@ impl Application {
     }
 
     fn calc_vwap(&self) -> Result<(), Box<dyn Error>> {
-        let vwap = hist_ftns::hist_vwap(&self.hist)?;
-        println!(" field: adj_close");
+        let vwap = hist_ftns::hist_field_vwap(&self.hist, self.args.field())?;
+        println!(" field: {}", self.args.field());
         println!("  vwap: {:.4}", vwap);
         Ok(())
     }
 
     fn calc_sa(&self) -> Result<(), Box<dyn Error>> {
-        let sa = hist_ftns::hist_sa(&self.hist)?;
-        println!(" field: adj_close");
+        let sa = hist_ftns::hist_field_sa(&self.hist, self.args.field())?;
+        println!(" field: {}", self.args.field());
         println!("    sa: {:.4}", sa);
         Ok(())
     }
 
     fn calc_volat(&self) -> Result<(), Box<dyn Error>> {
-        let volat = hist_ftns::hist_volatility(&self.hist)?;
-        println!(" field: adj_close");
+        let volat = hist_ftns::hist_field_volatility(&self.hist, self.args.field())?;
+        println!(" field: {}", self.args.field());
         println!(" volat: {:.4}", volat);
         Ok(())
     }
 
-    pub fn print_dp_list(dps: &hist_ftns::DatePriceList, name: &str, show_field: bool) {
+    pub fn print_dp_list(&self, dps: &hist_ftns::DatePriceList, name: &str, show_field: bool) {
         if show_field {
-            println!(" field: adj_close");
+            println!(" field: {}", self.args.field());
         }
         println!("{:>6}: ", name);
         for (date, price) in dps.iter() {
@@ -197,42 +203,42 @@ impl Application {
 
     fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(1)?;
-        let mvwap = hist_ftns::hist_mvwap(&self.hist, self.args.window())?;
-        Self::print_dp_list(&mvwap, MVWAP, true);
+        let mvwap = hist_ftns::hist_field_mvwap(&self.hist, self.args.field(), self.args.window())?;
+        self.print_dp_list(&mvwap, MVWAP, true);
         Ok(())
     }
 
     fn calc_sma(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(1)?;
-        let sma = hist_ftns::hist_sma(&self.hist, self.args.window())?;
-        Self::print_dp_list(&sma, SMA, true);
+        let sma = hist_ftns::hist_field_sma(&self.hist, self.args.field(), self.args.window())?;
+        self.print_dp_list(&sma, SMA, true);
         Ok(())
     }
 
     fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(2)?;
-        let roc = hist_ftns::hist_roc(&self.hist, self.args.window() - 1)?;
-        Self::print_dp_list(&roc, ROC, true);
+        let roc = hist_ftns::hist_field_roc(&self.hist, self.args.field(), self.args.window() - 1)?;
+        self.print_dp_list(&roc, ROC, true);
         Ok(())
     }
 
     fn calc_pctch(&self) -> Result<(), Box<dyn Error>> {
-        let pctch = hist_ftns::hist_pctch(&self.hist)?;
-        Self::print_dp_list(&pctch, PCTCH, true);
+        let pctch = hist_ftns::hist_field_pctch(&self.hist, self.args.field())?;
+        self.print_dp_list(&pctch, PCTCH, true);
         Ok(())
     }
 
     fn calc_mvolat(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(1)?;
-        let mvolat = hist_ftns::hist_mvolatility(&self.hist, self.args.window())?;
-        Self::print_dp_list(&mvolat, MVOLAT, true);
+        let mvolat = hist_ftns::hist_field_mvolatility(&self.hist, self.args.field(), self.args.window())?;
+        self.print_dp_list(&mvolat, MVOLAT, true);
         Ok(())
     }
 
     fn calc_rsi(&self) -> Result<(), Box<dyn Error>> {
         self.check_window(2)?;
         let rsi = hist_ftns::hist_rsi(&self.hist, self.args.window())?;
-        Self::print_dp_list(&rsi, RSI, false);
+        self.print_dp_list(&rsi, RSI, false);
         Ok(())
     }
 }

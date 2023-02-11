@@ -183,17 +183,20 @@ FLAGS:
 OPTIONS:
     -c, --calc <calculate>          Calculate stats, one of desc, divdesc, sa, vwap, volat, sma, mvwap, roc, pctch,
                                     mvolat, rsi.
-                                    desc    : describe symbol history
-                                    divdesc : describe symbol dividends
-                                    sa      : calculate symbol adjusted close simple average price
-                                    vwap    : calculate symbol adjusted close volume weighted average price
-                                    volat   : calculate symbol adjusted close volatility
-                                    sma     : calculate symbol adjusted close simple moving average price
-                                    mvwap   : calculate symbol adjusted close moving volume weighted average price
-                                    roc     : calculate symbol adjusted close rate of change
-                                    pctch   : calculate symbol adjusted close percent change relative to from date
-                                    mvolat  : calculate symbol adjusted close moving volatility
-                                    rsi     : Calculate symbol Relative Strength Index
+                                    desc    : describe history
+                                    divdesc : describe dividends
+                                    sa      : calculate simple average price
+                                    vwap    : calculate volume weighted average price
+                                    volat   : calculate volatility
+                                    sma     : calculate simple moving average price
+                                    mvwap   : calculate moving volume weighted average price
+                                    roc     : calculate rate of change
+                                    pctch   : calculate percent change relative to from date
+                                    mvolat  : calculate moving volatility
+                                    rsi     : Calculate Relative Strength Index
+    -i, --field <field>             Symbol history field to use in calculation.
+                                    One of open, high, low, close, adj_close. Default adj_close.
+                                    Applies to sa, vwap, volat, sma, mvwap, roc, pctch and mvolat
     -f, --from <from_date>          Start from date YYYY-MM-DD
     -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
                                     Both root and name can be set to "$default" which will use home path for root and
