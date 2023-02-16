@@ -12,7 +12,7 @@ pub type Price = PriceType;
 
 #[inline(always)]
 pub fn tag() -> &'static str {
-    &"dividends"
+    "dividends"
 }
 
 // --------------------------------------------------------------------------------
@@ -26,8 +26,8 @@ pub struct DividendEntry {
 impl DividendEntry {
     pub fn new(date: SPDate, price: Price) -> Self {
         DividendEntry {
-            date: date,
-            price: price
+            date,
+            price
         }
     }
 
@@ -35,7 +35,7 @@ impl DividendEntry {
         let values: Vec<&str> = csv.split(',').map(|field| field.trim()).collect();
         if values.len() == DividendEntry::number_of_fields() {
             Ok(DividendEntry {
-                date: datetime::parse_date(&values[0])?,
+                date: datetime::parse_date(values[0])?,
                 price: values[1].parse::<Price>()?
             })
         }
@@ -46,7 +46,7 @@ impl DividendEntry {
 
     #[inline(always)]
     pub fn number_of_fields() -> usize {
-        return 2
+        2
     }
 }
 
@@ -113,12 +113,11 @@ impl Dividends {
 
     pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
         let div = Dividends::parse_csv("dividends_check", csv)?;
-        let cnt = div.count();
-        if cnt > 0 {
-            let entries = div.entries;
+        let entries = div.entries;
+        if !entries.is_empty() {
             let mut last_date = entries[0].date;
-            for i in 1..cnt {
-                let curr_date = entries[i].date;
+            for entry in entries.iter().skip(1) {
+                let curr_date = entry.date;
                 datetime::check_dup_or_back_gap(&last_date, &curr_date)?;
                 last_date = curr_date;
             }

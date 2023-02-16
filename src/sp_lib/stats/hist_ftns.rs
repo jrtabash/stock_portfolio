@@ -30,7 +30,7 @@ pub fn entries_field_vwap(entries: &[HistoryEntry], field: &str) -> Result<Price
         volume += h.volume;
     }
     if volume == 0 {
-        return Err(format!("entries_vwap: Cannot divide by zero total volume").into())
+        return Err("entries_vwap: Cannot divide by zero total volume".into())
     }
     Ok(notional / volume as Price)
 }
@@ -54,7 +54,7 @@ pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
 // Simple Average Price
 
 pub fn entries_field_sa(entries: &[HistoryEntry], field: &str) -> Result<Price, Box<dyn Error>> {
-    if entries.len() > 0 {
+    if !entries.is_empty() {
         reduce_ftns::mean(entries, field_to_ftn(field))
     } else {
         Ok(0.0)
@@ -104,10 +104,10 @@ pub fn hist_volatility(hist: &History) -> Result<Price, Box<dyn Error>> {
 
 pub fn entries_field_mvwap(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     if days < 1 {
-        return Err(format!("entries_mvwap: days < 1").into())
+        return Err("entries_mvwap: days < 1".into())
     }
     if days > entries.len() {
-        return Err(format!("entries_mvwap: days > len").into())
+        return Err("entries_mvwap: days > len".into())
     }
 
     let base = days - 1;
@@ -116,9 +116,9 @@ pub fn entries_field_mvwap(entries: &[HistoryEntry], field: &str, days: usize) -
     let mut notional: Price = 0.0;
     let mut volume: u64 = 0;
     let field_ftn = field_to_ftn(field);
-    for i in 0..base {
-        notional += field_ftn(&entries[i]) * entries[i].volume as Price;
-        volume += entries[i].volume;
+    for entry in entries.iter().take(base) {
+        notional += field_ftn(entry) * entry.volume as Price;
+        volume += entry.volume;
     }
 
     let mut prices: DatePriceList = Vec::with_capacity(size - base);
@@ -126,10 +126,10 @@ pub fn entries_field_mvwap(entries: &[HistoryEntry], field: &str, days: usize) -
         notional += field_ftn(&entries[i]) * entries[i].volume as Price;
         volume += entries[i].volume;
         if volume == 0 {
-            return Err(format!("entries_mvwap: Cannot divide by zero total volume").into())
+            return Err("entries_mvwap: Cannot divide by zero total volume".into())
         }
 
-        prices.push((entries[i].date.clone(), notional / volume as Price));
+        prices.push((entries[i].date, notional / volume as Price));
 
         let i0 = i - base;
         notional -= field_ftn(&entries[i0]) * entries[i0].volume as Price;
@@ -159,10 +159,10 @@ pub fn hist_mvwap(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn 
 
 pub fn entries_field_sma(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     if days < 1 {
-        return Err(format!("entries_sma: days < 1").into())
+        return Err("entries_sma: days < 1".into())
     }
     if days > entries.len() {
-        return Err(format!("entries_sma: days > len").into())
+        return Err("entries_sma: days > len".into())
     }
 
     let base = days - 1;
@@ -171,8 +171,8 @@ pub fn entries_field_sma(entries: &[HistoryEntry], field: &str, days: usize) -> 
     let mut sum: Price = 0.0;
     let mut cnt: u64 = 0;
     let field_ftn = field_to_ftn(field);
-    for i in 0..base {
-        sum += field_ftn(&entries[i]);
+    for entry in entries.iter().take(base) {
+        sum += field_ftn(entry);
         cnt += 1;
     }
 
@@ -182,10 +182,10 @@ pub fn entries_field_sma(entries: &[HistoryEntry], field: &str, days: usize) -> 
         cnt += 1;
 
         if cnt == 0 {
-            return Err(format!("entries_sma: Cannot divide by zero total count").into())
+            return Err("entries_sma: Cannot divide by zero total count".into())
         }
 
-        prices.push((entries[i].date.clone(), sum / cnt as Price));
+        prices.push((entries[i].date, sum / cnt as Price));
 
         let i0 = i - base;
         sum -= field_ftn(&entries[i0]);
@@ -215,10 +215,10 @@ pub fn hist_sma(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Er
 
 pub fn entries_field_roc(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     if days < 1 {
-        return Err(format!("entries_roc: days < 1").into())
+        return Err("entries_roc: days < 1".into())
     }
     if days > entries.len() {
-        return Err(format!("entries_roc: days > len").into())
+        return Err("entries_roc: days > len".into())
     }
 
     let size = entries.len();
@@ -227,9 +227,9 @@ pub fn entries_field_roc(entries: &[HistoryEntry], field: &str, days: usize) -> 
     for i in days..size {
         let p0 = field_ftn(&entries[i - days]);
         if price_zero(p0) {
-            return Err(format!("entries_roc: Cannot divide by zero price").into())
+            return Err("entries_roc: Cannot divide by zero price".into())
         }
-        rocs.push((entries[i].date.clone(), 100.0 * (field_ftn(&entries[i]) - p0) / p0));
+        rocs.push((entries[i].date, 100.0 * (field_ftn(&entries[i]) - p0) / p0));
     }
 
     Ok(rocs)
@@ -257,19 +257,19 @@ pub fn entries_field_pctch(entries: &[HistoryEntry], field: &str) -> Result<Date
     let size = entries.len();
 
     if size < 2 {
-        return Err(format!("entries_pctch: len < 2").into())
+        return Err("entries_pctch: len < 2".into())
     }
 
     let field_ftn = field_to_ftn(field);
 
     let p0 = field_ftn(&entries[0]);
     if price_zero(p0) {
-        return Err(format!("entries_pctch: Cannot divide by zero price").into())
+        return Err("entries_pctch: Cannot divide by zero price".into())
     }
 
     let mut pctch: DatePriceList = Vec::with_capacity(entries.len() - 1);
-    for i in 1..size {
-        pctch.push((entries[i].date.clone(), 100.0 * (field_ftn(&entries[i]) - p0) / p0));
+    for entry in entries.iter().skip(1) {
+        pctch.push((entry.date, 100.0 * (field_ftn(entry) - p0) / p0));
     }
 
     Ok(pctch)
@@ -296,19 +296,19 @@ pub fn hist_pctch(hist: &History) -> Result<DatePriceList, Box<dyn Error>> {
 pub fn entries_field_mvolatility(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
     let size = entries.len();
     if size < 2 {
-        return Err(format!("entries_mvolatility: len < 2").into())
+        return Err("entries_mvolatility: len < 2".into())
     }
 
     if days < 1 {
-        return Err(format!("entries_mvolatility: days < 1").into())
+        return Err("entries_mvolatility: days < 1".into())
     }
     if days > entries.len() {
-        return Err(format!("entries_mvolatility: days > len").into())
+        return Err("entries_mvolatility: days > len".into())
     }
 
     let mut mvols: DatePriceList = Vec::with_capacity(size - days + 1);
     for i in days..(size+1) {
-        mvols.push((entries[i-1].date.clone(), entries_field_volatility(&entries[(i-days)..i], field)?));
+        mvols.push((entries[i-1].date, entries_field_volatility(&entries[(i-days)..i], field)?));
     }
 
     Ok(mvols)
@@ -338,11 +338,11 @@ pub fn entries_rsi(entries: &[HistoryEntry], days: usize) -> Result<DatePriceLis
     fn pct2loss(p: &Price) -> Price { if *p < 0.0 { *p * -1.0 } else { 0.0 } }
 
     if days < 2 {
-        return Err(format!("entries_rsi: days < 2").into())
+        return Err("entries_rsi: days < 2".into())
     }
 
     if days > entries.len() {
-        return Err(format!("entries_rsi: days > len").into())
+        return Err("entries_rsi: days > len".into())
     }
 
     let size = entries.len();
@@ -353,12 +353,12 @@ pub fn entries_rsi(entries: &[HistoryEntry], days: usize) -> Result<DatePriceLis
     let mut gain = pct[0..days].iter().map(pct2gain).sum::<Price>() / days as Price;
     let mut loss = pct[0..days].iter().map(pct2loss).sum::<Price>() / days as Price;
 
-    rsi.push((entries[days - 1].date.clone(), calc_rsi(gain, loss)));
+    rsi.push((entries[days - 1].date, calc_rsi(gain, loss)));
 
     for i in days..size {
         gain = (gain * days_1) + pct2gain(&pct[i]);
         loss = (loss * days_1) + pct2loss(&pct[i]);
-        rsi.push((entries[i].date.clone(), calc_rsi(gain, loss)));
+        rsi.push((entries[i].date, calc_rsi(gain, loss)));
     }
 
     Ok(rsi)

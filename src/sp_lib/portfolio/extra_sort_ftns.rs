@@ -27,7 +27,7 @@ pub fn extra_sort_by_volat(ds: &DataStore, stocks: &mut StockList, desc: bool) {
                     return volat
                 }
             }
-            return 0.0
+            0.0
         },
         desc);
 }
@@ -44,7 +44,7 @@ pub fn extra_sort_by_volat22(ds: &DataStore, stocks: &mut StockList, desc: bool)
                     }
                 }
             }
-            return 0.0
+            0.0
         },
         desc);
 }
@@ -60,7 +60,7 @@ pub fn extra_sort_by_change(ds: &DataStore, stocks: &mut StockList, desc: bool) 
                     return delta
                 }
             }
-            return 0.0
+            0.0
         },
         desc);
 }
@@ -78,7 +78,7 @@ pub fn extra_sort_by_pctchg(ds: &DataStore, stocks: &mut StockList, desc: bool) 
                     return pct
                 }
             }
-            return 0.0
+            0.0
         },
         desc);
 }
@@ -93,7 +93,7 @@ pub fn extra_sort_by_prevpr(ds: &DataStore, stocks: &mut StockList, desc: bool) 
                     return entries[0].adj_close
                 }
             }
-            return 0.0
+            0.0
         },
         desc);
 }
@@ -108,7 +108,7 @@ pub fn extra_sort_by_low(ds: &DataStore, stocks: &mut StockList, desc: bool) {
                     return entries[0].low
                 }
             }
-            return 0.0
+            0.0
         },
         desc);
 }
@@ -123,7 +123,7 @@ pub fn extra_sort_by_high(ds: &DataStore, stocks: &mut StockList, desc: bool) {
                     return entries[0].high
                 }
             }
-            return 0.0
+            0.0
         },
         desc);
 }
@@ -138,7 +138,7 @@ pub fn extra_sort_by_volume(ds: &DataStore, stocks: &mut StockList, desc: bool) 
                     return entries[0].volume as f64
                 }
             }
-            return 0.0
+            0.0
         },
         desc);
 }

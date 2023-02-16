@@ -31,14 +31,14 @@ impl common_app::AppTrait for Application {
         let config = stocks_config::StocksConfig::from_file(args.config_file()).expect("Missing config file");
         let ds = datastore::DataStore::new(config.ds_root(), config.ds_name());
         Application {
-            args: args,
-            ds: ds,
+            args,
+            ds,
             hist: history::History::new(""),
             div: dividends::Dividends::new("")
         }
     }
 
-    fn run(self: &mut Self) -> common_app::RunResult {
+    fn run(&mut self) -> common_app::RunResult {
         if !self.ds.exists() {
             return Err(format!("Datastore {} does not exist", self.ds).into());
         }
@@ -72,7 +72,7 @@ impl common_app::AppTrait for Application {
 
 impl Application {
     fn date_range<Entry>(entries: &Vec<Entry>, extract_date: impl Fn(&Entry) -> datetime::SPDate) -> (datetime::SPDate, datetime::SPDate) {
-        if entries.len() > 0 {
+        if !entries.is_empty() {
             (extract_date(&entries[0]), extract_date(&entries[entries.len() - 1]))
         } else {
             (datetime::earliest_date(), datetime::earliest_date())
@@ -81,9 +81,9 @@ impl Application {
 
     fn print_date_and_symbol(&self) {
         let (first_date, last_date) = if self.args.calculate() == DIVDESC {
-            Application::date_range(&self.div.entries(), |entry| entry.date)
+            Application::date_range(self.div.entries(), |entry| entry.date)
         } else {
-            Application::date_range(&self.hist.entries(), |entry| entry.date)
+            Application::date_range(self.hist.entries(), |entry| entry.date)
         };
 
         println!("  from: {}", first_date.format("%Y-%m-%d"));
@@ -109,7 +109,7 @@ impl Application {
         Ok(())
     }
 
-    fn describe(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn describe(&self) -> Result<(), Box<dyn Error>> {
         fn print_field(name: &str, hd: &hist_desc::HistDesc, extract: impl Fn(&description::Description) -> f64) {
             println!(
                 "{}: {:12.4} {:12.4} {:12.4} {:12.4} {:12.4} {:16.4}",
@@ -149,7 +149,7 @@ impl Application {
     }
 
     fn div_describe(&self) -> Result<(), Box<dyn Error>> {
-        let desc = description::Description::from_vec(&self.div.entries(), |entry| entry.price);
+        let desc = description::Description::from_vec(self.div.entries(), |entry| entry.price);
         println!(" field: dividend");
         println!(" count: {}", desc.count());
         println!("   min: {:.4}", desc.min());

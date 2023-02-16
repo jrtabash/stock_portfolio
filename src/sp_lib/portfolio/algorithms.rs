@@ -40,7 +40,7 @@ pub fn stock_groupby<T>(stocks: &StockList,
                         ftn: fn(&Stock, &T) -> T) -> HashMap<String, T> {
     let mut groupby: HashMap<String, T> = HashMap::new();
     for stock in stocks.iter() {
-        let entry = groupby.entry(stock.symbol.to_string()).or_insert(init(stock));
+        let entry = groupby.entry(stock.symbol.to_string()).or_insert_with(|| init(stock));
         *entry = ftn(stock, entry);
     }
     groupby
@@ -109,7 +109,7 @@ pub fn sort_stocks_by_extra_ftn(stocks: &mut StockList, extra_ftn: impl Fn(&Stoc
         stocks.sort_by(|lhs, rhs| user_data_cmp(rhs, lhs));
     }
     else {
-        stocks.sort_by(|lhs, rhs| user_data_cmp(lhs, rhs));
+        stocks.sort_by(user_data_cmp);
     }
 }
 
@@ -122,6 +122,6 @@ pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) -> R
 pub fn stock_base_dates(stocks: &StockList) -> HashMap<String, datetime::SPDate> {
     stock_groupby(
         stocks,
-        |stock| stock.date.clone(),
-        |stock, cur_date| if stock.date < *cur_date { stock.date.clone() } else { *cur_date })
+        |stock| stock.date,
+        |stock, cur_date| if stock.date < *cur_date { stock.date } else { *cur_date })
 }

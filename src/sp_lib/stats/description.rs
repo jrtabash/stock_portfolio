@@ -13,6 +13,7 @@ pub struct Description {
 }
 
 impl Description {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(count: usize,
                sum: f64,
                min: f64,
@@ -23,15 +24,15 @@ impl Description {
                median: f64,
                upperq: f64) -> Self {
         Description {
-            count: count,
-            sum: sum,
-            min: min,
-            max: max,
-            mean: mean,
-            stddev: stddev,
-            lowerq: lowerq,
-            median: median,
-            upperq: upperq
+            count,
+            sum,
+            min,
+            max,
+            mean,
+            stddev,
+            lowerq,
+            median,
+            upperq
         }
     }
 
@@ -39,7 +40,7 @@ impl Description {
         let mut values: Vec<f64> = data.iter().map(&extract).collect();
         values.sort_by(|l, r| {
             if      l < r { Ordering::Less }
-            else if r > l { Ordering::Greater }
+            else if l > r { Ordering::Greater }
             else          { Ordering::Equal }
         });
 
@@ -72,7 +73,7 @@ impl Description {
         }
 
         if count > 1 {
-            variance = variance / (count - 1) as f64;
+            variance /= (count - 1) as f64;
         }
 
         let (low, med, upp) = Self::calc_quartiles(&values);
@@ -155,7 +156,7 @@ impl Description {
         let size = values.len();
         let idx = size / 2;
 
-        let med = Self::calc_median(&values);
+        let med = Self::calc_median(values);
         let upp = Self::calc_median(&values[idx..size]);
         let low = if size % 2 == 0 {
             Self::calc_median(&values[0..idx])

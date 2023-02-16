@@ -9,7 +9,7 @@ use crate::datastore::datastore::DataStore;
 
 #[inline(always)]
 pub fn tag() -> &'static str {
-    &"splits"
+    "splits"
 }
 
 // --------------------------------------------------------------------------------
@@ -23,8 +23,8 @@ pub struct SplitEntry {
 impl SplitEntry {
     pub fn new(date: SPDate, split: String) -> Self {
         SplitEntry {
-            date: date,
-            split: split
+            date,
+            split
         }
     }
 
@@ -32,7 +32,7 @@ impl SplitEntry {
         let values: Vec<&str> = csv.split(',').map(|field| field.trim()).collect();
         if values.len() == SplitEntry::number_of_fields() {
             Ok(SplitEntry {
-                date: datetime::parse_date(&values[0])?,
+                date: datetime::parse_date(values[0])?,
                 split: String::from(values[1])
             })
         }
@@ -43,7 +43,7 @@ impl SplitEntry {
 
     #[inline(always)]
     pub fn number_of_fields() -> usize {
-        return 2
+        2
     }
 }
 
@@ -110,12 +110,11 @@ impl Splits {
 
     pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
         let splt = Splits::parse_csv("splits_check", csv)?;
-        let cnt = splt.count();
-        if cnt > 0 {
-            let entries = splt.entries;
+        let entries = splt.entries;
+        if !entries.is_empty() {
             let mut last_date = entries[0].date;
-            for i in 1..cnt {
-                let curr_date = entries[i].date;
+            for entry in entries.iter().skip(1) {
+                let curr_date = entry.date;
                 datetime::check_dup_or_back_gap(&last_date, &curr_date)?;
                 last_date = curr_date;
             }

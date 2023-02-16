@@ -55,7 +55,7 @@ pub fn variance<Entry>(entries: &[Entry],
                               0.0,
                               |v, e| Ok(v + (extract(e) - avg).powf(2.0)))?;
     if entries.len() > 1 {
-        variance = variance / (entries.len() - 1) as f64;
+        variance /= (entries.len() - 1) as f64;
     }
     Ok(variance)
 }

@@ -12,7 +12,7 @@ pub type Price = PriceType;
 
 #[inline(always)]
 pub fn tag() -> &'static str {
-    &"history"
+    "history"
 }
 
 // --------------------------------------------------------------------------------
@@ -37,13 +37,13 @@ impl HistoryEntry {
                adj_close: Price,
                volume: u64) -> Self {
         HistoryEntry {
-            date: date,
-            open: open,
-            high: high,
-            low: low,
-            close: close,
-            adj_close: adj_close,
-            volume: volume
+            date,
+            open,
+            high,
+            low,
+            close,
+            adj_close,
+            volume
         }
     }
 
@@ -51,7 +51,7 @@ impl HistoryEntry {
         let values: Vec<&str> = csv.split(',').map(|field| field.trim()).collect();
         if values.len() == HistoryEntry::number_of_fields() {
             Ok(HistoryEntry {
-                date: datetime::parse_date(&values[0])?,
+                date: datetime::parse_date(values[0])?,
                 open: values[1].parse::<Price>()?,
                 high: values[2].parse::<Price>()?,
                 low: values[3].parse::<Price>()?,
@@ -67,7 +67,7 @@ impl HistoryEntry {
 
     #[inline(always)]
     pub fn number_of_fields() -> usize {
-        return 7
+        7
     }
 }
 
@@ -134,12 +134,11 @@ impl History {
 
     pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
         let hist = History::parse_csv("history_check", csv)?;
-        let cnt = hist.count();
-        if cnt > 0 {
-            let entries = hist.entries;
+        let entries = hist.entries;
+        if !entries.is_empty() {
             let mut last_date = entries[0].date;
-            for i in 1..cnt {
-                let curr_date = entries[i].date;
+            for entry in entries.iter().skip(1) {
+                let curr_date = entry.date;
                 datetime::check_dup_or_back_gap(&last_date, &curr_date)?;
                 last_date = curr_date;
             }

@@ -5,7 +5,7 @@ pub type RunResult = Result<(), Box<dyn Error>>;
 
 pub trait AppTrait {
     fn new() -> Self;
-    fn run(self: &mut Self) -> RunResult;
+    fn run(&mut self) -> RunResult;
 }
 
 pub fn app_main<App: AppTrait>() {

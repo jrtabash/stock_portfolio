@@ -20,7 +20,7 @@ pub struct ReportParams<'a, 'b> {
 
 impl<'a, 'b> ReportParams<'a, 'b> {
     pub fn new(rtype: ReportType, stocks: &'a StockList) -> Self {
-        ReportParams { rtype: rtype, stocks: stocks, ds: None, groupby: false }
+        ReportParams { rtype, stocks, ds: None, groupby: false }
     }
 
     pub fn show_groupby(mut self, grpby: bool) -> Self {
@@ -71,19 +71,19 @@ fn value_report(params: &ReportParams) {
     let stocks = params.stocks();
     let groupby = params.groupby();
 
-    let (pct_chg, pct_chg_wd) = algorithms::calc_pct_change(&stocks);
+    let (pct_chg, pct_chg_wd) = algorithms::calc_pct_change(stocks);
 
     println!("Stocks Value Report");
     println!("-------------------");
     println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
     println!("Number of Stocks: {}", stocks.len());
-    println!("      Base Value: {:.2}", algorithms::base_notional(&stocks));
-    println!("    Latest Value: {:.2}", algorithms::latest_notional(&stocks));
-    println!("       Net Value: {:.2}", algorithms::net_notional(&stocks));
-    println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(&stocks));
+    println!("      Base Value: {:.2}", algorithms::base_notional(stocks));
+    println!("    Latest Value: {:.2}", algorithms::latest_notional(stocks));
+    println!("       Net Value: {:.2}", algorithms::net_notional(stocks));
+    println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(stocks));
     println!("  Percent Change: {:.2}", pct_chg);
     println!("  Pct Chg w/ Div: {:.2}", pct_chg_wd);
-    println!("");
+    println!();
 
     println!("{:8} {:10} {:10} {:6} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10} {:8}",
              "Symbol",
@@ -131,11 +131,11 @@ fn value_report(params: &ReportParams) {
     }
 
     if groupby {
-        println!("");
+        println!();
         println!("{:8} {:8} {:12}", "GroupBy", "Size", "Cur Value");
         println!("{:8} {:8} {:12}", "-------", "----", "---------");
 
-        let groupby = algorithms::stock_aggregate(&stocks);
+        let groupby = algorithms::stock_aggregate(stocks);
 
         let mut seen = HashSet::new();
         for stock in stocks.iter() {
@@ -151,22 +151,22 @@ fn value_report(params: &ReportParams) {
 fn value_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
     let stocks = params.stocks();
     let mut file = File::create(&filename)?;
-    write!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value,Cum Div\n")?;
+    writeln!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value,Cum Div")?;
     for stock in stocks.iter() {
-        write!(file, "{},{},{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2}\n",
-               stock.symbol,
-               stock.date.format("%Y-%m-%d"),
-               stock.latest_date.format("%Y-%m-%d"),
-               stock.days_held,
-               stock.quantity,
-               stock.base_price,
-               stock.latest_price,
-               stock.net_price(),
-               stock.pct_change(),
-               stock.base_notional(),
-               stock.latest_notional(),
-               stock.net_notional(),
-               stock.cum_dividend)?;
+        writeln!(file, "{},{},{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2}",
+                 stock.symbol,
+                 stock.date.format("%Y-%m-%d"),
+                 stock.latest_date.format("%Y-%m-%d"),
+                 stock.days_held,
+                 stock.quantity,
+                 stock.base_price,
+                 stock.latest_price,
+                 stock.net_price(),
+                 stock.pct_change(),
+                 stock.base_notional(),
+                 stock.latest_notional(),
+                 stock.net_notional(),
+                 stock.cum_dividend)?;
     }
     Ok(())
 }
@@ -218,7 +218,7 @@ fn top_report(params: &ReportParams) {
     println!("-----------------------------------");
     println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
     println!("Number of Stocks: {}", stocks.len());
-    println!("");
+    println!();
 
     println!("{:18} {:8} {:8}",
              "Category",
@@ -230,7 +230,7 @@ fn top_report(params: &ReportParams) {
              "------");
 
     let mut data: Vec<TopTuple> = stocks.iter().map(make_top_tuple).collect();
-    if data.len() > 0 {
+    if !data.is_empty() {
         print_row(PCT_CHG, &tb_pct_chg(&mut data));
         print_row(NET_CHG, &tb_net_chg(&mut data));
         print_row(CUM_DIV, &tb_cum_div(&mut data));
@@ -242,16 +242,16 @@ fn top_report(params: &ReportParams) {
 
 fn top_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
     fn write_row(file: &mut File, name: &str, top_bottom: &TopBottom) -> Result<(), Box<dyn Error>> {
-        write!(file, "{},{},{}\n", name, (*top_bottom).0, (*top_bottom).1)?;
+        writeln!(file, "{},{},{}", name, (*top_bottom).0, (*top_bottom).1)?;
         Ok(())
     }
 
     let stocks = params.stocks();
     let mut file = File::create(&filename)?;
-    write!(file, "Category,Top,Bottom\n")?;
+    writeln!(file, "Category,Top,Bottom")?;
 
     let mut data: Vec<TopTuple> = stocks.iter().map(make_top_tuple).collect();
-    if data.len() > 0 {
+    if !data.is_empty() {
         write_row(&mut file, PCT_CHG, &tb_pct_chg(&mut data))?;
         write_row(&mut file, NET_CHG, &tb_net_chg(&mut data))?;
         write_row(&mut file, CUM_DIV, &tb_cum_div(&mut data))?;
@@ -273,7 +273,7 @@ fn calc_volat(stock: &Stock, ds: &DataStore) -> Price {
             return volat
         }
     }
-    return 0.0
+    0.0
 }
 
 fn calc_volat22(stock: &Stock, ds: &DataStore) -> Price {
@@ -285,7 +285,7 @@ fn calc_volat22(stock: &Stock, ds: &DataStore) -> Price {
             }
         }
     }
-    return 0.0
+    0.0
 }
 
 fn volat_report(params: &ReportParams) {
@@ -296,7 +296,7 @@ fn volat_report(params: &ReportParams) {
     println!("------------------------");
     println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
     println!("Number of Stocks: {}", stocks.len());
-    println!("");
+    println!();
 
     println!("{:8} {:10} {:10} {:6} {:8} {:10}",
              "Symbol",
@@ -329,15 +329,15 @@ fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
     let ds = params.datastore().expect("Volat export missing datastore");
 
     let mut file = File::create(&filename)?;
-    write!(file, "Symbol,Buy Date,Upd Date,Days Held,Volat,Volat22\n")?;
+    writeln!(file, "Symbol,Buy Date,Upd Date,Days Held,Volat,Volat22")?;
     for stock in stocks.iter() {
-        write!(file, "{},{},{},{},{:.2},{:.2}\n",
-               stock.symbol,
-               stock.date.format("%Y-%m-%d"),
-               stock.latest_date.format("%Y-%m-%d"),
-               stock.days_held,
-               calc_volat(stock, ds),
-               calc_volat22(stock, ds))?;
+        writeln!(file, "{},{},{},{},{:.2},{:.2}",
+                 stock.symbol,
+                 stock.date.format("%Y-%m-%d"),
+                 stock.latest_date.format("%Y-%m-%d"),
+                 stock.days_held,
+                 calc_volat(stock, ds),
+                 calc_volat22(stock, ds))?;
     }
     Ok(())
 }
@@ -363,7 +363,7 @@ fn calc_daych(stock: &Stock, ds: &DataStore) -> Option<DayChange> {
                          entries[1].volume))
         }
     }
-    return None
+    None
 }
 
 fn daych_report(params: &ReportParams) {
@@ -374,7 +374,7 @@ fn daych_report(params: &ReportParams) {
     println!("------------------------");
     println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
     println!("Number of Stocks: {}", stocks.len());
-    println!("");
+    println!();
 
     println!("{:8} {:10} {:8} {:8} {:8} {:8} {:8} {:8} {:10}",
              "Symbol",
@@ -423,7 +423,7 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
     let ds = params.datastore().expect("Daych report missing datastore");
 
     let mut file = File::create(&filename)?;
-    write!(file, "Symbol,Upd Date,Prev Pr,Price,Change,Pct Chg,Low,High,Volume\n")?;
+    writeln!(file, "Symbol,Upd Date,Prev Pr,Price,Change,Pct Chg,Low,High,Volume")?;
 
     let mut seen = HashSet::new();
     for stock in stocks.iter() {
@@ -431,16 +431,16 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
 
         if let Some(chg) = calc_daych(stock, ds) {
             seen.insert(&stock.symbol);
-            write!(file, "{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{}\n",
-                   stock.symbol,
-                   stock.latest_date.format("%Y-%m-%d"),
-                   chg.0,
-                   chg.1,
-                   chg.2,
-                   chg.3,
-                   chg.4,
-                   chg.5,
-                   chg.6)?;
+            writeln!(file, "{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{}",
+                     stock.symbol,
+                     stock.latest_date.format("%Y-%m-%d"),
+                     chg.0,
+                     chg.1,
+                     chg.2,
+                     chg.3,
+                     chg.4,
+                     chg.5,
+                     chg.6)?;
         }
     }
     Ok(())

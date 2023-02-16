@@ -18,14 +18,14 @@ impl common_app::AppTrait for Application {
         let config = stocks_config::StocksConfig::from_file(args.config_file()).expect("Missing config file");
         let ds = datastore::DataStore::new(config.ds_root(), config.ds_name());
         Application {
-            args: args,
+            args,
             rtype: ReportType::Value,
-            config: config,
-            ds: ds
+            config,
+            ds
         }
     }
 
-    fn run(self: &mut Self) -> common_app::RunResult {
+    fn run(&mut self) -> common_app::RunResult {
         if !self.ds.exists() {
             return Err(format!("Datastore {} does not exist", self.ds).into());
         }
@@ -47,14 +47,14 @@ impl common_app::AppTrait for Application {
 impl Application {
     fn include(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if let Some(include_expr) = self.args.include() {
-            algorithms::filter_stocks(self.config.stocks_mut(), &include_expr, true)?;
+            algorithms::filter_stocks(self.config.stocks_mut(), include_expr, true)?;
         }
         Ok(())
     }
 
     fn exclude(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if let Some(exclude_expr) = self.args.exclude() {
-            algorithms::filter_stocks(self.config.stocks_mut(), &exclude_expr, false)?;
+            algorithms::filter_stocks(self.config.stocks_mut(), exclude_expr, false)?;
         }
         Ok(())
     }
@@ -71,10 +71,10 @@ impl Application {
 
     fn sort(self: &mut Application) -> Result<(), Box<dyn Error>> {
         if let Some(order_by) = self.args.order_by() {
-            if let Some(extra_sort) = extra_sort_ftns::extra_sort_ftn(&order_by) {
+            if let Some(extra_sort) = extra_sort_ftns::extra_sort_ftn(order_by) {
                 extra_sort(&self.ds, self.config.stocks_mut(), self.args.desc());
             } else {
-                algorithms::sort_stocks(self.config.stocks_mut(), &order_by, self.args.desc())?;
+                algorithms::sort_stocks(self.config.stocks_mut(), order_by, self.args.desc())?;
             }
         }
         Ok(())
@@ -91,7 +91,7 @@ impl Application {
     fn export(self: &Application) -> Result<(), Box<dyn Error>> {
         if let Some(export_file) = self.args.export_file() {
             let report_params = reports::ReportParams::new(self.rtype, self.config.stocks()).with_datastore(&self.ds);
-            reports::export_report(report_params, &export_file)?;
+            reports::export_report(report_params, export_file)?;
         }
         Ok(())
     }

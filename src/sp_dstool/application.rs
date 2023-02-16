@@ -43,14 +43,14 @@ impl common_app::AppTrait for Application {
         let config = stocks_config::StocksConfig::from_file(args.config_file()).expect("Missing config file");
         let ds = datastore::DataStore::new(config.ds_root(), config.ds_name());
         Application {
-            args: args,
+            args,
             sym_dates: HashMap::new(),
-            config: config,
-            ds: ds
+            config,
+            ds
         }
     }
 
-    fn run(self: &mut Self) -> common_app::RunResult {
+    fn run(&mut self) -> common_app::RunResult {
         if !self.ds.exists() && self.args.ds_operation() != CREATE {
             return Err(format!("Datastore {} does not exist", self.ds).into());
         }
@@ -85,18 +85,18 @@ impl common_app::AppTrait for Application {
 }
 
 impl Application {
-    fn is_symbol_match(self: &Self, expr: &str) -> bool {
+    fn is_symbol_match(&self, expr: &str) -> bool {
         match self.args.symbol() {
             Some(symbol) => expr.contains(symbol),
             None => true
         }
     }
 
-    fn is_dsop_reset(self: &Self) -> bool {
+    fn is_dsop_reset(&self) -> bool {
         self.args.ds_operation().as_str() == RESET
     }
 
-    fn set_symbol_dates(self: &mut Self) {
+    fn set_symbol_dates(&mut self) {
         if self.args.is_verbose() {
             println!("Set symbol dates");
         }
@@ -104,7 +104,7 @@ impl Application {
         self.sym_dates = algorithms::stock_base_dates(self.config.stocks());
     }
 
-    fn update(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn update(&self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Update stocks");
         }
@@ -139,14 +139,14 @@ impl Application {
         }
     }
 
-    fn perform_update(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
+    fn perform_update(&self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
         self.update_stock_history(symbol, base_date)?;
         let need_div_reset = self.update_stock_dividends(symbol, base_date)?;
         let need_slt_reset = self.update_stock_splits(symbol, base_date)?;
         Ok(need_div_reset || need_slt_reset)
     }
 
-    fn update_stock_data(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<(), Box<dyn Error>> {
+    fn update_stock_data(&self, symbol: &str, base_date: &datetime::SPDate) -> Result<(), Box<dyn Error>> {
         let need_reset = self.perform_update(symbol, base_date)?;
         if need_reset && self.args.is_auto_reset() {
             let count = self.perform_drop(symbol)?;
@@ -158,7 +158,7 @@ impl Application {
         Ok(())
     }
 
-    fn update_stock_history(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<(), Box<dyn Error>> {
+    fn update_stock_history(&self, symbol: &str, base_date: &datetime::SPDate) -> Result<(), Box<dyn Error>> {
         let hist = if self.ds.symbol_exists(history::tag(), symbol) {
             history::History::ds_select_last(&self.ds, symbol)?
         } else {
@@ -172,7 +172,7 @@ impl Application {
         let begin_date = if hist.count() == 1 {
             datetime::date_plus_days(&hist.entries()[0].date, 1)
         } else {
-            base_date.clone()
+            *base_date
         };
 
         let today = datetime::today();
@@ -191,7 +191,7 @@ impl Application {
         Ok(())
     }
 
-    fn update_stock_dividends(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
+    fn update_stock_dividends(&self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
         let mut result = false;
 
         let div = if self.ds.symbol_exists(dividends::tag(), symbol) {
@@ -207,7 +207,7 @@ impl Application {
         let begin_date = if div.count() == 1 {
             datetime::date_plus_days(&div.entries()[0].date, 1)
         } else {
-            base_date.clone()
+            *base_date
         };
 
         let today = datetime::today();
@@ -221,13 +221,11 @@ impl Application {
             );
 
             query.execute()?;
-            if self.ds.insert_symbol(dividends::tag(), symbol, &query.result)? > 0 {
-                if !self.is_dsop_reset() {
-                    if self.args.is_auto_reset() {
-                        result = true;
-                    } else {
-                        println!("Dividends updated, check if {} data reset is needed", symbol);
-                    }
+            if self.ds.insert_symbol(dividends::tag(), symbol, &query.result)? > 0 && !self.is_dsop_reset() {
+                if self.args.is_auto_reset() {
+                    result = true;
+                } else {
+                    println!("Dividends updated, check if {} data reset is needed", symbol);
                 }
             }
         }
@@ -235,7 +233,7 @@ impl Application {
         Ok(result)
     }
 
-    fn update_stock_splits(self: &Self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
+    fn update_stock_splits(&self, symbol: &str, base_date: &datetime::SPDate) -> Result<bool, Box<dyn Error>> {
         let mut result = false;
 
         let splt = if self.ds.symbol_exists(splits::tag(), symbol) {
@@ -251,7 +249,7 @@ impl Application {
         let begin_date = if splt.count() == 1 {
             datetime::date_plus_days(&splt.entries()[0].date, 1)
         } else {
-            base_date.clone()
+            *base_date
         };
 
         let today = datetime::today();
@@ -265,13 +263,11 @@ impl Application {
             );
 
             query.execute()?;
-            if self.ds.insert_symbol(splits::tag(), symbol, &query.result)? > 0 {
-                if !self.is_dsop_reset() {
-                    if self.args.is_auto_reset() {
-                        result = true;
-                    } else {
-                        println!("Splits updated, check if {} data reset is needed", symbol);
-                    }
+            if self.ds.insert_symbol(splits::tag(), symbol, &query.result)? > 0 && !self.is_dsop_reset() {
+                if self.args.is_auto_reset() {
+                    result = true;
+                } else {
+                    println!("Splits updated, check if {} data reset is needed", symbol);
                 }
             }
         }
@@ -279,7 +275,7 @@ impl Application {
         Ok(result)
     }
 
-    fn drop(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn drop(&self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Drop symbol");
         }
@@ -289,12 +285,12 @@ impl Application {
         }
 
         let symbol = self.args.symbol().unwrap();
-        let count = self.perform_drop(&symbol)?;
+        let count = self.perform_drop(symbol)?;
         println!("Dropped {} for symbol {}", misc::count_format(count, "file"), symbol);
         Ok(())
     }
 
-    fn perform_drop(self: &Self, symbol: &str) -> Result<usize, Box<dyn Error>> {
+    fn perform_drop(&self, symbol: &str) -> Result<usize, Box<dyn Error>> {
         let mut count: usize = 0;
         count += self.drop_symbol(history::tag(), symbol)?;
         count += self.drop_symbol(dividends::tag(), symbol)?;
@@ -302,16 +298,16 @@ impl Application {
         Ok(count)
     }
 
-    fn drop_symbol(self: &Self, tag: &str, symbol: &str) -> Result<usize, Box<dyn Error>> {
+    fn drop_symbol(&self, tag: &str, symbol: &str) -> Result<usize, Box<dyn Error>> {
         let mut count: usize = 0;
         if self.ds.symbol_exists(tag, symbol) {
-            self.ds.drop_symbol(tag, &symbol)?;
+            self.ds.drop_symbol(tag, symbol)?;
             count += 1;
         }
         Ok(count)
     }
 
-    fn reset(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn reset(&self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Reset symbol");
         }
@@ -325,7 +321,7 @@ impl Application {
         Ok(())
     }
 
-    fn show_data(self: &Self, tag: &str) -> Result<(), Box<dyn Error>> {
+    fn show_data(&self, tag: &str) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Show {}", tag);
         }
@@ -335,26 +331,26 @@ impl Application {
         }
 
         let symbol = self.args.symbol().unwrap();
-        if self.ds.symbol_exists(tag, &symbol) {
-            self.ds.show_symbol(tag, &symbol)?;
+        if self.ds.symbol_exists(tag, symbol) {
+            self.ds.show_symbol(tag, symbol)?;
         }
 
         Ok(())
     }
 
-    fn show_history(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn show_history(&self) -> Result<(), Box<dyn Error>> {
         self.show_data(history::tag())
     }
 
-    fn show_dividends(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn show_dividends(&self) -> Result<(), Box<dyn Error>> {
         self.show_data(dividends::tag())
     }
 
-    fn show_splits(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn show_splits(&self) -> Result<(), Box<dyn Error>> {
         self.show_data(splits::tag())
     }
 
-    fn export(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn export(&self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Export datastore");
         }
@@ -369,13 +365,13 @@ impl Application {
 
         let symbol = self.args.symbol().unwrap();
         let export_file = self.args.export_file().unwrap();
-        let count = export::export_symbol(&self.ds, &symbol, &export_file)?;
+        let count = export::export_symbol(&self.ds, symbol, export_file)?;
 
         println!("Exported {} for symbol {}", misc::count_format(count, "row"), symbol);
         Ok(())
     }
 
-    fn check(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn check(&self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Check datastore");
         }
@@ -389,7 +385,7 @@ impl Application {
                 self.check_entry(&entry.path())?;
                 Ok(())
             },
-            |entry_str| return self.is_symbol_match(entry_str),
+            |entry_str| self.is_symbol_match(entry_str),
             |entry, err| {
                 eprintln!("{}: {}", misc::direntry_filename(entry), err);
                 Ok(())
@@ -404,8 +400,8 @@ impl Application {
         Ok(())
     }
 
-    fn check_entry(self: &Self, entry_path: &Path) -> Result<(), Box<dyn Error>> {
-        let content = self.ds.read_file(&entry_path)?;
+    fn check_entry(&self, entry_path: &Path) -> Result<(), Box<dyn Error>> {
+        let content = self.ds.read_file(entry_path)?;
 
         let fname = misc::path_basename(entry_path)?;
         if fname.starts_with(history::tag()) {
@@ -415,13 +411,13 @@ impl Application {
         } else if fname.starts_with(splits::tag()) {
             splits::Splits::check_csv(&content)?;
         } else {
-            return Err(format!("Unknown entry name").into());
+            return Err("Unknown entry name".into());
         }
 
         Ok(())
     }
 
-    fn create(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn create(&self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Create datastore");
         }
@@ -432,7 +428,7 @@ impl Application {
         Ok(())
     }
 
-    fn delete(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn delete(&self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Delete datastore");
         }
@@ -443,7 +439,7 @@ impl Application {
         Ok(())
     }
 
-    fn stat(self: &Self) -> Result<(), Box<dyn Error>> {
+    fn stat(&self) -> Result<(), Box<dyn Error>> {
         if self.args.is_verbose() {
             println!("Stat datastore");
         }
@@ -480,7 +476,7 @@ impl Application {
                 }
                 Ok(())
             },
-            |entry_str| return self.is_symbol_match(entry_str),
+            |entry_str| self.is_symbol_match(entry_str),
             |entry, err| {
                 eprintln!("{}: {}", misc::direntry_filename(entry), err);
                 Ok(())

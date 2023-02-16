@@ -70,3 +70,9 @@ impl Arguments {
         &self.interval
     }
 }
+
+impl Default for Arguments {
+    fn default() -> Self {
+        Self::new()
+    }
+}

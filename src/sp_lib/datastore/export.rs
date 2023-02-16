@@ -14,7 +14,7 @@ pub fn export_symbol(ds: &datastore::DataStore, symbol: &str, filename: &str) ->
         };
 
     let mut file = File::create(&filename)?;
-    write!(file, "date,open,high,low,close,adj_close,volume,dividend\n")?;
+    writeln!(file, "date,open,high,low,close,adj_close,volume,dividend")?;
 
     let div_entries = div_data.entries();
     let div_size = div_entries.len();
@@ -34,11 +34,11 @@ pub fn export_symbol(ds: &datastore::DataStore, symbol: &str, filename: &str) ->
                hist_entry.adj_close,
                hist_entry.volume)?;
         if idx < div_size && div_entries[idx].date == hist_entry.date {
-            write!(file, "{:.2}\n", div_entries[idx].price)?;
+            writeln!(file, "{:.2}", div_entries[idx].price)?;
             idx += 1;
         }
         else {
-            write!(file, "0.00\n")?;
+            writeln!(file, "0.00")?;
         }
     }
 

@@ -12,7 +12,7 @@ pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<d
     if hist.count() > 0 {
         let latest = &hist.entries()[hist.count() - 1];
         if latest.adj_close > 0.0 {
-            stock.set_latest_price(latest.adj_close, latest.date.clone());
+            stock.set_latest_price(latest.adj_close, latest.date);
             return Ok(true)
         }
     }
@@ -56,7 +56,7 @@ pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, B
 
     let entry = &hist.entries()[0];
     if entry.adj_close > 0.0 {
-        stock.set_latest_price(entry.adj_close, entry.date.clone());
+        stock.set_latest_price(entry.adj_close, entry.date);
         return Ok(true)
     }
     Ok(false)

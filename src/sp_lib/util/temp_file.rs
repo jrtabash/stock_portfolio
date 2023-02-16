@@ -10,36 +10,32 @@ pub fn make_path(name: &str) -> PathBuf {
 }
 
 pub fn create_file(name: &str, data: &str) -> bool {
-    let path_buf = make_path(&name);
+    let path_buf = make_path(name);
     let path = path_buf.as_path();
 
     if remove_path(path) {
         if let Ok(mut file) = fs::File::create(path) {
-            if !data.is_empty() {
-                if let Err(_) = write!(file, "{}", data) {
-                    return false;
-                }
+            if !data.is_empty() && write!(file, "{}", data).is_err() {
+                return false;
             }
             return true;
         }
     }
 
-    return false;
+    false
 }
 
 pub fn remove_file(name: &str) -> bool {
-    let path_buf = make_path(&name);
+    let path_buf = make_path(name);
     let path = path_buf.as_path();
-    remove_path(&path)
+    remove_path(path)
 }
 
 fn remove_path(path: &Path) -> bool {
-    if path.exists() {
-        if let Err(_) = fs::remove_file(path) {
-            return false;
-        }
+    if path.exists() && fs::remove_file(path).is_err() {
+        return false;
     }
-    return true;
+    true
 }
 
 // --------------------------------------------------------------------------------

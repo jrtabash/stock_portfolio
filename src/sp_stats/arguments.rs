@@ -98,3 +98,9 @@ impl Arguments {
         self.from
     }
 }
+
+impl Default for Arguments {
+    fn default() -> Self {
+        Self::new()
+    }
+}

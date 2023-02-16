@@ -20,7 +20,7 @@ impl common_app::AppTrait for Application {
         Application { args: Arguments::new() }
     }
 
-    fn run(self: &mut Self) -> common_app::RunResult {
+    fn run(&mut self) -> common_app::RunResult {
         let from_date = self.args.from().unwrap_or_else(|| datetime::today_plus_days(-7));
         let to_date = datetime::date_plus_days(&self.args.to().unwrap_or_else(datetime::today), 1);
 
@@ -36,7 +36,7 @@ impl common_app::AppTrait for Application {
             println!("{}", query.result);
             Ok(())
         } else {
-            Err(format!("To date is greater than from date").into())
+            Err("To date is greater than from date".into())
         }
     }
 }
@@ -47,7 +47,7 @@ impl Application {
             EVT_HISTORY => Ok(types::Events::History),
             EVT_DIVIDEND => Ok(types::Events::Dividend),
             EVT_SPLIT => Ok(types::Events::Split),
-            _ => Err(format!("Invalid events").into())
+            _ => Err("Invalid events".into())
         }
     }
 
@@ -56,7 +56,7 @@ impl Application {
             INT_DAY => Ok(types::Interval::Daily),
             INT_WEEK => Ok(types::Interval::Weekly),
             INT_MONTH => Ok(types::Interval::Monthly),
-            _ => Err(format!("Invalid interval").into())
+            _ => Err("Invalid interval".into())
         }
     }
 }

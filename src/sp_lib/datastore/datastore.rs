@@ -19,7 +19,7 @@ impl DataStore {
         DataStore {
             root: PathBuf::from(root),
             name: String::from(name),
-            base_path: DataStore::make_base_path(&root, &name)
+            base_path: DataStore::make_base_path(root, name)
         }
     }
 
@@ -88,14 +88,13 @@ impl DataStore {
         let mut buf = [0; 1];
         let mut count = 0;
         while position > 0 {
-            file.read(&mut buf)?;
-            if str::from_utf8(&buf)? == "\n" {
+            if file.read(&mut buf)? > 0 && str::from_utf8(&buf)? == "\n" {
                 count += 1;
                 if count >= n {
                     break;
                 }
             }
-            position = position - 1;
+            position -= 1;
             file.seek(std::io::SeekFrom::Start(position))?;
         }
 
@@ -136,7 +135,7 @@ impl DataStore {
                 Some(pos) => {
                     if pos > 0 { &csv[pos..] } else { csv }
                 },
-                None => &""
+                None => ""
             };
 
         let mut count: usize = 0;
@@ -163,7 +162,7 @@ impl DataStore {
                         }
                     }
                 }
-                write!(file, "{}\n", line)?;
+                writeln!(file, "{}", line)?;
                 last_line = Some(line);
                 count += 1;
             }
@@ -177,7 +176,7 @@ impl DataStore {
         Ok(())
     }
 
-    pub fn foreach_entry<T>(self: &Self,
+    pub fn foreach_entry<T>(&self,
                             init: T,
                             ftn: impl Fn(&fs::DirEntry, &mut T) -> FtnResult,
                             filter: impl Fn(&str) -> bool,
@@ -212,8 +211,8 @@ impl DataStore {
         pbuf
     }
 
-    fn make_symbol_file(base: &PathBuf, tag: &str, symbol: &str) -> PathBuf {
-        let mut pbuf = base.clone();
+    fn make_symbol_file(base: &Path, tag: &str, symbol: &str) -> PathBuf {
+        let mut pbuf = base.to_path_buf();
         pbuf.push(&format!("{}_{}.csv", tag, symbol));
         pbuf
     }

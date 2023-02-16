@@ -71,22 +71,10 @@ impl Arguments {
             .get_matches();
 
         let config_file = common_args::parsed_stocks_config(&parsed_args);
-        let report_type = match parsed_args.value_of("report_type") {
-            Some(value) => Some(String::from(value)),
-            None => None
-        };
-        let order_by = match parsed_args.value_of("order_by") {
-            Some(value) => Some(String::from(value)),
-            None => None
-        };
-        let include = match parsed_args.value_of("include") {
-            Some(value) => Some(String::from(value)),
-            None => None
-        };
-        let exclude = match parsed_args.value_of("exclude") {
-            Some(value) => Some(String::from(value)),
-            None => None
-        };
+        let report_type = parsed_args.value_of("report_type").map(String::from);
+        let order_by = parsed_args.value_of("order_by").map(String::from);
+        let include = parsed_args.value_of("include").map(String::from);
+        let exclude = parsed_args.value_of("exclude").map(String::from);
         let export_file = common_args::parsed_export_file(&parsed_args);
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");
@@ -104,42 +92,49 @@ impl Arguments {
     }
 
     #[inline(always)]
-    pub fn config_file(self: &Arguments) -> &String {
+    pub fn config_file(&self) -> &String {
         &self.config_file
     }
 
     #[inline(always)]
-    pub fn report_type(self: &Arguments) -> Option<&String> {
+    pub fn report_type(&self) -> Option<&String> {
         self.report_type.as_ref()
     }
 
     #[inline(always)]
-    pub fn order_by(self: &Arguments) -> Option<&String> {
+    pub fn order_by(&self) -> Option<&String> {
         self.order_by.as_ref()
     }
 
     #[inline(always)]
-    pub fn include(self: &Arguments) -> Option<&String> {
+    pub fn include(&self) -> Option<&String> {
         self.include.as_ref()
     }
 
     #[inline(always)]
-    pub fn exclude(self: &Arguments) -> Option<&String> {
+    pub fn exclude(&self) -> Option<&String> {
         self.exclude.as_ref()
     }
 
     #[inline(always)]
-    pub fn export_file(self: &Arguments) -> Option<&String> {
+    pub fn export_file(&self) -> Option<&String> {
         self.export_file.as_ref()
     }
 
     #[inline(always)]
-    pub fn show_groupby(self: &Arguments) -> bool {
+    pub fn show_groupby(&self) -> bool {
         self.show_groupby
     }
 
     #[inline(always)]
-    pub fn desc(self: &Arguments) -> bool {
+    pub fn desc(&self) -> bool {
         self.desc
     }
 }
+
+impl Default for Arguments {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+

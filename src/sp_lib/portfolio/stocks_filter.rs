@@ -29,7 +29,7 @@ impl StocksFilter {
 
     fn make_filter_func(filter_str: &str) -> Result<FilterFtnPtr, Box<dyn Error>> {
         let fstr = filter_str.trim();
-        if let Ok(stype) = stock_type::str2stocktype(&fstr) {
+        if let Ok(stype) = stock_type::str2stocktype(fstr) {
             Ok(Box::new(TypeFilter::make(stype)))
         }
         else if fstr.contains(',') || !fstr.contains(' ') {
@@ -51,7 +51,7 @@ struct TypeFilter {
 impl TypeFilter {
     pub fn make(stype: stock_type::StockType) -> Self {
         TypeFilter {
-            stype: stype
+            stype
         }
     }
 }
@@ -92,6 +92,9 @@ struct ExprFilter {
     value: f64
 }
 
+pub type ExprFieldFtn = fn(&Stock) -> f64;
+pub type ExprOpFtn = fn(f64, f64) -> bool;
+
 impl ExprFilter {
     pub fn make(filter_expr: &str) -> Result<Self, Box<dyn Error>> {
         let tokens: Vec<&str> = filter_expr.split_whitespace().collect();
@@ -104,13 +107,13 @@ impl ExprFilter {
         let value = tokens[2].parse::<f64>()?;
 
         Ok(ExprFilter {
-            field_ftn: field_ftn,
-            op_ftn: op_ftn,
-            value: value
+            field_ftn,
+            op_ftn,
+            value
         })
     }
 
-    fn make_field_ftn(field: &str) -> Result<fn(&Stock) -> f64, Box<dyn Error>> {
+    fn make_field_ftn(field: &str) -> Result<ExprFieldFtn, Box<dyn Error>> {
         if field == "days" {
             Ok(|stock| stock.days_held as f64)
         } else if field == "price" {
@@ -130,7 +133,7 @@ impl ExprFilter {
         }
     }
 
-    fn make_op_ftn(op: &str) -> Result<fn(f64, f64) -> bool, Box<dyn Error>> {
+    fn make_op_ftn(op: &str) -> Result<ExprOpFtn, Box<dyn Error>> {
         if op == "=" {
             Ok(|l, r| l == r)
         } else if op == "!=" {

@@ -7,6 +7,7 @@ use crate::portfolio::stock::StockList;
 use crate::portfolio::stocks_reader::StocksReader;
 
 #[derive(Copy, Clone, PartialEq)]
+#[allow(clippy::upper_case_acronyms)]
 enum SContentType {
     None,
     CSV,
@@ -42,6 +43,7 @@ impl StocksConfig {
         }
     }
 
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(config_str: &str) -> Result<Self, Box<dyn Error>> {
         Self::parse(config_str)
     }
@@ -65,7 +67,7 @@ impl StocksConfig {
         let mut scontent = String::new();
 
         for line in content.lines() {
-            if line == "" { continue; }
+            if line.is_empty() { continue; }
 
             if line.trim() == "}" {
                 stocks = Some(
@@ -118,7 +120,13 @@ impl StocksConfig {
         Ok(StocksConfig {
             ds_root: root,
             ds_name: name,
-            stocks: stocks.unwrap_or(StockList::new())
+            stocks: stocks.unwrap_or_default()
         })
+    }
+}
+
+impl Default for StocksConfig {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -10,7 +10,7 @@ pub fn price_cmp(lhs: PriceType, rhs: PriceType) -> Ordering {
     else if lhs > rhs {
         return Ordering::Greater;
     }
-    return Ordering::Equal;
+    Ordering::Equal
 }
 
 #[inline(always)]
@@ -34,7 +34,7 @@ pub fn prices_eql(lhs: &[PriceType], rhs: &[PriceType]) -> bool {
         }
     }
 
-    return true;
+    true
 }
 
 // --------------------------------------------------------------------------------

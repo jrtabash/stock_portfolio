@@ -67,32 +67,38 @@ impl Arguments {
     }
 
     #[inline(always)]
-    pub fn ds_operation(self: &Self) -> &String {
+    pub fn ds_operation(&self) -> &String {
         &self.ds_operation
     }
 
     #[inline(always)]
-    pub fn config_file(self: &Self) -> &String {
+    pub fn config_file(&self) -> &String {
         &self.config_file
     }
 
     #[inline(always)]
-    pub fn symbol(self: &Self) -> Option<&String> {
+    pub fn symbol(&self) -> Option<&String> {
         self.symbol.as_ref()
     }
 
     #[inline(always)]
-    pub fn export_file(self: &Arguments) -> Option<&String> {
+    pub fn export_file(&self) -> Option<&String> {
         self.export_file.as_ref()
     }
 
     #[inline(always)]
-    pub fn is_verbose(self: &Self) -> bool {
+    pub fn is_verbose(&self) -> bool {
         self.verbose
     }
 
     #[inline(always)]
-    pub fn is_auto_reset(self: &Self) -> bool {
+    pub fn is_auto_reset(&self) -> bool {
         self.auto_reset
+    }
+}
+
+impl Default for Arguments {
+    fn default() -> Self {
+        Self::new()
     }
 }

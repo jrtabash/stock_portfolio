@@ -60,7 +60,7 @@ impl HistoryQuery {
 // --------------------------------------------------------------------------------
 // Private Helpers
 
-fn url_request(url: &String, result: &mut String) -> Result<(), curl::Error> {
+fn url_request(url: &str, result: &mut String) -> Result<(), curl::Error> {
     let mut handle = easy::Easy::new();
 
     handle.url(url)?;

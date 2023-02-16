@@ -32,7 +32,7 @@ impl StocksReader {
         }
     }
 
-    pub fn parse_content(content: &String) -> Result<StockList, Box<dyn Error>> {
+    pub fn parse_content(content: &str) -> Result<StockList, Box<dyn Error>> {
         let mut stocks = StockList::new();
 
         let mut skip_header: bool = true;
@@ -43,18 +43,18 @@ impl StocksReader {
                 continue;
             }
 
-            if stock_line == "" {
+            if stock_line.is_empty() {
                 continue;
             }
 
-            let stock_tokens: Vec<&str> = stock_line.split(",").collect();
+            let stock_tokens: Vec<&str> = stock_line.split(',').collect();
             if stock_tokens.len() != 5 {
                 return Err(format!("StocksReader::parse_content - Invalid stock line '{}'", stock_line).into())
             }
 
             let symbol = String::from(stock_tokens[0]);
             let stype = stock_type::str2stocktype(stock_tokens[1])?;
-            let date = datetime::parse_date(&stock_tokens[2])?;
+            let date = datetime::parse_date(stock_tokens[2])?;
 
             let quantity = match stock_tokens[3].parse::<u32>() {
                 Ok(qty) => qty,

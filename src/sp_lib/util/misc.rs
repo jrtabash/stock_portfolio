@@ -20,13 +20,13 @@ pub fn direntry_filename(entry: &fs::DirEntry) -> String {
     }
 }
 
-pub fn path_basename<'a>(path: &'a Path) -> Result<&'a str, Box<dyn Error>> {
+pub fn path_basename(path: &Path) -> Result<&str, Box<dyn Error>> {
     if let Some(basename) = path.file_name() {
         if let Some(fname) = basename.to_str() {
             return Ok(fname)
         }
     }
-    Err(format!("Invalid entry path").into())
+    Err("Invalid entry path".into())
 }
 
 // --------------------------------------------------------------------------------
