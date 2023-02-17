@@ -17,7 +17,7 @@ pub struct Application {
 
 impl common_app::AppTrait for Application {
     fn new() -> Self {
-        Application { args: Arguments::new() }
+        Application { args: Default::default() }
     }
 
     fn run(&mut self) -> common_app::RunResult {
