@@ -13,7 +13,7 @@ pub fn export_symbol(ds: &datastore::DataStore, symbol: &str, filename: &str) ->
             dividends::Dividends::new(symbol)
         };
 
-    let mut file = File::create(&filename)?;
+    let mut file = File::create(filename)?;
     writeln!(file, "date,open,high,low,close,adj_close,volume,dividend")?;
 
     let div_entries = div_data.entries();

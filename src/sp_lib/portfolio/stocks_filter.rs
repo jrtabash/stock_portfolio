@@ -147,7 +147,7 @@ impl ExprFilter {
         } else if op == ">=" {
             Ok(|l, r| l >= r)
         } else {
-            return Err(format!("Unsupported filter expression op '{}'", op).into())
+            Err(format!("Unsupported filter expression op '{}'", op).into())
         }
     }
 }

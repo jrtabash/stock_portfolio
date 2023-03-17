@@ -150,7 +150,7 @@ fn value_report(params: &ReportParams) {
 
 fn value_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
     let stocks = params.stocks();
-    let mut file = File::create(&filename)?;
+    let mut file = File::create(filename)?;
     writeln!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value,Cum Div")?;
     for stock in stocks.iter() {
         writeln!(file, "{},{},{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2}",
@@ -209,7 +209,7 @@ fn tb_cum_div_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_b
 
 fn top_report(params: &ReportParams) {
     fn print_row(name: &str, top_bottom: &TopBottom) {
-        println!("{:18} {:8} {:8}", name, (*top_bottom).0, (*top_bottom).1);
+        println!("{:18} {:8} {:8}", name, (top_bottom).0, (top_bottom).1);
     }
 
     let stocks = params.stocks();
@@ -242,12 +242,12 @@ fn top_report(params: &ReportParams) {
 
 fn top_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
     fn write_row(file: &mut File, name: &str, top_bottom: &TopBottom) -> Result<(), Box<dyn Error>> {
-        writeln!(file, "{},{},{}", name, (*top_bottom).0, (*top_bottom).1)?;
+        writeln!(file, "{},{},{}", name, (top_bottom).0, (top_bottom).1)?;
         Ok(())
     }
 
     let stocks = params.stocks();
-    let mut file = File::create(&filename)?;
+    let mut file = File::create(filename)?;
     writeln!(file, "Category,Top,Bottom")?;
 
     let mut data: Vec<TopTuple> = stocks.iter().map(make_top_tuple).collect();
@@ -328,7 +328,7 @@ fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
     let stocks = params.stocks();
     let ds = params.datastore().expect("Volat export missing datastore");
 
-    let mut file = File::create(&filename)?;
+    let mut file = File::create(filename)?;
     writeln!(file, "Symbol,Buy Date,Upd Date,Days Held,Volat,Volat22")?;
     for stock in stocks.iter() {
         writeln!(file, "{},{},{},{},{:.2},{:.2}",
@@ -422,7 +422,7 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
     let stocks = params.stocks();
     let ds = params.datastore().expect("Daych report missing datastore");
 
-    let mut file = File::create(&filename)?;
+    let mut file = File::create(filename)?;
     writeln!(file, "Symbol,Upd Date,Prev Pr,Price,Change,Pct Chg,Low,High,Volume")?;
 
     let mut seen = HashSet::new();
