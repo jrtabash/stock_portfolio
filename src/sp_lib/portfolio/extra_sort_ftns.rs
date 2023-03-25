@@ -3,6 +3,7 @@ use crate::datastore::history::History;
 use crate::stats::hist_ftns;
 use crate::portfolio::algorithms;
 use crate::portfolio::stock::StockList;
+use crate::portfolio::stock_type::StockType;
 
 pub fn extra_sort_ftn(order_by: &str) -> Option<fn(&DataStore, &mut StockList, bool)> {
     match order_by {
@@ -10,6 +11,7 @@ pub fn extra_sort_ftn(order_by: &str) -> Option<fn(&DataStore, &mut StockList, b
         "volat22" => Some(extra_sort_by_volat22),  // 22 day volatility
         "change"  => Some(extra_sort_by_change),   // day change
         "pctchg"  => Some(extra_sort_by_pctchg),   // day percent change
+        "valchg"  => Some(extra_sort_by_valchg),   // day value change
         "prevpr"  => Some(extra_sort_by_prevpr),   // previous day price
         "low"     => Some(extra_sort_by_low),      // day low price
         "high"    => Some(extra_sort_by_high),     // day high price
@@ -76,6 +78,24 @@ pub fn extra_sort_by_pctchg(ds: &DataStore, stocks: &mut StockList, desc: bool) 
                     let delta = entries[1].adj_close - prev_price;
                     let pct = 100.0 * if prev_price > 0.0 { delta / prev_price } else { 0.00 };
                     return pct
+                }
+            }
+            0.0
+        },
+        desc);
+}
+
+pub fn extra_sort_by_valchg(ds: &DataStore, stocks: &mut StockList, desc: bool) {
+    algorithms::sort_stocks_by_extra_ftn(
+        stocks,
+        |stock| -> f64 {
+            if stock.stype != StockType::Index {
+                if let Ok(hist) = History::ds_select_last_n(ds, &stock.symbol, 2) {
+                    let entries = hist.entries();
+                    if entries.len() == 2 {
+                        let delta = entries[1].adj_close - entries[0].adj_close;
+                        return stock.quantity as f64 * delta;
+                    }
                 }
             }
             0.0

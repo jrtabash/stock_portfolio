@@ -53,15 +53,16 @@ OPTIONS:
                                     <op>    : one of =, !=, <, >, <=, >=
                                     Example : 'days > 365'
     -o, --orderby <order_by>        Order stocks by one of:
-                                    symbol : stock symbol        | type    : stock type
-                                    date   : base date           | days    : days held
-                                    price  : latest price        | size    : quantity
-                                    net    : net price           | pct     : percent change
-                                    value  : notional value      | div     : cumulative dividend
-                                    volat  : orderall volatility | volat22 : 22 day volatility
-                                    prevpr : previous day price  | volume  : day volume
-                                    change : day change          | pctchg  : day percent change
-                                    low    : day low price       | high    : day high price
+                                    symbol : stock symbol       | type    : stock type
+                                    date   : base date          | days    : days held
+                                    price  : latest price       | size    : quantity
+                                    net    : net price          | pct     : percent change
+                                    value  : notional value     | div     : cumulative dividend
+                                    volat  : overall volatility | volat22 : 22 day volatility
+                                    prevpr : previous day price | volume  : day volume
+                                    change : day change         | pctchg  : day percent change
+                                    valchg : day value change   | low     : day low price
+                                    high   : day high price
     -p, --type <report_type>        Report type, one of value, top, volat (default: value)
                                     value : stocks value (gains & losses)
                                     top   : Top/Bottom performing stocks
