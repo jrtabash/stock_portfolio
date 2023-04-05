@@ -116,11 +116,23 @@ impl ops::Add for FixedPrice {
     }
 }
 
+impl ops::AddAssign for FixedPrice {
+    fn add_assign(&mut self, other: Self) {
+        *self = *self + other
+    }
+}
+
 impl ops::Sub for FixedPrice {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
         Self::from_scaled(self.value - other.value)
+    }
+}
+
+impl ops::SubAssign for FixedPrice {
+    fn sub_assign(&mut self, other: Self) {
+        *self = *self - other
     }
 }
 
@@ -132,6 +144,12 @@ impl ops::Mul for FixedPrice {
     }
 }
 
+impl ops::MulAssign for FixedPrice {
+    fn mul_assign(&mut self, other: Self) {
+        *self = *self * other;
+    }
+}
+
 impl ops::Div for FixedPrice {
     type Output = Self;
 
@@ -140,11 +158,23 @@ impl ops::Div for FixedPrice {
     }
 }
 
+impl ops::DivAssign for FixedPrice {
+    fn div_assign(&mut self, other: Self) {
+        *self = *self / other;
+    }
+}
+
 impl ops::Rem for FixedPrice {
     type Output = Self;
 
     fn rem(self, other: Self) -> Self {
         Self::from_scaled(self.value % other.value)
+    }
+}
+
+impl ops::RemAssign for FixedPrice {
+    fn rem_assign(&mut self, other: Self) {
+        *self = *self % other;
     }
 }
 
@@ -260,40 +290,64 @@ mod tests {
 
     #[test]
     fn test_price_add() {
-        let p1 = FixedPrice::from_string("1.52");
-        let p2 = FixedPrice::from_string("2.12");
+        let mut p1 = FixedPrice::from_string("1.52");
+        let mut p2 = FixedPrice::from_string("2.12");
         let p3 = FixedPrice::from_string("-1.02");
         assert_eq!((p1 + p2).to_scaled(), 36400);
         assert_eq!((p1 + p3).to_scaled(), 5000);
+
+        p1 += p2;
+        assert_eq!(p1.to_scaled(), 36400);
+
+        p2 += p3;
+        assert_eq!(p2.to_scaled(), 11000);
     }
 
     #[test]
     fn test_price_sub() {
         let p1 = FixedPrice::from_string("1.52");
-        let p2 = FixedPrice::from_string("2.12");
-        let p3 = FixedPrice::from_string("-1.02");
+        let mut p2 = FixedPrice::from_string("2.12");
+        let mut p3 = FixedPrice::from_string("-1.02");
         assert_eq!((p2 - p1).to_scaled(), 6000);
         assert_eq!((p1 - p3).to_scaled(), 25400);
         assert_eq!((p3 - p1).to_scaled(), -25400);
+
+        p2 -= p1;
+        assert_eq!(p2.to_scaled(), 6000);
+
+        p3 -= p1;
+        assert_eq!(p3.to_scaled(), -25400);
     }
 
     #[test]
     fn test_price_mul() {
         let p1 = FixedPrice::from_string("1.52");
-        let p2 = FixedPrice::from_string("2.12");
-        let p3 = FixedPrice::from_string("-1.02");
+        let mut p2 = FixedPrice::from_string("2.12");
+        let mut p3 = FixedPrice::from_string("-1.02");
         assert_eq!((p1 * p2).to_scaled(), 32224);
         assert_eq!((p1 * p3).to_scaled(), -15504);
+
+        p2 *= p1;
+        assert_eq!(p2.to_scaled(), 32224);
+
+        p3 *= p1;
+        assert_eq!(p3.to_scaled(), -15504);
     }
 
     #[test]
     fn test_price_div() {
-        let p1 = FixedPrice::from_string("1.52");
-        let p2 = FixedPrice::from_string("2.12");
+        let mut p1 = FixedPrice::from_string("1.52");
+        let mut p2 = FixedPrice::from_string("2.12");
         let p3 = FixedPrice::from_string("-1.02");
         assert_eq!((p1 / p2).to_scaled(), 7169);
         assert_eq!((p2 / p1).to_scaled(), 13947);
         assert_eq!((p1 / p3).to_scaled(), -14901);
+
+        p2 /= p1;
+        assert_eq!(p2.to_scaled(), 13947);
+
+        p1 /= p3;
+        assert_eq!(p1.to_scaled(), -14901);
 
         let p1 = FixedPrice::from_string("1.0002");
         let p2 = FixedPrice::from_string("0.0001");
@@ -310,11 +364,17 @@ mod tests {
 
     #[test]
     fn test_price_rem() {
-        let p1 = FixedPrice::from_string("9.00");
-        let p2 = FixedPrice::from_string("10.00");
+        let mut p1 = FixedPrice::from_string("9.00");
+        let mut p2 = FixedPrice::from_string("10.00");
         let p3 = FixedPrice::from_string("2.00");
         assert_eq!((p1 % p3).to_scaled(), SCALE);
         assert_eq!((p2 % p3).to_scaled(), 0);
+
+        p1 %= p3;
+        assert_eq!(p1.to_scaled(), SCALE);
+
+        p2 %= p3;
+        assert_eq!(p2.to_scaled(), 0);
     }
 
     #[test]
