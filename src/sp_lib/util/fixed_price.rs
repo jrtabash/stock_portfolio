@@ -1,5 +1,6 @@
 use crate::util::scaled_util::*;
 use std::fmt;
+use std::iter::zip;
 use std::ops;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
@@ -9,6 +10,7 @@ pub struct FixedPrice {
 
 pub const ZERO: FixedPrice = FixedPrice { value: 0 };
 pub const ONE: FixedPrice = FixedPrice { value: SCALE };
+pub const HUNDRED: FixedPrice = FixedPrice { value: 100 * SCALE };
 pub const MIN: FixedPrice = FixedPrice { value: SCALE_MIN };
 pub const MAX: FixedPrice = FixedPrice { value: SCALE_MAX };
 
@@ -34,6 +36,20 @@ impl FixedPrice {
     pub fn from_float(value: f64) -> Self {
         FixedPrice {
             value: float_to_scaled(value)
+        }
+    }
+
+    #[inline(always)]
+    pub fn from_signed(value: i32) -> Self {
+        FixedPrice {
+            value: value as Scaled * SCALE
+        }
+    }
+
+    #[inline(always)]
+    pub fn from_unsigned(value: u32) -> Self {
+        FixedPrice {
+            value: value as Scaled * SCALE
         }
     }
 
@@ -92,6 +108,11 @@ impl FixedPrice {
         } else {
             -ONE
         }
+    }
+
+    #[inline(always)]
+    pub fn slices_eql(lhs: &[FixedPrice], rhs: &[FixedPrice]) -> bool {
+        lhs.len() == rhs.len() && zip(lhs, rhs).all(|(l, r)| l == r)
     }
 }
 
@@ -200,6 +221,8 @@ mod tests {
         assert_eq!(FixedPrice::from_scaled(10000).to_scaled(), 10000);
         assert_eq!(FixedPrice::from_parts(1, 5200).to_scaled(), 15200);
         assert_eq!(FixedPrice::from_float(1.52).to_scaled(), 15200);
+        assert_eq!(FixedPrice::from_signed(100).to_scaled(), 1000000);
+        assert_eq!(FixedPrice::from_unsigned(100).to_scaled(), 1000000);
         assert_eq!(FixedPrice::from_string("1.52").to_scaled(), 15200);
     }
 
@@ -284,6 +307,7 @@ mod tests {
     fn test_price_consts() {
         assert_eq!(FixedPrice::new(), ZERO);
         assert_eq!(FixedPrice::from_scaled(SCALE), ONE);
+        assert_eq!(FixedPrice::from_scaled(100 * SCALE), HUNDRED);
         assert_eq!(FixedPrice::from_scaled(SCALE_MIN), MIN);
         assert_eq!(FixedPrice::from_scaled(SCALE_MAX), MAX);
     }
@@ -401,5 +425,26 @@ mod tests {
         let p2 = FixedPrice::from_string("-3.00");
         assert_eq!(p1.sign().to_scaled(), 10000);
         assert_eq!(p2.sign().to_scaled(), -10000);
+    }
+
+    #[test]
+    fn test_price_slices_eql() {
+        let p1 = FixedPrice::from_string("1.00");
+        let p2 = FixedPrice::from_string("2.00");
+        let p3 = FixedPrice::from_string("3.00");
+
+        let q1 = FixedPrice::from_string("1.00");
+        let q2 = FixedPrice::from_string("2.00");
+        let q3 = FixedPrice::from_string("3.00");
+
+        assert!(FixedPrice::slices_eql(&[p1], &[q1]));
+        assert!(FixedPrice::slices_eql(&[p1, p2], &[q1, q2]));
+        assert!(FixedPrice::slices_eql(&[p1, p2, p3], &[q1, q2, q3]));
+
+        assert!(!FixedPrice::slices_eql(&[p1, p2], &[q1]));
+        assert!(!FixedPrice::slices_eql(&[p1, p2], &[q1, q2, q3]));
+        assert!(!FixedPrice::slices_eql(&[p1], &[q2]));
+        assert!(!FixedPrice::slices_eql(&[p1, p2], &[q1, q3]));
+        assert!(!FixedPrice::slices_eql(&[p1, p2], &[q2, q1]));
     }
 }
