@@ -1,3 +1,28 @@
+use std::fmt;
+
+// --------------------------------------------------------------------------------
+// Scaled Error
+
+#[derive(Debug, Clone)]
+pub struct ScaledError {
+    err_msg: String
+}
+
+impl ScaledError {
+    pub fn new(err_msg: String) -> Self {
+        ScaledError { err_msg }
+    }
+}
+
+impl fmt::Display for ScaledError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.err_msg)
+    }
+}
+
+// --------------------------------------------------------------------------------
+// Scaled Type, Consts and Functions
+
 pub type Scaled = i64;
 
 pub const SCALE: Scaled = 10000;
@@ -36,7 +61,7 @@ pub fn scaled_to_float(value: Scaled) -> f64 {
     value as f64 / SCALE as f64
 }
 
-pub fn string_to_scaled(value: &str) -> Scaled {
+pub fn parse_scaled(value: &str) -> Result<Scaled, ScaledError> {
     let negative = value.starts_with('-');
     let value_str = if negative { &value[1..] } else { value };
 
@@ -56,7 +81,11 @@ pub fn string_to_scaled(value: &str) -> Scaled {
             }
             part_scale *= 10;
         }
-        ret = (ret * 10) + (c.to_digit(10).unwrap_or(0) as Scaled);
+        let dig = match c.to_digit(10) {
+            Some(d) => d,
+            None => return Err(ScaledError::new(format!("parse_scaled - Invalid value '{}'", value)))
+        };
+        ret = (ret * 10) + (dig as Scaled);
     }
 
     while part_scale < SCALE {
@@ -68,7 +97,12 @@ pub fn string_to_scaled(value: &str) -> Scaled {
         ret *= -1;
     }
 
-    ret
+    Ok(ret)
+}
+
+#[inline(always)]
+pub fn string_to_scaled(value: &str) -> Scaled {
+    parse_scaled(value).unwrap_or(0)
 }
 
 #[inline(always)]
@@ -126,6 +160,44 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_scaled() {
+        fn test_case(s: &str, val: Option<Scaled>) {
+            let v = parse_scaled(s);
+            match val {
+                Some(e) => {
+                    match v {
+                        Ok(vr) => assert_eq!(vr, e),
+                        Err(_) => assert!(false)
+                    };
+                }
+                None => {
+                    match v {
+                        Ok(_) => assert!(false),
+                        Err(e) => assert_eq!(format!("{}", e), format!("parse_scaled - Invalid value '{}'", s))
+                    };
+                }
+            }
+        }
+
+        test_case("1.25", Some(12500));
+        test_case("12.3455", Some(123455));
+        test_case("0.0001", Some(1));
+        test_case("0.9999", Some(9999));
+        test_case("-1.25", Some(-12500));
+        test_case("154.123456", Some(1541234));
+        test_case("154.123", Some(1541230));
+        test_case("154", Some(1540000));
+        test_case("154.", Some(1540000));
+        test_case("-154", Some(-1540000));
+        test_case("-", Some(0));
+        test_case("", Some(0));
+
+        test_case("abc", None);
+        test_case("10foo", None);
+        test_case("--", None);
+    }
+
+    #[test]
     fn test_string_scaled() {
         fn test_case(s: &str, e: Scaled, es: &str) {
             let v = string_to_scaled(s);
@@ -143,5 +215,6 @@ mod tests {
         test_case("154", 1540000, "154.0000");
         test_case("154.", 1540000, "154.0000");
         test_case("-154", -1540000, "-154.0000");
+        test_case("10foo", 0, "0.0000");
     }
 }

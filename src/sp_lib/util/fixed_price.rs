@@ -61,6 +61,13 @@ impl FixedPrice {
     }
 
     #[inline(always)]
+    pub fn parse(value: &str) -> Result<Self, ScaledError> {
+        Ok(FixedPrice {
+            value: parse_scaled(value)?
+        })
+    }
+
+    #[inline(always)]
     pub fn to_scaled(&self) -> Scaled {
         self.value
     }
@@ -224,6 +231,16 @@ mod tests {
         assert_eq!(FixedPrice::from_signed(100).to_scaled(), 1000000);
         assert_eq!(FixedPrice::from_unsigned(100).to_scaled(), 1000000);
         assert_eq!(FixedPrice::from_string("1.52").to_scaled(), 15200);
+    }
+
+    #[test]
+    fn test_price_parse() {
+        assert_eq!(FixedPrice::parse("1.52").unwrap().to_scaled(), 15200);
+        assert_eq!(FixedPrice::parse("-1.52").unwrap().to_scaled(), -15200);
+        assert_eq!(FixedPrice::parse("0.00").unwrap().to_scaled(), 0);
+
+        assert!(FixedPrice::parse("foobar").is_err());
+        assert!(FixedPrice::parse("-10foo").is_err());
     }
 
     #[test]
