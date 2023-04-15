@@ -1,10 +1,32 @@
 #!/usr/bin/python3
 
+import argparse
 import subprocess
 import sys
 
+def parse_args():
+    args = argparse.ArgumentParser()
+    args.add_argument("-o", "--override", help="Override generated title and ylabel",
+                      dest="override",
+                      action="store_true",
+                      default=False)
+    args.add_argument("-t", "--title", help="Text to augment or override title",
+                      dest="title",
+                      type=str,
+                      default="")
+    args.add_argument("-y", "--ylabel", help="Text to augment or override ylabel",
+                      dest="ylabel",
+                      type=str,
+                      default="")
+    args.add_argument("-x", "--xlabel", help="Text to set xlabel",
+                      dest="xlabel",
+                      type=str,
+                      default="")
+    return args.parse_args()
+
 class PlotStats:
-    def __init__(self):
+    def __init__(self, parsed_args):
+        self.parsed_args = parsed_args
         self.from_date = None
         self.to_date = None
         self.symbol = None
@@ -46,17 +68,34 @@ class PlotStats:
             f.write("set terminal wxt background 0\n")
             f.write("set style line 101 lc rgb '#808080' lt 1 lw 1\n")
             f.write("set border 3 front ls 101 lc rgb '#808080'\n")
-            f.write("set title '{} {} {} - {}' tc rgb '#808080'\n".format(
-                self.symbol,
-                self.field.capitalize() if self.field is not None else "",
-                self.from_date,
-                self.to_date))
-            f.write(f"set ylabel '{self.calc}' tc rgb '#808080'\n")
+            f.write("set title '{}' tc rgb '#808080'\n".format(self.make_title()))
+            f.write("set ylabel '{}' tc rgb '#808080'\n".format(self.make_ylabel()))
+            f.write("set xlabel '{}' tc rgb '#808080'\n".format(self.parsed_args.xlabel))
             f.write("plot '-' with lines notitle\n")
             for val in self.data:
                 f.write(f"{val}\n")
             f.write("EOF")
         self.run_command(["gnuplot", "-p", self.tmp_gp_file])
+
+    def make_title(self):
+        return self.augment_or_override(
+            "{} {} {} - {}".format(
+                self.symbol,
+                self.field.capitalize() if self.field is not None else "",
+                self.from_date,
+                self.to_date),
+            self.parsed_args.title)
+
+    def make_ylabel(self):
+        return self.augment_or_override(self.calc, self.parsed_args.ylabel)
+
+    def augment_or_override(self, text, alt_text):
+        if alt_text != "":
+            if self.parsed_args.override:
+                return alt_text
+            else:
+                return "{} ({})".format(text, alt_text)
+        return text
 
     def run_command(self, command):
         ret = subprocess.run(command, capture_output=True)
@@ -65,4 +104,4 @@ class PlotStats:
             raise Exception(f"Failed to run command: {command}")
 
 if __name__ == "__main__":
-    PlotStats().run()
+    PlotStats(parse_args()).run()
