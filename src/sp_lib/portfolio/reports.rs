@@ -1,5 +1,5 @@
 use std::io::prelude::*;
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 use std::error::Error;
 use std::fs::File;
 use std::iter::zip;
@@ -358,6 +358,9 @@ struct DayChange {
     volume: u64
 }
 
+type DayChangeList = Vec<Option<DayChange>>;
+type AggValChanges = HashMap<String, Price>;
+
 fn calc_daych(stock: &Stock, ds: &DataStore) -> Option<DayChange> {
     if let Ok(hist) = History::ds_select_last_n(ds, &stock.symbol, 2) {
         let entries = hist.entries();
@@ -379,10 +382,21 @@ fn calc_daych(stock: &Stock, ds: &DataStore) -> Option<DayChange> {
     None
 }
 
+fn calc_agg_value_changes(stocks: &StockList, changes: &DayChangeList) -> AggValChanges {
+    let mut agg_value_changes: AggValChanges = AggValChanges::new();
+    for (stock, change) in zip(stocks, changes) {
+        if let Some(chg) = change {
+            let entry = agg_value_changes.entry(stock.symbol.to_string()).or_insert(0.00);
+            *entry += chg.val_change;
+        }
+    }
+    agg_value_changes
+}
+
 fn daych_report(params: &ReportParams) {
     let stocks = params.stocks();
     let ds = params.datastore().expect("Daych report missing datastore");
-    let changes: Vec<Option<DayChange>> = stocks
+    let changes: DayChangeList = stocks
         .iter()
         .map(|s| calc_daych(s, ds))
         .collect();
@@ -423,6 +437,7 @@ fn daych_report(params: &ReportParams) {
              "----",
              "------");
 
+    let agg_value_changes = calc_agg_value_changes(stocks, &changes);
     let mut seen = HashSet::new();
     for (stock, change) in zip(stocks, &changes) {
         if seen.contains(&stock.symbol) { continue; }
@@ -436,7 +451,7 @@ fn daych_report(params: &ReportParams) {
                      chg.price,
                      chg.change,
                      chg.pct_change,
-                     chg.val_change,
+                     agg_value_changes.get(&stock.symbol).unwrap_or(&0.0),
                      chg.low,
                      chg.high,
                      chg.volume);
@@ -451,11 +466,17 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
     let mut file = File::create(filename)?;
     writeln!(file, "Symbol,Upd Date,Prev Pr,Price,Change,Pct Chg,Val Chg,Low,High,Volume")?;
 
+    let changes: DayChangeList = stocks
+        .iter()
+        .map(|s| calc_daych(s, ds))
+        .collect();
+    let agg_value_changes = calc_agg_value_changes(stocks, &changes);
+
     let mut seen = HashSet::new();
-    for stock in stocks.iter() {
+    for (stock, change) in zip(stocks, &changes) {
         if seen.contains(&stock.symbol) { continue; }
 
-        if let Some(chg) = calc_daych(stock, ds) {
+        if let Some(chg) = change {
             seen.insert(&stock.symbol);
             writeln!(file, "{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{:.2},{}",
                      stock.symbol,
@@ -464,7 +485,7 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
                      chg.price,
                      chg.change,
                      chg.pct_change,
-                     chg.val_change,
+                     agg_value_changes.get(&stock.symbol).unwrap_or(&0.0),
                      chg.low,
                      chg.high,
                      chg.volume)?;
