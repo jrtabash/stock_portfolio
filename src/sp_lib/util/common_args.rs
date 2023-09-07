@@ -36,15 +36,15 @@ pub fn stocks_config_help() -> &'static str {
      A CSV file block \"csv_file{\" can be used instead of a CSV block. It should contain the path to a CSV file. \
      The file should contain the CSV symbol data.\n\
      Sample config 1:\n\
-     \troot: $default\n\
-     \tname: my_datastore\n\
+     \tds_root: $default\n\
+     \tds_name: my_datastore\n\
      \tstocks: csv{\n\
      \t  symbol,type,date,quantity,base_price\n\
      \t  AAPL,stock,2020-09-20,100,115.00\n\
      \t}\n\
      Sample config 2:\n\
-     \troot: $default\n\
-     \tname: my_datastore\n\
+     \tds_root: $default\n\
+     \tds_name: my_datastore\n\
      \tstocks: csv_file{\n\
      \t  /path/to/my/stocks.csv\n\
      \t}\n"
