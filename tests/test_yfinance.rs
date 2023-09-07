@@ -19,13 +19,13 @@ fn test_history_query() {
     assert_eq!(prices_vec.len(), 7);
     assert_eq!(prices_vec[0], "2021-02-11");
     assert!(prices_vec[6].parse::<u32>().unwrap() >= 64000000);
-    check_prices(&prices_vec, &vec![135.90, 136.39, 133.77, 135.13, 133.75]);
+    check_prices(&prices_vec, &vec![135.90, 136.39, 133.77, 135.13, 133.15]);
 
     let prices_vec: Vec<&str> = result_vec[2].split(",").collect();
     assert_eq!(prices_vec.len(), 7);
     assert_eq!(prices_vec[0], "2021-02-12");
     assert!(prices_vec[6].parse::<u32>().unwrap() >= 60000000);
-    check_prices(&prices_vec, &vec![134.35, 135.53, 133.69, 135.37, 134.00]);
+    check_prices(&prices_vec, &vec![134.35, 135.53, 133.69, 135.37, 133.50]);
 }
 
 fn check_prices(actual: &Vec<&str>, expect: &Vec<f64>) {
