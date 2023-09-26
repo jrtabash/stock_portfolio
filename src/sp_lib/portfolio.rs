@@ -8,3 +8,5 @@ pub mod stocks_filter;
 pub mod stocks_reader;
 pub mod stocks_update;
 pub mod reports;
+pub mod closed_position;
+pub mod closed_positions_reader;
