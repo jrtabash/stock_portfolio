@@ -393,6 +393,7 @@ fn test_stock_config_from_file() {
     assert_eq!(cfg.ds_root(), "sp_root");
     assert_eq!(cfg.ds_name(), "sp_name");
     assert_eq!(cfg.stocks().len(), 3);
+    assert_eq!(cfg.closed_positions().len(), 0);
 
     let list = cfg.stocks();
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
@@ -433,6 +434,7 @@ fn test_stock_config_from_file2() {
     assert_eq!(cfg.ds_root(), "sp_root");
     assert_eq!(cfg.ds_name(), "sp_name");
     assert_eq!(cfg.stocks().len(), 3);
+    assert_eq!(cfg.closed_positions().len(), 0);
 
     let list = cfg.stocks();
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
@@ -447,6 +449,146 @@ fn test_stock_config_from_file2() {
                vec![115.0, 118.50, 75.50]);
 
     assert!(temp_file::remove_file(&cfg_file));
+    assert!(temp_file::remove_file(&csv_file));
+}
+
+#[test]
+fn test_stock_config_from_file3() {
+    let temp_name = "sp_test_stocks_config.cfg";
+    let config_filename = temp_file::make_path(&temp_name);
+
+    assert!(temp_file::create_file(&temp_name,
+                                   "ds_root: sp_root\n\
+                                    ds_name: sp_name\n\
+                                    stocks: csv{\n\
+                                    symbol,type,date,quantity,base_price\n\
+                                    AAPL,stock,2020-09-20,100,115.00\n\
+                                    AAPL,stock,2020-11-12,100,118.50\n\
+                                    DELL,stock,2021-02-10,100,75.50\n\
+                                    }\n\
+                                    closed_positions: csv{\n\
+                                    symbol,type,base_date,exit_date,quantity,base_price,exit_price,base_fee,exit_fee,dividend\n\
+                                    DELL,stock,2021-02-10,2022-04-05,100,75.50,81.75,0.00,0.05,52.00\n\
+                                    DELL,stock,2021-02-10,2022-05-18,100,75.50,82.25,0.00,0.05,52.00\n\
+                                    }\n"));
+
+    let cfg = StocksConfig::from_file(config_filename.to_str().unwrap()).unwrap();
+    assert_eq!(cfg.ds_root(), "sp_root");
+    assert_eq!(cfg.ds_name(), "sp_name");
+    assert_eq!(cfg.stocks().len(), 3);
+    assert_eq!(cfg.closed_positions().len(), 2);
+
+    let list = cfg.stocks();
+    assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
+               vec!["AAPL", "AAPL", "DELL"]);
+    assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
+               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+    assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
+               vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
+    assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
+               vec![100, 100, 100]);
+    assert_eq!(list.iter().map(|s| s.base_price).collect::<Vec<f64>>(),
+               vec![115.0, 118.50, 75.50]);
+
+    let positions = cfg.closed_positions();
+    assert_eq!(positions.iter().map(|p| p.symbol.as_str()).collect::<Vec<&str>>(),
+               vec!["DELL", "DELL"]);
+    assert_eq!(positions.iter().map(|p| p.stype).collect::<Vec<StockType>>(),
+               vec![StockType::Stock, StockType::Stock]);
+    assert_eq!(positions.iter().map(|p| p.base_date).collect::<Vec<SPDate>>(),
+               vec![make_date(2021, 2, 10), make_date(2021, 2, 10)]);
+    assert_eq!(positions.iter().map(|p| p.exit_date).collect::<Vec<SPDate>>(),
+               vec![make_date(2022, 4, 5), make_date(2022, 5, 18)]);
+    assert_eq!(positions.iter().map(|p| p.quantity).collect::<Vec<u32>>(),
+               vec![100, 100]);
+    assert_eq!(positions.iter().map(|p| p.base_price).collect::<Vec<Price>>(),
+               vec![75.50, 75.50]);
+    assert_eq!(positions.iter().map(|p| p.exit_price).collect::<Vec<Price>>(),
+               vec![81.75, 82.25]);
+    assert_eq!(positions.iter().map(|p| p.base_fee).collect::<Vec<Price>>(),
+               vec![0.00, 0.00]);
+    assert_eq!(positions.iter().map(|p| p.exit_fee).collect::<Vec<Price>>(),
+               vec![0.05, 0.05]);
+    assert_eq!(positions.iter().map(|p| p.dividend).collect::<Vec<Price>>(),
+               vec![52.00, 52.00]);
+
+    assert!(temp_file::remove_file(&temp_name));
+}
+
+#[test]
+fn test_stock_config_from_file4() {
+    let csv_file = "test_stock_config_from_file4.csv";
+    let pos_file = "test_position_config_from_file4.csv";
+    let cfg_file = "test_stock_config_from_file4.cfg";
+    let csv_filename = temp_file::make_path(&csv_file);
+    let pos_filename = temp_file::make_path(&pos_file);
+    let cfg_filename = temp_file::make_path(&cfg_file);
+
+    assert!(temp_file::create_file(&csv_file,
+                                   "symbol,type,date,quantity,base_price\n\
+                                    AAPL,stock,2020-09-20,100,115.00\n\
+                                    AAPL,stock,2020-11-12,100,118.50\n\
+                                    DELL,stock,2021-02-10,100,75.50\n"));
+
+    assert!(temp_file::create_file(&pos_file,
+                                   "symbol,type,base_date,exit_date,quantity,base_price,exit_price,base_fee,exit_fee,dividend\n\
+                                    DELL,stock,2021-02-10,2022-04-05,100,75.50,81.75,0.00,0.05,52.00\n\
+                                    DELL,stock,2021-02-10,2022-05-18,100,75.50,82.25,0.00,0.05,52.00\n"));
+
+    assert!(temp_file::create_file(&cfg_file,
+                                   &format!("ds_root: sp_root\n\
+                                             ds_name: sp_name\n\
+                                             stocks: csv_file{{\n\
+                                             {}\n\
+                                             }}\n\
+                                             closed_positions: csv_file{{\n\
+                                             {}\n\
+                                             }}\n",
+                                            csv_filename.to_str().unwrap(),
+                                            pos_filename.to_str().unwrap())));
+
+    let cfg = StocksConfig::from_file(cfg_filename.to_str().unwrap()).unwrap();
+    assert_eq!(cfg.ds_root(), "sp_root");
+    assert_eq!(cfg.ds_name(), "sp_name");
+    assert_eq!(cfg.stocks().len(), 3);
+    assert_eq!(cfg.closed_positions().len(), 2);
+
+    let list = cfg.stocks();
+    assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
+               vec!["AAPL", "AAPL", "DELL"]);
+    assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
+               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+    assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
+               vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
+    assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
+               vec![100, 100, 100]);
+    assert_eq!(list.iter().map(|s| s.base_price).collect::<Vec<f64>>(),
+               vec![115.0, 118.50, 75.50]);
+
+    let positions = cfg.closed_positions();
+    assert_eq!(positions.iter().map(|p| p.symbol.as_str()).collect::<Vec<&str>>(),
+               vec!["DELL", "DELL"]);
+    assert_eq!(positions.iter().map(|p| p.stype).collect::<Vec<StockType>>(),
+               vec![StockType::Stock, StockType::Stock]);
+    assert_eq!(positions.iter().map(|p| p.base_date).collect::<Vec<SPDate>>(),
+               vec![make_date(2021, 2, 10), make_date(2021, 2, 10)]);
+    assert_eq!(positions.iter().map(|p| p.exit_date).collect::<Vec<SPDate>>(),
+               vec![make_date(2022, 4, 5), make_date(2022, 5, 18)]);
+    assert_eq!(positions.iter().map(|p| p.quantity).collect::<Vec<u32>>(),
+               vec![100, 100]);
+    assert_eq!(positions.iter().map(|p| p.base_price).collect::<Vec<Price>>(),
+               vec![75.50, 75.50]);
+    assert_eq!(positions.iter().map(|p| p.exit_price).collect::<Vec<Price>>(),
+               vec![81.75, 82.25]);
+    assert_eq!(positions.iter().map(|p| p.base_fee).collect::<Vec<Price>>(),
+               vec![0.00, 0.00]);
+    assert_eq!(positions.iter().map(|p| p.exit_fee).collect::<Vec<Price>>(),
+               vec![0.05, 0.05]);
+    assert_eq!(positions.iter().map(|p| p.dividend).collect::<Vec<Price>>(),
+               vec![52.00, 52.00]);
+
+    assert!(temp_file::remove_file(&cfg_file));
+    assert!(temp_file::remove_file(&pos_file));
     assert!(temp_file::remove_file(&csv_file));
 }
 
@@ -540,7 +682,6 @@ fn test_stock_config_errors() {
     check(&cfg("csv:{\n}\n"), "StocksConfig::parse - Invalid line 'stocks: csv:{'");
     check(&cfg("csv[\n]\n"), "StocksConfig::parse - Unsupported block type 'csv['");
     check(&cfg("csv{\n}\nwhat: who\n"), "StocksConfig::parse - Unknown config name 'what'");
-    check(&cfg("csv{\n}\nstocks: csv{\n"), "StocksConfig::parse - Unsupported multiple stocks entries");
 }
 
 // --------------------------------------------------------------------------------
