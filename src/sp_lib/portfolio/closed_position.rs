@@ -3,6 +3,7 @@ use std::fmt;
 use crate::util::datetime::SPDate;
 use crate::util::price_type::PriceType;
 use crate::portfolio::stock_type::StockType;
+use crate::portfolio::symbol_trait::GetSymbol;
 
 pub type Price = PriceType;
 
@@ -60,6 +61,12 @@ impl ClosedPosition {
 impl fmt::Display for ClosedPosition {
     fn fmt(self: &ClosedPosition, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "ClosedPosition({} NetNotional={})", self.symbol, self.net_notional())
+    }
+}
+
+impl GetSymbol for ClosedPosition {
+    fn get_symbol(&self) -> &String {
+        &self.symbol
     }
 }
 

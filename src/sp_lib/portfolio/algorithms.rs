@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::error::Error;
+use crate::portfolio::symbol_trait::GetSymbol;
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::util::{price_type, datetime};
 use crate::portfolio::stocks_filter;
@@ -124,4 +125,22 @@ pub fn stock_base_dates(stocks: &StockList) -> HashMap<String, datetime::SPDate>
         stocks,
         |stock| stock.date,
         |stock, cur_date| if stock.date < *cur_date { stock.date } else { *cur_date })
+}
+
+pub fn match_list_to_symbols<Entry: GetSymbol>(entries: &mut Vec<Entry>, symbols: &Vec<String>) -> Result<(), Box<dyn Error>> {
+    let mut score: u32 = 0;
+    let ordering: HashMap<&String, u32> = symbols
+        .iter()
+        .map(|sym| { score += 1; (sym, score) })
+        .collect();
+
+    entries.retain(|ent| ordering.contains_key(ent.get_symbol()));
+
+    entries.sort_by(|ent1, ent2| {
+        let scr1 = ordering.get(ent1.get_symbol()).unwrap();
+        let scr2 = ordering.get(ent2.get_symbol()).unwrap();
+        scr1.cmp(scr2)
+    });
+
+    Ok(())
 }

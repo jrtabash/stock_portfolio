@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 use std::fs;
 use std::env;
+use std::iter::zip;
 use sp_lib::util::datetime::*;
 use sp_lib::util::temp_file;
 use sp_lib::util::price_type::price_eql;
+use sp_lib::portfolio::closed_position::{ClosedPosition, ClosedPositionList};
 use sp_lib::portfolio::stock_type::*;
 use sp_lib::portfolio::stock::*;
 use sp_lib::portfolio::algorithms::*;
@@ -294,6 +296,45 @@ fn test_filter_stocks_by_expr() {
 }
 
 #[test]
+fn test_match_list_to_symbols() {
+    fn test(psyms: Vec<&str>, syms: Vec<&str>, expect: Vec<&str>) {
+        let mut poss = psyms
+            .iter()
+            .map(|s| {
+                make_position(
+                    s,
+                    StockType::Stock,
+                    today_plus_days(-10),
+                    today(),
+                    100,
+                    10.00,
+                    15.00,
+                    0.05,
+                    0.00) })
+            .collect();
+        let syms = syms
+            .iter()
+            .map(|s| String::from(*s))
+            .collect();
+
+        assert!(match_list_to_symbols(&mut poss, &syms).is_ok());
+        assert_eq!(poss.len(), expect.len());
+        assert!(zip(poss, expect).all(|(p, s)| p.symbol == s));
+    }
+
+    test(vec!["A", "A", "A"], vec!["A"], vec!["A", "A", "A"]);
+    test(vec!["B", "A", "A"], vec!["A", "B"], vec!["A", "A", "B"]);
+    test(vec!["B", "A", "A"], vec!["A"], vec!["A", "A"]);
+    test(vec!["B", "A", "A"], vec!["B"], vec!["B"]);
+
+    test(vec!["B", "A", "A"], vec!["C"], vec![]);
+    test(vec!["B", "A", "A"], vec![], vec![]);
+
+    test(vec!["B", "A", "C", "A"], vec!["C", "A"], vec!["C", "A", "A"]);
+    test(vec!["B", "A", "C", "A"], vec!["A", "C"], vec!["A", "A", "C"]);
+}
+
+#[test]
 fn test_stock_base_dates() {
     fn test_dates(list: &StockList) {
         let sym_dates = stock_base_dates(&list);
@@ -325,9 +366,11 @@ fn test_value_export() {
     list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
     list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 100, 24.10, 24.15));
 
+    let positions = ClosedPositionList::new();
+
     let temp_name = "sp_test_value_export.csv";
     let csv_filename = temp_file::make_path(&temp_name);
-    let rparams = reports::ReportParams::new(ReportType::Value, &list);
+    let rparams = reports::ReportParams::new(ReportType::Value, &list, &positions);
     reports::export_report(rparams, &csv_filename.to_str().unwrap()).unwrap();
 
     let csv_content = fs::read_to_string(&csv_filename).unwrap();
@@ -454,7 +497,7 @@ fn test_stock_config_from_file2() {
 
 #[test]
 fn test_stock_config_from_file3() {
-    let temp_name = "sp_test_stocks_config.cfg";
+    let temp_name = "sp_test_stocks_config3.cfg";
     let config_filename = temp_file::make_path(&temp_name);
 
     assert!(temp_file::create_file(&temp_name,
@@ -692,4 +735,21 @@ fn make_stock(sym: &str, stype: StockType, date: SPDate, qty: u32, base: Price, 
     let mut stock = Stock::new(symbol, stype, date, qty, base);
     stock.set_latest_price(latest, today_plus_days(0));
     stock
+}
+
+fn make_position(sym: &str, stype: StockType,
+                 base_date: SPDate, exit_date: SPDate,
+                 quantity: u32, base_price: Price, exit_price: Price,
+                 exit_fee: Price, dividend: Price) -> ClosedPosition {
+    ClosedPosition::new(
+        String::from(sym),
+        stype,
+        base_date,
+        exit_date,
+        quantity,
+        base_price,
+        exit_price,
+        0.00,
+        exit_fee,
+        dividend)
 }

@@ -4,6 +4,7 @@ use crate::util::datetime;
 use crate::util::datetime::SPDate;
 use crate::util::price_type::PriceType;
 use crate::portfolio::stock_type::StockType;
+use crate::portfolio::symbol_trait::GetSymbol;
 
 pub type Price = PriceType;
 
@@ -80,6 +81,12 @@ impl Stock {
 impl fmt::Display for Stock {
     fn fmt(self: &Stock, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Stock({} {}@{:.2})", self.symbol, self.quantity, self.latest_price)
+    }
+}
+
+impl GetSymbol for Stock {
+    fn get_symbol(&self) -> &String {
+        &self.symbol
     }
 }
 
