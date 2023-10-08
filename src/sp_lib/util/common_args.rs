@@ -29,12 +29,20 @@ pub fn stocks_file_help() -> &'static str {
 }
 
 pub fn stocks_config_help() -> &'static str {
-    "Config file containing datastore root and name, as well as stocks in portfolio.\n\
+    "Config file containing datastore root and name, stocks and closed positions in portfolio. \
      Both root and name can be set to \"$default\" which will use home path for root and sp_datastore for name.\n\
-     The CSV block \"csv{\" should contain stocks in portfolio, formatted as 'symbol,type,date,quantity,base_price' including a header line. \
-     Supported type values include stock, etf and index.\n\
-     A CSV file block \"csv_file{\" can be used instead of a CSV block. It should contain the path to a CSV file. \
-     The file should contain the CSV symbol data.\n\
+     \n\
+     The stocks CSV block \"csv{\" should contain stocks in portfolio, with the following columns:\n\
+     \tsymbol\n\ttype\n\tdate\n\tquantity\n\tbase_price\n\
+     including a header line. Supported type values include stock, etf and index. A stocks CSV file block \"csv_file{\" can \
+     be used instead of a stocks CSV block. It should contain the path to a CSV file. The file should contain the CSV stocks data.\n\
+     \n\
+     The closed positions CSV block \"csv{\" should contain closed positions in portfolio, with the following columns:\n\
+     \tsymbol\n\ttype\n\tbase_date\n\texit_date\n\tquantity\n\tbase_price\n\texit_price\n\tbase_fee\n\texit_fee\n\tdividend\n\
+     including a header line. Supported type values include stock, etf and index. The closed positions CSV \
+     file block \"csv_file{\" can be used instead of a closed positions CSV block. It should contain the path to a CSV file. \
+     The file should contain the CSV closed positions data.\n\
+     \n\
      Sample config 1:\n\
      \tds_root: $default\n\
      \tds_name: my_datastore\n\
@@ -42,11 +50,15 @@ pub fn stocks_config_help() -> &'static str {
      \t  symbol,type,date,quantity,base_price\n\
      \t  AAPL,stock,2020-09-20,100,115.00\n\
      \t}\n\
+     \n\
      Sample config 2:\n\
      \tds_root: $default\n\
      \tds_name: my_datastore\n\
      \tstocks: csv_file{\n\
      \t  /path/to/my/stocks.csv\n\
+     \t}\n\
+     \tclosed_positions: csv_file{\n\
+     \t  /path/to/my/closed_positions.csv\n\
      \t}\n"
 }
 
