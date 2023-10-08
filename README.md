@@ -31,10 +31,11 @@ USAGE:
     sp_report [FLAGS] [OPTIONS] --config <stocks_config>
 
 FLAGS:
-    -d, --desc            Used with order by option to sort in descending order
-    -h, --help            Prints help information
-    -g, --show-groupby    Show quantities and current notional values grouped by symbol
-    -V, --version         Prints version information
+    -d, --desc             Used with order by option to sort in descending order
+    -h, --help             Prints help information
+    -m, --match-symbols    Match closed positions to configured stock symbols post filtering and ordering
+    -g, --show-groupby     Show quantities and current notional values grouped by symbol
+    -V, --version          Prints version information
 
 OPTIONS:
     -x, --exclude <exclude>         Filter stocks by type, symbols or expression;
@@ -68,26 +69,54 @@ OPTIONS:
                                     top   : Top/Bottom performing stocks
                                     volat : Stocks volatility
                                     daych : Stocks day change
-    -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
-                                    Both root and name can be set to "$default" which will use home path for root and
-                                    sp_datastore for name.
-                                    The CSV block "csv{" should contain stocks in portfolio, formatted as
-                                    'symbol,type,date,quantity,base_price' including a header line. Supported type
-                                    values include stock, etf and index.
-                                    A CSV file block "csv_file{" can be used instead of a CSV block. It should contain
-                                    the path to a CSV file. The file should contain the CSV symbol data.
+    -l, --config <stocks_config>    Config file containing datastore root and name, stocks and closed positions in
+                                    portfolio. Both root and name can be set to "$default" which will use home path for
+                                    root and sp_datastore for name.
+                                    
+                                    The stocks CSV block "csv{" should contain stocks in portfolio, with the following
+                                    columns:
+                                        symbol
+                                        type
+                                        date
+                                        quantity
+                                        base_price
+                                    including a header line. Supported type values include stock, etf and index. A
+                                    stocks CSV file block "csv_file{" can be used instead of a stocks CSV block. It
+                                    should contain the path to a CSV file. The file should contain the CSV stocks data.
+                                    
+                                    The closed positions CSV block "csv{" should contain closed positions in portfolio,
+                                    with the following columns:
+                                        symbol
+                                        type
+                                        base_date
+                                        exit_date
+                                        quantity
+                                        base_price
+                                        exit_price
+                                        base_fee
+                                        exit_fee
+                                        dividend
+                                    including a header line. Supported type values include stock, etf and index. The
+                                    closed positions CSV file block "csv_file{" can be used instead of a closed
+                                    positions CSV block. It should contain the path to a CSV file. The file should
+                                    contain the CSV closed positions data.
+                                    
                                     Sample config 1:
-                                        root: $default
-                                        name: my_datastore
+                                        ds_root: $default
+                                        ds_name: my_datastore
                                         stocks: csv{
                                           symbol,type,date,quantity,base_price
                                           AAPL,stock,2020-09-20,100,115.00
                                         }
+                                    
                                     Sample config 2:
-                                        root: $default
-                                        name: my_datastore
+                                        ds_root: $default
+                                        ds_name: my_datastore
                                         stocks: csv_file{
                                           /path/to/my/stocks.csv
+                                        }
+                                        closed_positions: csv_file{
+                                          /path/to/my/closed_positions.csv
                                         }
 ```
 
@@ -132,26 +161,54 @@ OPTIONS:
                                     check  : check history, dividend and split data
                                     stat   : calculate files count and size
     -e, --export <export_file>      Export symbol history and dividends to csv file. Required with export operation
-    -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
-                                    Both root and name can be set to "$default" which will use home path for root and
-                                    sp_datastore for name.
-                                    The CSV block "csv{" should contain stocks in portfolio, formatted as
-                                    'symbol,type,date,quantity,base_price' including a header line. Supported type
-                                    values include stock, etf and index.
-                                    A CSV file block "csv_file{" can be used instead of a CSV block. It should contain
-                                    the path to a CSV file. The file should contain the CSV symbol data.
+    -l, --config <stocks_config>    Config file containing datastore root and name, stocks and closed positions in
+                                    portfolio. Both root and name can be set to "$default" which will use home path for
+                                    root and sp_datastore for name.
+                                    
+                                    The stocks CSV block "csv{" should contain stocks in portfolio, with the following
+                                    columns:
+                                        symbol
+                                        type
+                                        date
+                                        quantity
+                                        base_price
+                                    including a header line. Supported type values include stock, etf and index. A
+                                    stocks CSV file block "csv_file{" can be used instead of a stocks CSV block. It
+                                    should contain the path to a CSV file. The file should contain the CSV stocks data.
+                                    
+                                    The closed positions CSV block "csv{" should contain closed positions in portfolio,
+                                    with the following columns:
+                                        symbol
+                                        type
+                                        base_date
+                                        exit_date
+                                        quantity
+                                        base_price
+                                        exit_price
+                                        base_fee
+                                        exit_fee
+                                        dividend
+                                    including a header line. Supported type values include stock, etf and index. The
+                                    closed positions CSV file block "csv_file{" can be used instead of a closed
+                                    positions CSV block. It should contain the path to a CSV file. The file should
+                                    contain the CSV closed positions data.
+                                    
                                     Sample config 1:
-                                        root: $default
-                                        name: my_datastore
+                                        ds_root: $default
+                                        ds_name: my_datastore
                                         stocks: csv{
                                           symbol,type,date,quantity,base_price
                                           AAPL,stock,2020-09-20,100,115.00
                                         }
+                                    
                                     Sample config 2:
-                                        root: $default
-                                        name: my_datastore
+                                        ds_root: $default
+                                        ds_name: my_datastore
                                         stocks: csv_file{
                                           /path/to/my/stocks.csv
+                                        }
+                                        closed_positions: csv_file{
+                                          /path/to/my/closed_positions.csv
                                         }
     -y, --symbol <symbol>           Stock symbol. Optional with update and check operations. Required with drop, reset,
                                     showh, showd, shows, and export operations
@@ -199,26 +256,54 @@ OPTIONS:
                                     One of open, high, low, close, adj_close. Default adj_close.
                                     Applies to sa, vwap, volat, sma, mvwap, roc, pctch and mvolat
     -f, --from <from_date>          Start from date YYYY-MM-DD
-    -l, --config <stocks_config>    Config file containing datastore root and name, as well as stocks in portfolio.
-                                    Both root and name can be set to "$default" which will use home path for root and
-                                    sp_datastore for name.
-                                    The CSV block "csv{" should contain stocks in portfolio, formatted as
-                                    'symbol,type,date,quantity,base_price' including a header line. Supported type
-                                    values include stock, etf and index.
-                                    A CSV file block "csv_file{" can be used instead of a CSV block. It should contain
-                                    the path to a CSV file. The file should contain the CSV symbol data.
+    -l, --config <stocks_config>    Config file containing datastore root and name, stocks and closed positions in
+                                    portfolio. Both root and name can be set to "$default" which will use home path for
+                                    root and sp_datastore for name.
+                                    
+                                    The stocks CSV block "csv{" should contain stocks in portfolio, with the following
+                                    columns:
+                                        symbol
+                                        type
+                                        date
+                                        quantity
+                                        base_price
+                                    including a header line. Supported type values include stock, etf and index. A
+                                    stocks CSV file block "csv_file{" can be used instead of a stocks CSV block. It
+                                    should contain the path to a CSV file. The file should contain the CSV stocks data.
+                                    
+                                    The closed positions CSV block "csv{" should contain closed positions in portfolio,
+                                    with the following columns:
+                                        symbol
+                                        type
+                                        base_date
+                                        exit_date
+                                        quantity
+                                        base_price
+                                        exit_price
+                                        base_fee
+                                        exit_fee
+                                        dividend
+                                    including a header line. Supported type values include stock, etf and index. The
+                                    closed positions CSV file block "csv_file{" can be used instead of a closed
+                                    positions CSV block. It should contain the path to a CSV file. The file should
+                                    contain the CSV closed positions data.
+                                    
                                     Sample config 1:
-                                        root: $default
-                                        name: my_datastore
+                                        ds_root: $default
+                                        ds_name: my_datastore
                                         stocks: csv{
                                           symbol,type,date,quantity,base_price
                                           AAPL,stock,2020-09-20,100,115.00
                                         }
+                                    
                                     Sample config 2:
-                                        root: $default
-                                        name: my_datastore
+                                        ds_root: $default
+                                        ds_name: my_datastore
                                         stocks: csv_file{
                                           /path/to/my/stocks.csv
+                                        }
+                                        closed_positions: csv_file{
+                                          /path/to/my/closed_positions.csv
                                         }
     -y, --symbol <symbol>           Stock symbol
     -w, --window <window>           Number of days, required with sma, mvwap, roc, mvolat and rsi calculations
