@@ -11,7 +11,8 @@ pub struct Arguments {
     exclude: Option<String>,
     export_file: Option<String>,
     show_groupby: bool,
-    desc: bool
+    desc: bool,
+    match_symbols: bool
 }
 
 impl Arguments {
@@ -69,6 +70,10 @@ impl Arguments {
                  .short("d")
                  .long("desc")
                  .help("Used with order by option to sort in descending order"))
+            .arg(Arg::with_name("match_symbols")
+                 .short("m")
+                 .long("match-symbols")
+                 .help("Match closed positions to configured stock symbols post filtering and ordering"))
             .get_matches();
 
         let config_file = common_args::parsed_stocks_config(&parsed_args);
@@ -79,6 +84,7 @@ impl Arguments {
         let export_file = common_args::parsed_export_file(&parsed_args);
         let show_groupby = parsed_args.is_present("show_groupby");
         let desc = parsed_args.is_present("desc");
+        let match_symbols = parsed_args.is_present("match_symbols");
 
         Arguments {
             config_file,
@@ -88,7 +94,8 @@ impl Arguments {
             exclude,
             export_file,
             show_groupby,
-            desc
+            desc,
+            match_symbols
         }
     }
 
@@ -130,6 +137,11 @@ impl Arguments {
     #[inline(always)]
     pub fn desc(&self) -> bool {
         self.desc
+    }
+
+    #[inline(always)]
+    pub fn match_symbols(&self) -> bool {
+        self.match_symbols
     }
 }
 

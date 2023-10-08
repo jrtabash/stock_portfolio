@@ -38,6 +38,7 @@ impl common_app::AppTrait for Application {
         self.include()?;
         self.exclude()?;
         self.sort()?;
+        self.match_positions_to_stocks()?;
         self.report();
         self.export()?;
         Ok(())
@@ -80,9 +81,18 @@ impl Application {
         Ok(())
     }
 
+    fn match_positions_to_stocks(self: &mut Application) -> Result<(), Box<dyn Error>> {
+        if self.args.match_symbols() {
+            let mut symbols: Vec<String> = self.config.stocks().iter().map(|s| s.symbol.clone()).collect();
+            symbols.dedup();
+            algorithms::match_list_to_symbols(self.config.closed_positions_mut(), &symbols)?;
+        }
+        Ok(())
+    }
+
     fn report(self: &Application) {
         reports::print_report(
-            reports::ReportParams::new(self.rtype, self.config.stocks())
+            reports::ReportParams::new(self.rtype, self.config.stocks(), self.config.closed_positions())
                 .show_groupby(self.args.show_groupby())
                 .with_datastore(&self.ds)
         );
@@ -90,7 +100,8 @@ impl Application {
 
     fn export(self: &Application) -> Result<(), Box<dyn Error>> {
         if let Some(export_file) = self.args.export_file() {
-            let report_params = reports::ReportParams::new(self.rtype, self.config.stocks()).with_datastore(&self.ds);
+            let report_params = reports::ReportParams::new(self.rtype, self.config.stocks(), self.config.closed_positions())
+                .with_datastore(&self.ds);
             reports::export_report(report_params, export_file)?;
         }
         Ok(())

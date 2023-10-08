@@ -8,6 +8,7 @@ use crate::util::{price_type, datetime};
 use crate::datastore::datastore::DataStore;
 use crate::datastore::history::History;
 use crate::stats::hist_ftns;
+use crate::portfolio::closed_position::ClosedPositionList;
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::portfolio::stock_type::StockType;
 use crate::portfolio::algorithms;
@@ -16,13 +17,22 @@ use crate::portfolio::report_type::ReportType;
 pub struct ReportParams<'a, 'b> {
     rtype: ReportType,
     stocks: &'a StockList,
+    closed_positions: &'a ClosedPositionList,
     ds: Option<&'b DataStore>,
     groupby: bool
 }
 
 impl<'a, 'b> ReportParams<'a, 'b> {
-    pub fn new(rtype: ReportType, stocks: &'a StockList) -> Self {
-        ReportParams { rtype, stocks, ds: None, groupby: false }
+    pub fn new(rtype: ReportType,
+               stocks: &'a StockList,
+               closed_positions: &'a ClosedPositionList) -> Self {
+        ReportParams {
+            rtype,
+            stocks,
+            closed_positions,
+            ds: None,
+            groupby: false
+        }
     }
 
     pub fn show_groupby(mut self, grpby: bool) -> Self {
@@ -40,6 +50,9 @@ impl<'a, 'b> ReportParams<'a, 'b> {
 
     #[inline(always)]
     pub fn stocks(&self) -> &'a StockList { self.stocks }
+
+    #[inline(always)]
+    pub fn closed_positions(&self) -> &'a ClosedPositionList { self.closed_positions }
 
     #[inline(always)]
     pub fn datastore(&self) -> Option<&'b DataStore> { self.ds }
