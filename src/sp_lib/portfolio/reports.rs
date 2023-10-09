@@ -66,7 +66,8 @@ pub fn print_report(params: ReportParams) {
         ReportType::Value => value_report(&params),
         ReportType::Top => top_report(&params),
         ReportType::Volat => volat_report(&params),
-        ReportType::Daych => daych_report(&params)
+        ReportType::Daych => daych_report(&params),
+        ReportType::Closed => closed_report(&params)
     }
 }
 
@@ -75,7 +76,8 @@ pub fn export_report(params: ReportParams, filename: &str) -> Result<(), Box<dyn
         ReportType::Value => value_export(&params, filename),
         ReportType::Top => top_export(&params, filename),
         ReportType::Volat => volat_export(&params, filename),
-        ReportType::Daych => daych_export(&params, filename)
+        ReportType::Daych => daych_export(&params, filename),
+        ReportType::Closed => closed_export(&params, filename)
     }
 }
 
@@ -358,7 +360,7 @@ fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
 }
 
 // --------------------------------------------------------------------------------
-// Stocks Day Change Report and Exporta
+// Stocks Day Change Report and Export
 
 struct DayChange {
     prev_price: Price,
@@ -503,6 +505,89 @@ fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Err
                      chg.high,
                      chg.volume)?;
         }
+    }
+    Ok(())
+}
+
+// --------------------------------------------------------------------------------
+// Closed Positions Value Report and Export
+
+fn closed_report(params: &ReportParams) {
+    let positions = params.closed_positions();
+
+    let mut base_ntnl: Price = 0.0;
+    let mut exit_ntnl: Price = 0.0;
+    let mut net_ntnl: Price = 0.0;
+    let mut tot_fees: Price = 0.0;
+    let mut tot_div: Price = 0.0;
+
+    for pos in positions.iter() {
+        base_ntnl += pos.base_notional();
+        exit_ntnl += pos.exit_notional();
+        net_ntnl += pos.net_notional();
+        tot_fees += pos.base_fee + pos.exit_fee;
+        tot_div += pos.dividend;
+    }
+
+    println!("Closed Positions Report");
+    println!("-----------------------");
+    println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
+    println!("Total Base Value: {:.2}", base_ntnl);
+    println!("Total Exit Value: {:.2}", exit_ntnl);
+    println!(" Total Net Value: {:.2}", net_ntnl);
+    println!("      Total Fees: {:.2}", tot_fees);
+    println!("  Total Dividend: {:.2}", tot_div);
+    println!("Net + Div - Fees: {:.2}", net_ntnl + tot_div - tot_fees);
+    println!();
+
+    println!("{:8} {:10} {:10} {:12} {:12} {:12} {:6} {:10}",
+             "Symbol",
+             "Base Date",
+             "Exit Date",
+             "Base Value",
+             "Exit Value",
+             "Net Value",
+             "Fees",
+             "Dividend");
+    println!("{:8} {:10} {:10} {:12} {:12} {:12} {:6} {:10}",
+             "------",
+             "---------",
+             "---------",
+             "----------",
+             "----------",
+             "---------",
+             "----",
+             "--------");
+
+    for pos in positions.iter() {
+        println!("{:8} {:10} {:10} {:12.2} {:12.2} {:12.2} {:6.2} {:10.2}",
+                 pos.symbol,
+                 pos.base_date.format("%Y-%m-%d"),
+                 pos.exit_date.format("%Y-%m-%d"),
+                 pos.base_notional(),
+                 pos.exit_notional(),
+                 pos.net_notional(),
+                 pos.base_fee + pos.exit_fee,
+                 pos.dividend);
+    }
+}
+
+fn closed_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+    let positions = params.closed_positions();
+
+    let mut file = File::create(filename)?;
+    writeln!(file, "Symbol,Base Date,Exit Date,Base Value,Exit Value,Net Value,Fees,Dividend")?;
+
+    for pos in positions.iter() {
+        writeln!(file, "{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2}",
+                 pos.symbol,
+                 pos.base_date.format("%Y-%m-%d"),
+                 pos.exit_date.format("%Y-%m-%d"),
+                 pos.base_notional(),
+                 pos.exit_notional(),
+                 pos.net_notional(),
+                 pos.base_fee + pos.exit_fee,
+                 pos.dividend)?;
     }
     Ok(())
 }

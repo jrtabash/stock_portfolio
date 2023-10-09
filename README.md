@@ -12,6 +12,7 @@ The following reports are supported:
 - **Top**: Top/bottom performers in portfolio
 - **Volat**: Volatility of stocks in portfolio
 - **Daych**: Day change of stocks in portfolio
+- **Closed**: Closed Positions Value
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
 get the latest close prices and dividends from the datastore and generate a report. The value report shows base,
@@ -65,10 +66,11 @@ OPTIONS:
                                     valchg : day value change   | low     : day low price
                                     high   : day high price
     -p, --type <report_type>        Report type, one of value, top, volat (default: value)
-                                    value : stocks value (gains & losses)
-                                    top   : Top/Bottom performing stocks
-                                    volat : Stocks volatility
-                                    daych : Stocks day change
+                                    value  : stocks value (gains & losses)
+                                    top    : Top/Bottom performing stocks
+                                    volat  : Stocks volatility
+                                    daych  : Stocks day change
+                                    closed : Closed positions value
     -l, --config <stocks_config>    Config file containing datastore root and name, stocks and closed positions in
                                     portfolio. Both root and name can be set to "$default" which will use home path for
                                     root and sp_datastore for name.

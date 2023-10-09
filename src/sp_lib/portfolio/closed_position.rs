@@ -56,6 +56,16 @@ impl ClosedPosition {
     pub fn net_notional(&self) -> Price {
         self.quantity as Price * self.net_price()
     }
+
+    #[inline(always)]
+    pub fn base_notional(&self) -> Price {
+        self.quantity as Price * self.base_price
+    }
+
+    #[inline(always)]
+    pub fn exit_notional(&self) -> Price {
+        self.quantity as Price * self.exit_price
+    }
 }
 
 impl fmt::Display for ClosedPosition {

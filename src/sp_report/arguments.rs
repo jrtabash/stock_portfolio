@@ -30,10 +30,11 @@ impl Arguments {
                  .short("p")
                  .long("type")
                  .help("Report type, one of value, top, volat (default: value)\n\
-                        value : stocks value (gains & losses)\n\
-                        top   : Top/Bottom performing stocks\n\
-                        volat : Stocks volatility\n\
-                        daych : Stocks day change")
+                        value  : stocks value (gains & losses)\n\
+                        top    : Top/Bottom performing stocks\n\
+                        volat  : Stocks volatility\n\
+                        daych  : Stocks day change\n\
+                        closed : Closed positions value")
                  .takes_value(true))
             .arg(Arg::with_name("order_by")
                  .short("o")
