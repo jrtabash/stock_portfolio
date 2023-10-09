@@ -12,7 +12,7 @@ The following reports are supported:
 - **Top**: Top/bottom performers in portfolio
 - **Volat**: Volatility of stocks in portfolio
 - **Daych**: Day change of stocks in portfolio
-- **Closed**: Closed Positions Value
+- **Closed**: Closed positions value
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
 get the latest close prices and dividends from the datastore and generate a report. The value report shows base,
