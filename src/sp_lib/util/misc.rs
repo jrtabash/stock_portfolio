@@ -1,6 +1,6 @@
-use std::error::Error;
 use std::fs;
 use std::path::Path;
+use crate::util::error::Error;
 
 #[inline(always)]
 pub fn maybe_letter_s(sz: usize) -> &'static str {
@@ -20,7 +20,7 @@ pub fn direntry_filename(entry: &fs::DirEntry) -> String {
     }
 }
 
-pub fn path_basename(path: &Path) -> Result<&str, Box<dyn Error>> {
+pub fn path_basename(path: &Path) -> Result<&str, Error> {
     if let Some(basename) = path.file_name() {
         if let Some(fname) = basename.to_str() {
             return Ok(fname)

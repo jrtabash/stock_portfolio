@@ -5,6 +5,7 @@ use curl::easy;
 use crate::yfinance::types;
 use crate::yfinance::types::{Interval, Events};
 use crate::util::datetime;
+use crate::util::error::Error;
 use crate::util::datetime::SPDate;
 
 // --------------------------------------------------------------------------------
@@ -50,7 +51,7 @@ impl HistoryQuery {
                 evt_str)
     }
 
-    pub fn execute(self: &mut HistoryQuery) -> Result<(), curl::Error> {
+    pub fn execute(self: &mut HistoryQuery) -> Result<(), Error> {
         self.result.clear();
         url_request(&self.url(), &mut self.result)?;
         Ok(())
@@ -60,7 +61,7 @@ impl HistoryQuery {
 // --------------------------------------------------------------------------------
 // Private Helpers
 
-fn url_request(url: &str, result: &mut String) -> Result<(), curl::Error> {
+fn url_request(url: &str, result: &mut String) -> Result<(), Error> {
     let mut handle = easy::Easy::new();
 
     handle.url(url)?;

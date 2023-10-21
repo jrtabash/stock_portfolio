@@ -1,4 +1,4 @@
-use std::error::Error;
+use crate::util::error::Error;
 use crate::datastore::history::{History, HistoryEntry, Price};
 use crate::util::datetime::SPDate;
 use crate::util::price_type::price_zero;
@@ -21,7 +21,7 @@ fn field_to_ftn(field: &str) -> impl Fn(&HistoryEntry) -> Price {
 // --------------------------------------------------------------------------------
 // Volume Weighted Average Price
 
-pub fn entries_field_vwap(entries: &[HistoryEntry], field: &str) -> Result<Price, Box<dyn Error>> {
+pub fn entries_field_vwap(entries: &[HistoryEntry], field: &str) -> Result<Price, Error> {
     let mut notional: Price = 0.0;
     let mut volume: u64 = 0;
     let field_ftn = field_to_ftn(field);
@@ -36,24 +36,24 @@ pub fn entries_field_vwap(entries: &[HistoryEntry], field: &str) -> Result<Price
 }
 
 #[inline(always)]
-pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+pub fn entries_vwap(entries: &[HistoryEntry]) -> Result<Price, Error> {
     entries_field_vwap(entries, DEFAULT_FIELD)
 }
 
 #[inline(always)]
-pub fn hist_field_vwap(hist: &History, field: &str) -> Result<Price, Box<dyn Error>> {
+pub fn hist_field_vwap(hist: &History, field: &str) -> Result<Price, Error> {
     entries_field_vwap(hist.entries(), field)
 }
 
 #[inline(always)]
-pub fn hist_vwap(hist: &History) -> Result<Price, Box<dyn Error>> {
+pub fn hist_vwap(hist: &History) -> Result<Price, Error> {
     entries_field_vwap(hist.entries(), DEFAULT_FIELD)
 }
 
 // --------------------------------------------------------------------------------
 // Simple Average Price
 
-pub fn entries_field_sa(entries: &[HistoryEntry], field: &str) -> Result<Price, Box<dyn Error>> {
+pub fn entries_field_sa(entries: &[HistoryEntry], field: &str) -> Result<Price, Error> {
     if !entries.is_empty() {
         reduce_ftns::mean(entries, field_to_ftn(field))
     } else {
@@ -62,47 +62,47 @@ pub fn entries_field_sa(entries: &[HistoryEntry], field: &str) -> Result<Price, 
 }
 
 #[inline(always)]
-pub fn entries_sa(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+pub fn entries_sa(entries: &[HistoryEntry]) -> Result<Price, Error> {
     entries_field_sa(entries, DEFAULT_FIELD)
 }
 
 #[inline(always)]
-pub fn hist_field_sa(hist: &History, field: &str) -> Result<Price, Box<dyn Error>> {
+pub fn hist_field_sa(hist: &History, field: &str) -> Result<Price, Error> {
     entries_field_sa(hist.entries(), field)
 }
 
 #[inline(always)]
-pub fn hist_sa(hist: &History) -> Result<Price, Box<dyn Error>> {
+pub fn hist_sa(hist: &History) -> Result<Price, Error> {
     entries_field_sa(hist.entries(), DEFAULT_FIELD)
 }
 
 // --------------------------------------------------------------------------------
 // Volatility
 
-pub fn entries_field_volatility(entries: &[HistoryEntry], field: &str) -> Result<Price, Box<dyn Error>> {
+pub fn entries_field_volatility(entries: &[HistoryEntry], field: &str) -> Result<Price, Error> {
     let roc = entries_field_roc(entries, field, 1)?;
     reduce_ftns::stddev(&roc, |r| r.1)
 }
 
 #[inline(always)]
-pub fn entries_volatility(entries: &[HistoryEntry]) -> Result<Price, Box<dyn Error>> {
+pub fn entries_volatility(entries: &[HistoryEntry]) -> Result<Price, Error> {
     entries_field_volatility(entries, DEFAULT_FIELD)
 }
 
 #[inline(always)]
-pub fn hist_field_volatility(hist: &History, field: &str) -> Result<Price, Box<dyn Error>> {
+pub fn hist_field_volatility(hist: &History, field: &str) -> Result<Price, Error> {
     entries_field_volatility(hist.entries(), field)
 }
 
 #[inline(always)]
-pub fn hist_volatility(hist: &History) -> Result<Price, Box<dyn Error>> {
+pub fn hist_volatility(hist: &History) -> Result<Price, Error> {
     entries_field_volatility(hist.entries(), DEFAULT_FIELD)
 }
 
 // --------------------------------------------------------------------------------
 // Moving Volume Weighted Average Price
 
-pub fn entries_field_mvwap(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_field_mvwap(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Error> {
     if days < 1 {
         return Err("entries_mvwap: days < 1".into())
     }
@@ -140,24 +140,24 @@ pub fn entries_field_mvwap(entries: &[HistoryEntry], field: &str, days: usize) -
 }
 
 #[inline(always)]
-pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_mvwap(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Error> {
     entries_field_mvwap(entries, DEFAULT_FIELD, days)
 }
 
 #[inline(always)]
-pub fn hist_field_mvwap(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_field_mvwap(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Error> {
     entries_field_mvwap(hist.entries(), field, days)
 }
 
 #[inline(always)]
-pub fn hist_mvwap(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_mvwap(hist: &History, days: usize) -> Result<DatePriceList, Error> {
     entries_field_mvwap(hist.entries(), DEFAULT_FIELD, days)
 }
 
 // --------------------------------------------------------------------------------
 // Simple Moving Average Price
 
-pub fn entries_field_sma(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_field_sma(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Error> {
     if days < 1 {
         return Err("entries_sma: days < 1".into())
     }
@@ -196,24 +196,24 @@ pub fn entries_field_sma(entries: &[HistoryEntry], field: &str, days: usize) -> 
 }
 
 #[inline(always)]
-pub fn entries_sma(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_sma(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Error> {
     entries_field_sma(entries, DEFAULT_FIELD, days)
 }
 
 #[inline(always)]
-pub fn hist_field_sma(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_field_sma(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Error> {
     entries_field_sma(hist.entries(), field, days)
 }
 
 #[inline(always)]
-pub fn hist_sma(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_sma(hist: &History, days: usize) -> Result<DatePriceList, Error> {
     entries_field_sma(hist.entries(), DEFAULT_FIELD, days)
 }
 
 // --------------------------------------------------------------------------------
 // Rate of Change
 
-pub fn entries_field_roc(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_field_roc(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Error> {
     if days < 1 {
         return Err("entries_roc: days < 1".into())
     }
@@ -236,24 +236,24 @@ pub fn entries_field_roc(entries: &[HistoryEntry], field: &str, days: usize) -> 
 }
 
 #[inline(always)]
-pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_roc(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Error> {
     entries_field_roc(entries, DEFAULT_FIELD, days)
 }
 
 #[inline(always)]
-pub fn hist_field_roc(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_field_roc(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Error> {
     entries_field_roc(hist.entries(), field, days)
 }
 
 #[inline(always)]
-pub fn hist_roc(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_roc(hist: &History, days: usize) -> Result<DatePriceList, Error> {
     entries_field_roc(hist.entries(), DEFAULT_FIELD, days)
 }
 
 // --------------------------------------------------------------------------------
 // Percent change relative to first history point
 
-pub fn entries_field_pctch(entries: &[HistoryEntry], field: &str) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_field_pctch(entries: &[HistoryEntry], field: &str) -> Result<DatePriceList, Error> {
     let size = entries.len();
 
     if size < 2 {
@@ -276,24 +276,24 @@ pub fn entries_field_pctch(entries: &[HistoryEntry], field: &str) -> Result<Date
 }
 
 #[inline(always)]
-pub fn entries_pctch(entries: &[HistoryEntry]) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_pctch(entries: &[HistoryEntry]) -> Result<DatePriceList, Error> {
     entries_field_pctch(entries, DEFAULT_FIELD)
 }
 
 #[inline(always)]
-pub fn hist_field_pctch(hist: &History, field: &str) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_field_pctch(hist: &History, field: &str) -> Result<DatePriceList, Error> {
     entries_field_pctch(hist.entries(), field)
 }
 
 #[inline(always)]
-pub fn hist_pctch(hist: &History) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_pctch(hist: &History) -> Result<DatePriceList, Error> {
     entries_field_pctch(hist.entries(), DEFAULT_FIELD)
 }
 
 // --------------------------------------------------------------------------------
 // Moving Volatility
 
-pub fn entries_field_mvolatility(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_field_mvolatility(entries: &[HistoryEntry], field: &str, days: usize) -> Result<DatePriceList, Error> {
     let size = entries.len();
     if size < 2 {
         return Err("entries_mvolatility: len < 2".into())
@@ -315,24 +315,24 @@ pub fn entries_field_mvolatility(entries: &[HistoryEntry], field: &str, days: us
 }
 
 #[inline(always)]
-pub fn entries_mvolatility(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_mvolatility(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Error> {
     entries_field_mvolatility(entries, DEFAULT_FIELD, days)
 }
 
 #[inline(always)]
-pub fn hist_field_mvolatility(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_field_mvolatility(hist: &History, field: &str, days: usize) -> Result<DatePriceList, Error> {
     entries_field_mvolatility(hist.entries(), field, days)
 }
 
 #[inline(always)]
-pub fn hist_mvolatility(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_mvolatility(hist: &History, days: usize) -> Result<DatePriceList, Error> {
     entries_field_mvolatility(hist.entries(), DEFAULT_FIELD, days)
 }
 
 // --------------------------------------------------------------------------------
 // Relative Strength Index
 
-pub fn entries_rsi(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn entries_rsi(entries: &[HistoryEntry], days: usize) -> Result<DatePriceList, Error> {
     fn calc_rsi(mean_gain: Price, mean_loss: Price) -> Price { 100.0 - (100.0 / (1.0 + mean_gain / mean_loss)) }
     fn pct2gain(p: &Price) -> Price { if *p > 0.0 { *p } else { 0.0 } }
     fn pct2loss(p: &Price) -> Price { if *p < 0.0 { *p * -1.0 } else { 0.0 } }
@@ -365,7 +365,7 @@ pub fn entries_rsi(entries: &[HistoryEntry], days: usize) -> Result<DatePriceLis
 }
 
 #[inline(always)]
-pub fn hist_rsi(hist: &History, days: usize) -> Result<DatePriceList, Box<dyn Error>> {
+pub fn hist_rsi(hist: &History, days: usize) -> Result<DatePriceList, Error> {
     entries_rsi(hist.entries(), days)
 }
 

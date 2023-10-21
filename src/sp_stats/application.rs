@@ -3,8 +3,8 @@ use sp_lib::datastore::{datastore, dividends, history};
 use sp_lib::stats::{description, hist_desc, hist_ftns};
 use sp_lib::portfolio::stocks_config;
 use sp_lib::util::{common_app, datetime};
+use sp_lib::util::error::Error;
 use std::collections::HashSet;
-use std::error::Error;
 
 const DESC: &str = "desc";
 const DIVDESC: &str = "divdesc";
@@ -91,7 +91,7 @@ impl Application {
         println!("symbol: {}", self.args.symbol());
     }
 
-    fn load_data(&mut self) -> Result<(), Box<dyn Error>> {
+    fn load_data(&mut self) -> Result<(), Error> {
         let symbol = self.args.symbol();
         if self.args.calculate() == DIVDESC {
             if self.ds.symbol_exists(dividends::tag(), symbol) {
@@ -109,7 +109,7 @@ impl Application {
         Ok(())
     }
 
-    fn describe(&self) -> Result<(), Box<dyn Error>> {
+    fn describe(&self) -> Result<(), Error> {
         fn print_field(name: &str, hd: &hist_desc::HistDesc, extract: impl Fn(&description::Description) -> f64) {
             println!(
                 "{}: {:12.4} {:12.4} {:12.4} {:12.4} {:12.4} {:16.4}",
@@ -148,7 +148,7 @@ impl Application {
         Ok(())
     }
 
-    fn div_describe(&self) -> Result<(), Box<dyn Error>> {
+    fn div_describe(&self) -> Result<(), Error> {
         let desc = description::Description::from_vec(self.div.entries(), |entry| entry.price);
         println!(" field: dividend");
         println!(" count: {}", desc.count());
@@ -162,21 +162,21 @@ impl Application {
         Ok(())
     }
 
-    fn calc_vwap(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_vwap(&self) -> Result<(), Error> {
         let vwap = hist_ftns::hist_field_vwap(&self.hist, self.args.field())?;
         println!(" field: {}", self.args.field());
         println!("  vwap: {:.4}", vwap);
         Ok(())
     }
 
-    fn calc_sa(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_sa(&self) -> Result<(), Error> {
         let sa = hist_ftns::hist_field_sa(&self.hist, self.args.field())?;
         println!(" field: {}", self.args.field());
         println!("    sa: {:.4}", sa);
         Ok(())
     }
 
-    fn calc_volat(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_volat(&self) -> Result<(), Error> {
         let volat = hist_ftns::hist_field_volatility(&self.hist, self.args.field())?;
         println!(" field: {}", self.args.field());
         println!(" volat: {:.4}", volat);
@@ -193,7 +193,7 @@ impl Application {
         }
     }
 
-    fn check_window(&self, min_window: usize) -> Result<(), Box<dyn Error>> {
+    fn check_window(&self, min_window: usize) -> Result<(), Error> {
         if self.args.window() < min_window {
             Err(format!("Window size {} less than required size {}", self.args.window(), min_window).into())
         } else {
@@ -201,41 +201,41 @@ impl Application {
         }
     }
 
-    fn calc_mvwap(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_mvwap(&self) -> Result<(), Error> {
         self.check_window(1)?;
         let mvwap = hist_ftns::hist_field_mvwap(&self.hist, self.args.field(), self.args.window())?;
         self.print_dp_list(&mvwap, MVWAP, true);
         Ok(())
     }
 
-    fn calc_sma(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_sma(&self) -> Result<(), Error> {
         self.check_window(1)?;
         let sma = hist_ftns::hist_field_sma(&self.hist, self.args.field(), self.args.window())?;
         self.print_dp_list(&sma, SMA, true);
         Ok(())
     }
 
-    fn calc_roc(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_roc(&self) -> Result<(), Error> {
         self.check_window(2)?;
         let roc = hist_ftns::hist_field_roc(&self.hist, self.args.field(), self.args.window() - 1)?;
         self.print_dp_list(&roc, ROC, true);
         Ok(())
     }
 
-    fn calc_pctch(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_pctch(&self) -> Result<(), Error> {
         let pctch = hist_ftns::hist_field_pctch(&self.hist, self.args.field())?;
         self.print_dp_list(&pctch, PCTCH, true);
         Ok(())
     }
 
-    fn calc_mvolat(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_mvolat(&self) -> Result<(), Error> {
         self.check_window(1)?;
         let mvolat = hist_ftns::hist_field_mvolatility(&self.hist, self.args.field(), self.args.window())?;
         self.print_dp_list(&mvolat, MVOLAT, true);
         Ok(())
     }
 
-    fn calc_rsi(&self) -> Result<(), Box<dyn Error>> {
+    fn calc_rsi(&self) -> Result<(), Error> {
         self.check_window(2)?;
         let rsi = hist_ftns::hist_rsi(&self.hist, self.args.window())?;
         self.print_dp_list(&rsi, RSI, false);

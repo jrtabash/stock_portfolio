@@ -1,6 +1,6 @@
-use std::error::Error;
+use crate::util::error::Error;
 
-pub type ReduceResult = Result<f64, Box<dyn Error>>;
+pub type ReduceResult = Result<f64, Error>;
 
 pub fn reduce<Entry>(entries: &[Entry],
                      init: f64,

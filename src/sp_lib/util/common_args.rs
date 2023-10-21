@@ -1,9 +1,9 @@
 extern crate clap;
 
 use std::env;
-use std::error::Error;
 use clap::{Arg, ArgMatches};
 use crate::util::datetime;
+use crate::util::error::Error;
 
 // --------------------------------------------------------------------------------
 // Common Version
@@ -163,7 +163,7 @@ pub fn export_file(custom_help: Option<&'static str>) -> Arg<'static, 'static> {
 // --------------------------------------------------------------------------------
 // Common Parsed Matches
 
-pub fn parsed_ds_root(parsed_args: &ArgMatches) -> Result<String, Box<dyn Error>> {
+pub fn parsed_ds_root(parsed_args: &ArgMatches) -> Result<String, Error> {
     match parsed_args.value_of("ds_root") {
         Some(value) => Ok(String::from(value)),
         None => Ok(env::var("HOME")?)

@@ -1,5 +1,4 @@
-use std::error::Error;
-
+use crate::util::error::Error;
 use crate::util::datetime;
 use crate::util::datetime::SPDate;
 use crate::datastore::datastore::DataStore;
@@ -28,7 +27,7 @@ impl SplitEntry {
         }
     }
 
-    pub fn parse_csv(csv: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_csv(csv: &str) -> Result<Self, Error> {
         let values: Vec<&str> = csv.split(',').map(|field| field.trim()).collect();
         if values.len() == SplitEntry::number_of_fields() {
             Ok(SplitEntry {
@@ -63,7 +62,7 @@ impl Splits {
         }
     }
 
-    pub fn parse_csv(symbol: &str, csv: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_csv(symbol: &str, csv: &str) -> Result<Self, Error> {
         let mut splt = Splits::new(symbol);
         for line in csv.split('\n') {
             if line.is_empty() || line.starts_with(char::is_alphabetic) {
@@ -74,7 +73,7 @@ impl Splits {
         Ok(splt)
     }
 
-    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: impl Fn(&SplitEntry) -> bool) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: impl Fn(&SplitEntry) -> bool) -> Result<Self, Error> {
         let mut splt = Splits::new(symbol);
         for line in csv.split('\n') {
             if line.is_empty() || line.starts_with(char::is_alphabetic) {
@@ -88,27 +87,27 @@ impl Splits {
         Ok(splt)
     }
 
-    pub fn ds_select_all(ds: &DataStore, symbol: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_all(ds: &DataStore, symbol: &str) -> Result<Self, Error> {
         let content = ds.select_symbol(tag(), symbol)?;
         Splits::parse_csv(symbol, &content)
     }
 
-    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: impl Fn(&SplitEntry) -> bool) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: impl Fn(&SplitEntry) -> bool) -> Result<Self, Error> {
         let content = ds.select_symbol(tag(), symbol)?;
         Splits::parse_filter_csv(symbol, &content, pred)
     }
 
-    pub fn ds_select_last(ds: &DataStore, symbol: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_last(ds: &DataStore, symbol: &str) -> Result<Self, Error> {
         let content = ds.select_last(tag(), symbol)?;
         Splits::parse_csv(symbol, &content)
     }
 
-    pub fn ds_select_last_n(ds: &DataStore, symbol: &str, n: usize) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_last_n(ds: &DataStore, symbol: &str, n: usize) -> Result<Self, Error> {
         let content = ds.select_last_n(tag(), symbol, n)?;
         Splits::parse_csv(symbol, &content)
     }
 
-    pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
+    pub fn check_csv(csv: &str) -> Result<(), Error> {
         let splt = Splits::parse_csv("splits_check", csv)?;
         let entries = splt.entries;
         if !entries.is_empty() {

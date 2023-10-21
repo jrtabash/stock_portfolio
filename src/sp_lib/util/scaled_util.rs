@@ -1,24 +1,4 @@
-use std::fmt;
-
-// --------------------------------------------------------------------------------
-// Scaled Error
-
-#[derive(Debug, Clone)]
-pub struct ScaledError {
-    err_msg: String
-}
-
-impl ScaledError {
-    pub fn new(err_msg: String) -> Self {
-        ScaledError { err_msg }
-    }
-}
-
-impl fmt::Display for ScaledError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.err_msg)
-    }
-}
+use crate::util::error::Error;
 
 // --------------------------------------------------------------------------------
 // Scaled Type, Consts and Functions
@@ -61,7 +41,7 @@ pub fn scaled_to_float(value: Scaled) -> f64 {
     value as f64 / SCALE as f64
 }
 
-pub fn parse_scaled(value: &str) -> Result<Scaled, ScaledError> {
+pub fn parse_scaled(value: &str) -> Result<Scaled, Error> {
     let negative = value.starts_with('-');
     let value_str = if negative { &value[1..] } else { value };
 
@@ -83,7 +63,7 @@ pub fn parse_scaled(value: &str) -> Result<Scaled, ScaledError> {
         }
         let dig = match c.to_digit(10) {
             Some(d) => d,
-            None => return Err(ScaledError::new(format!("parse_scaled - Invalid value '{}'", value)))
+            None => return Err(format!("parse_scaled - Invalid value '{}'", value).into())
         };
         ret = (ret * 10) + (dig as Scaled);
     }

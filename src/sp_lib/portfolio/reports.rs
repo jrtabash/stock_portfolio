@@ -1,9 +1,9 @@
 use std::io::prelude::*;
 use std::collections::{HashSet, HashMap};
-use std::error::Error;
 use std::fs::File;
 use std::iter::zip;
 
+use crate::util::error::Error;
 use crate::util::{price_type, datetime};
 use crate::datastore::datastore::DataStore;
 use crate::datastore::history::History;
@@ -71,7 +71,7 @@ pub fn print_report(params: ReportParams) {
     }
 }
 
-pub fn export_report(params: ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+pub fn export_report(params: ReportParams, filename: &str) -> Result<(), Error> {
     match params.rtype() {
         ReportType::Value => value_export(&params, filename),
         ReportType::Top => top_export(&params, filename),
@@ -165,7 +165,7 @@ fn value_report(params: &ReportParams) {
     }
 }
 
-fn value_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+fn value_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
     let stocks = params.stocks();
     let mut file = File::create(filename)?;
     writeln!(file, "Symbol,Buy Date,Upd Date,Days Held,Size,Base,Cur,Net,Pct,Base Value,Cur Value,Net Value,Cum Div")?;
@@ -257,8 +257,8 @@ fn top_report(params: &ReportParams) {
     }
 }
 
-fn top_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
-    fn write_row(file: &mut File, name: &str, top_bottom: &TopBottom) -> Result<(), Box<dyn Error>> {
+fn top_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
+    fn write_row(file: &mut File, name: &str, top_bottom: &TopBottom) -> Result<(), Error> {
         writeln!(file, "{},{},{}", name, (top_bottom).0, (top_bottom).1)?;
         Ok(())
     }
@@ -341,7 +341,7 @@ fn volat_report(params: &ReportParams) {
     }
 }
 
-fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+fn volat_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
     let stocks = params.stocks();
     let ds = params.datastore().expect("Volat export missing datastore");
 
@@ -474,7 +474,7 @@ fn daych_report(params: &ReportParams) {
     }
 }
 
-fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+fn daych_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
     let stocks = params.stocks();
     let ds = params.datastore().expect("Daych report missing datastore");
 
@@ -572,7 +572,7 @@ fn closed_report(params: &ReportParams) {
     }
 }
 
-fn closed_export(params: &ReportParams, filename: &str) -> Result<(), Box<dyn Error>> {
+fn closed_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
     let positions = params.closed_positions();
 
     let mut file = File::create(filename)?;

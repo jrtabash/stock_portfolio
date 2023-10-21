@@ -4,9 +4,9 @@ use std::fs;
 use std::str;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
-use std::error::Error;
+use crate::util::error::Error;
 
-type FtnResult = Result<(), Box<dyn Error>>;
+type FtnResult = Result<(), Error>;
 
 pub struct DataStore {
     root: PathBuf,
@@ -48,7 +48,7 @@ impl DataStore {
         DataStore::make_symbol_file(&self.base_path, tag, symbol).exists()
     }
 
-    pub fn create(&self) -> Result<(), Box<dyn Error>> {
+    pub fn create(&self) -> Result<(), Error> {
         if self.exists() {
             Err(format!("Datastore '{}' already exists", self.name).into())
         }
@@ -58,7 +58,7 @@ impl DataStore {
         }
     }
 
-    pub fn delete(&self) -> Result<(), Box<dyn Error>> {
+    pub fn delete(&self) -> Result<(), Error> {
         if self.exists() {
             fs::remove_dir_all(self.base_path.as_path())?;
             Ok(())
@@ -68,7 +68,7 @@ impl DataStore {
         }
     }
 
-    pub fn read_file(&self, sym_file: &Path) -> Result<String, Box<dyn Error>> {
+    pub fn read_file(&self, sym_file: &Path) -> Result<String, Error> {
         let file = fs::File::open(sym_file)?;
         let mut reader = BufReader::new(&file);
         let mut content = String::new();
@@ -76,7 +76,7 @@ impl DataStore {
         Ok(content)
     }
 
-    pub fn read_last_n(&self, sym_file: &Path, n: usize) -> Result<String, Box<dyn Error>> {
+    pub fn read_last_n(&self, sym_file: &Path, n: usize) -> Result<String, Error> {
         let mut file = fs::File::open(sym_file)?;
 
         let meta_data = file.metadata()?;
@@ -103,32 +103,32 @@ impl DataStore {
         Ok(String::from(content.trim()))
     }
 
-    pub fn read_last(&self, sym_file: &Path) -> Result<String, Box<dyn Error>> {
+    pub fn read_last(&self, sym_file: &Path) -> Result<String, Error> {
         self.read_last_n(sym_file, 1)
     }
 
-    pub fn select_symbol(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
+    pub fn select_symbol(&self, tag: &str, symbol: &str) -> Result<String, Error> {
         let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         self.read_file(&sym_file)
     }
 
-    pub fn select_last_n(&self, tag: &str, symbol: &str, n: usize) -> Result<String, Box<dyn Error>> {
+    pub fn select_last_n(&self, tag: &str, symbol: &str, n: usize) -> Result<String, Error> {
         let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         self.read_last_n(&sym_file, n)
     }
 
-    pub fn select_last(&self, tag: &str, symbol: &str) -> Result<String, Box<dyn Error>> {
+    pub fn select_last(&self, tag: &str, symbol: &str) -> Result<String, Error> {
         let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         self.read_last(&sym_file)
     }
 
-    pub fn show_symbol(&self, tag: &str, symbol: &str) -> Result<(), Box<dyn Error>> {
+    pub fn show_symbol(&self, tag: &str, symbol: &str) -> Result<(), Error> {
         let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         println!("{}", self.read_file(&sym_file)?.trim());
         Ok(())
     }
 
-    pub fn insert_symbol(&self, tag: &str, symbol: &str, csv: &str) -> Result<usize, Box<dyn Error>> {
+    pub fn insert_symbol(&self, tag: &str, symbol: &str, csv: &str) -> Result<usize, Error> {
         // Skip non-numeric header if one exists.
         let csv_ref =
             match csv.find(char::is_numeric) {
@@ -170,7 +170,7 @@ impl DataStore {
         Ok(count)
     }
 
-    pub fn drop_symbol(&self, tag: &str, symbol: &str) -> Result<(), Box<dyn Error>> {
+    pub fn drop_symbol(&self, tag: &str, symbol: &str) -> Result<(), Error> {
         let sym_file = DataStore::make_symbol_file(&self.base_path, tag, symbol);
         fs::remove_file(sym_file.as_path())?;
         Ok(())
@@ -180,7 +180,7 @@ impl DataStore {
                             init: T,
                             ftn: impl Fn(&fs::DirEntry, &mut T) -> FtnResult,
                             filter: impl Fn(&str) -> bool,
-                            on_error: impl Fn(&fs::DirEntry, Box<dyn Error>) -> FtnResult) -> Result<(T, usize, usize), Box<dyn Error>> {
+                            on_error: impl Fn(&fs::DirEntry, Error) -> FtnResult) -> Result<(T, usize, usize), Error> {
         let mut aggregate: T = init;
         let mut itm_count: usize = 0;
         let mut err_count: usize = 0;

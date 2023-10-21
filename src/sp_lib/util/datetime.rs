@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
-use std::error::Error;
 use chrono::{Local, Duration, NaiveDate, NaiveDateTime, Datelike, Weekday};
+use crate::util::error::Error;
 
 pub type SPDate = NaiveDate;
 
@@ -34,7 +34,7 @@ pub fn earliest_date() -> SPDate {
     make_date(1970, 1, 1)
 }
 
-pub fn parse_date(date_str: &str) -> Result<SPDate, Box<dyn Error>> {
+pub fn parse_date(date_str: &str) -> Result<SPDate, Error> {
     match NaiveDate::parse_from_str(date_str, "%Y-%m-%d") {
         Ok(dt) => Ok(make_date(dt.year(), dt.month(), dt.day())),
         Err(e) => Err(format!("parse_date: {}", e).into())
@@ -61,7 +61,7 @@ pub fn count_days(from_date: &SPDate, to_date: &SPDate) -> i64 {
     to_date.signed_duration_since(*from_date).num_days()
 }
 
-pub fn check_dup_or_back_gap(old_date: &SPDate, new_date: &SPDate) -> Result<(), Box<dyn Error>> {
+pub fn check_dup_or_back_gap(old_date: &SPDate, new_date: &SPDate) -> Result<(), Error> {
     match new_date.cmp(old_date) {
         Ordering::Equal => Err(format!("Duplicate date {}", new_date.format("%Y-%m-%d")).into()),
         Ordering::Less => Err(format!("Earlier date {}", new_date.format("%Y-%m-%d")).into()),

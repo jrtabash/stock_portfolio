@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::error::Error;
+use crate::util::error::Error;
 use crate::portfolio::stock::{Stock, StockList};
 use crate::portfolio::stock_type;
 
@@ -17,7 +17,7 @@ pub struct StocksFilter {
 }
 
 impl StocksFilter {
-    pub fn from(filter_str: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from(filter_str: &str) -> Result<Self, Error> {
         Ok(StocksFilter {
             func: Self::make_filter_func(filter_str)?
         })
@@ -27,7 +27,7 @@ impl StocksFilter {
         self.func.filter_stocks(stocks, keep)
     }
 
-    fn make_filter_func(filter_str: &str) -> Result<FilterFtnPtr, Box<dyn Error>> {
+    fn make_filter_func(filter_str: &str) -> Result<FilterFtnPtr, Error> {
         let fstr = filter_str.trim();
         if let Ok(stype) = stock_type::str2stocktype(fstr) {
             Ok(Box::new(TypeFilter::make(stype)))
@@ -96,7 +96,7 @@ pub type ExprFieldFtn = fn(&Stock) -> f64;
 pub type ExprOpFtn = fn(f64, f64) -> bool;
 
 impl ExprFilter {
-    pub fn make(filter_expr: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn make(filter_expr: &str) -> Result<Self, Error> {
         let tokens: Vec<&str> = filter_expr.split_whitespace().collect();
         if tokens.len() != 3 {
             return Err(format!("Invalid by expression '{}'", filter_expr).into())
@@ -113,7 +113,7 @@ impl ExprFilter {
         })
     }
 
-    fn make_field_ftn(field: &str) -> Result<ExprFieldFtn, Box<dyn Error>> {
+    fn make_field_ftn(field: &str) -> Result<ExprFieldFtn, Error> {
         if field == "days" {
             Ok(|stock| stock.days_held as f64)
         } else if field == "price" {
@@ -133,7 +133,7 @@ impl ExprFilter {
         }
     }
 
-    fn make_op_ftn(op: &str) -> Result<ExprOpFtn, Box<dyn Error>> {
+    fn make_op_ftn(op: &str) -> Result<ExprOpFtn, Error> {
         if op == "=" {
             Ok(|l, r| l == r)
         } else if op == "!=" {

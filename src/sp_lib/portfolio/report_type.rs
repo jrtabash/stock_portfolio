@@ -1,5 +1,5 @@
-use std::error::Error;
 use std::fmt;
+use crate::util::error::Error;
 
 #[derive(Debug, Copy, Clone)]
 #[derive(PartialOrd, Ord, PartialEq, Eq)]
@@ -21,7 +21,7 @@ pub fn reporttype2str(rt: ReportType) -> &'static str {
     }
 }
 
-pub fn str2reporttype(rtstr: &str) -> Result<ReportType, Box<dyn Error>> {
+pub fn str2reporttype(rtstr: &str) -> Result<ReportType, Error> {
     match rtstr.to_lowercase().as_str() {
         "value" => Ok(ReportType::Value),
         "top" => Ok(ReportType::Top),

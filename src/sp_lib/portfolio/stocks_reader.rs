@@ -1,9 +1,9 @@
 use std::io::prelude::*;
 use std::fs::File;
 use std::io::BufReader;
-use std::error::Error;
 
 use crate::util::datetime;
+use crate::util::error::Error;
 use crate::portfolio::stock_type;
 use crate::portfolio::stock::{Price, Stock, StockList};
 
@@ -18,7 +18,7 @@ impl StocksReader {
         }
     }
 
-    pub fn read(self: &StocksReader) -> Result<StockList, Box<dyn Error>> {
+    pub fn read(self: &StocksReader) -> Result<StockList, Error> {
         match File::open(&self.stocks_file) {
             Ok(file) => {
                 let mut reader = BufReader::new(file);
@@ -32,7 +32,7 @@ impl StocksReader {
         }
     }
 
-    pub fn parse_content(content: &str) -> Result<StockList, Box<dyn Error>> {
+    pub fn parse_content(content: &str) -> Result<StockList, Error> {
         let mut stocks = StockList::new();
 
         let mut skip_header: bool = true;

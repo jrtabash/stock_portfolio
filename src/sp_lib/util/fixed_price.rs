@@ -1,3 +1,4 @@
+use crate::util::error::Error;
 use crate::util::scaled_util::*;
 use std::fmt;
 use std::iter::zip;
@@ -61,7 +62,7 @@ impl FixedPrice {
     }
 
     #[inline(always)]
-    pub fn parse(value: &str) -> Result<Self, ScaledError> {
+    pub fn parse(value: &str) -> Result<Self, Error> {
         Ok(FixedPrice {
             value: parse_scaled(value)?
         })

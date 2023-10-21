@@ -1,10 +1,10 @@
 use std::io::prelude::*;
-use std::error::Error;
 use std::fs::File;
 
+use crate::util::error::Error;
 use crate::datastore::{datastore, history, dividends};
 
-pub fn export_symbol(ds: &datastore::DataStore, symbol: &str, filename: &str) -> Result<usize, Box<dyn Error>> {
+pub fn export_symbol(ds: &datastore::DataStore, symbol: &str, filename: &str) -> Result<usize, Error> {
     let hist_data = history::History::ds_select_all(ds, symbol)?;
     let div_data =
         if ds.symbol_exists(dividends::tag(), symbol) {

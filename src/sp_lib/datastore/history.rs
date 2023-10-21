@@ -1,5 +1,4 @@
-use std::error::Error;
-
+use crate::util::error::Error;
 use crate::util::datetime;
 use crate::util::datetime::SPDate;
 use crate::util::price_type::PriceType;
@@ -47,7 +46,7 @@ impl HistoryEntry {
         }
     }
 
-    pub fn parse_csv(csv: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_csv(csv: &str) -> Result<Self, Error> {
         let values: Vec<&str> = csv.split(',').map(|field| field.trim()).collect();
         if values.len() == HistoryEntry::number_of_fields() {
             Ok(HistoryEntry {
@@ -87,7 +86,7 @@ impl History {
         }
     }
 
-    pub fn parse_csv(symbol: &str, csv: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_csv(symbol: &str, csv: &str) -> Result<Self, Error> {
         let mut hist = History::new(symbol);
         for line in csv.split('\n') {
             if line.is_empty() || line.starts_with(char::is_alphabetic) {
@@ -98,7 +97,7 @@ impl History {
         Ok(hist)
     }
 
-    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: impl Fn(&HistoryEntry) -> bool) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: impl Fn(&HistoryEntry) -> bool) -> Result<Self, Error> {
         let mut hist = History::new(symbol);
         for line in csv.split('\n') {
             if line.is_empty() || line.starts_with(char::is_alphabetic) {
@@ -112,27 +111,27 @@ impl History {
         Ok(hist)
     }
 
-    pub fn ds_select_all(ds: &DataStore, symbol: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_all(ds: &DataStore, symbol: &str) -> Result<Self, Error> {
         let content = ds.select_symbol(tag(), symbol)?;
         History::parse_csv(symbol, &content)
     }
 
-    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: impl Fn(&HistoryEntry) -> bool) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: impl Fn(&HistoryEntry) -> bool) -> Result<Self, Error> {
         let content = ds.select_symbol(tag(), symbol)?;
         History::parse_filter_csv(symbol, &content, pred)
     }
 
-    pub fn ds_select_last(ds: &DataStore, symbol: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_last(ds: &DataStore, symbol: &str) -> Result<Self, Error> {
         let content = ds.select_last(tag(), symbol)?;
         History::parse_csv(symbol, &content)
     }
 
-    pub fn ds_select_last_n(ds: &DataStore, symbol: &str, n: usize) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_last_n(ds: &DataStore, symbol: &str, n: usize) -> Result<Self, Error> {
         let content = ds.select_last_n(tag(), symbol, n)?;
         History::parse_csv(symbol, &content)
     }
 
-    pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
+    pub fn check_csv(csv: &str) -> Result<(), Error> {
         let hist = History::parse_csv("history_check", csv)?;
         let entries = hist.entries;
         if !entries.is_empty() {

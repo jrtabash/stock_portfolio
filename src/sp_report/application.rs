@@ -3,7 +3,7 @@ use sp_lib::datastore::datastore;
 use sp_lib::portfolio::report_type::ReportType;
 use sp_lib::portfolio::{algorithms, extra_sort_ftns, report_type, reports, stocks_config, stocks_update};
 use sp_lib::util::common_app;
-use std::error::Error;
+use sp_lib::util::error::Error;
 
 pub struct Application {
     args: Arguments,
@@ -46,21 +46,21 @@ impl common_app::AppTrait for Application {
 }
 
 impl Application {
-    fn include(self: &mut Application) -> Result<(), Box<dyn Error>> {
+    fn include(self: &mut Application) -> Result<(), Error> {
         if let Some(include_expr) = self.args.include() {
             algorithms::filter_stocks(self.config.stocks_mut(), include_expr, true)?;
         }
         Ok(())
     }
 
-    fn exclude(self: &mut Application) -> Result<(), Box<dyn Error>> {
+    fn exclude(self: &mut Application) -> Result<(), Error> {
         if let Some(exclude_expr) = self.args.exclude() {
             algorithms::filter_stocks(self.config.stocks_mut(), exclude_expr, false)?;
         }
         Ok(())
     }
 
-    fn update(self: &mut Application) -> Result<(), Box<dyn Error>> {
+    fn update(self: &mut Application) -> Result<(), Error> {
         let count = stocks_update::update_stocks_from_ds(self.config.stocks_mut(), &self.ds)?;
 
         if count != self.config.stocks().len() {
@@ -70,7 +70,7 @@ impl Application {
         Ok(())
     }
 
-    fn sort(self: &mut Application) -> Result<(), Box<dyn Error>> {
+    fn sort(self: &mut Application) -> Result<(), Error> {
         if let Some(order_by) = self.args.order_by() {
             if let Some(extra_sort) = extra_sort_ftns::extra_sort_ftn(order_by) {
                 extra_sort(&self.ds, self.config.stocks_mut(), self.args.desc());
@@ -81,7 +81,7 @@ impl Application {
         Ok(())
     }
 
-    fn match_positions_to_stocks(self: &mut Application) -> Result<(), Box<dyn Error>> {
+    fn match_positions_to_stocks(self: &mut Application) -> Result<(), Error> {
         if self.args.match_symbols() {
             let mut symbols: Vec<String> = self.config.stocks().iter().map(|s| s.symbol.clone()).collect();
             symbols.dedup();
@@ -98,7 +98,7 @@ impl Application {
         );
     }
 
-    fn export(self: &Application) -> Result<(), Box<dyn Error>> {
+    fn export(self: &Application) -> Result<(), Error> {
         if let Some(export_file) = self.args.export_file() {
             let report_params = reports::ReportParams::new(self.rtype, self.config.stocks(), self.config.closed_positions())
                 .with_datastore(&self.ds);

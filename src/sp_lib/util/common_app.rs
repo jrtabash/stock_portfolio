@@ -1,7 +1,7 @@
 use std::process;
-use std::error::Error;
+use crate::util::error::Error;
 
-pub type RunResult = Result<(), Box<dyn Error>>;
+pub type RunResult = Result<(), Error>;
 
 pub trait AppTrait {
     fn new() -> Self;

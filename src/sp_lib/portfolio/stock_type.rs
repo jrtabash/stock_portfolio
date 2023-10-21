@@ -1,5 +1,5 @@
-use std::error::Error;
 use std::fmt;
+use crate::util::error::Error;
 
 #[derive(Debug, Copy, Clone)]
 #[derive(PartialOrd, Ord, PartialEq, Eq)]
@@ -17,7 +17,7 @@ pub fn stocktype2str(st: StockType) -> &'static str {
     }
 }
 
-pub fn str2stocktype(ststr: &str) -> Result<StockType, Box<dyn Error>> {
+pub fn str2stocktype(ststr: &str) -> Result<StockType, Error> {
     match ststr.to_lowercase().as_str() {
         "stock" => Ok(StockType::Stock),
         "etf" => Ok(StockType::ETF),

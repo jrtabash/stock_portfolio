@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::error::Error;
+use crate::util::error::Error;
 use crate::portfolio::symbol_trait::GetSymbol;
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::util::{price_type, datetime};
@@ -58,7 +58,7 @@ pub fn stock_aggregate(stocks: &StockList) -> HashMap<String, (u32, Price)> {
         })
 }
 
-pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result<(), Box<dyn Error>> {
+pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result<(), Error> {
     match (order_by, desc) {
         ("symbol", false) => stocks.sort_by(|lhs, rhs| lhs.symbol.cmp(&rhs.symbol)),
         ("symbol", true)  => stocks.sort_by(|lhs, rhs| rhs.symbol.cmp(&lhs.symbol)),
@@ -114,7 +114,7 @@ pub fn sort_stocks_by_extra_ftn(stocks: &mut StockList, extra_ftn: impl Fn(&Stoc
     }
 }
 
-pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) -> Result<(), Box<dyn Error>> {
+pub fn filter_stocks(stocks: &mut StockList, filter_expr: &str, keep: bool) -> Result<(), Error> {
     let filter = stocks_filter::StocksFilter::from(filter_expr)?;
     filter.filter_stocks(stocks, keep);
     Ok(())
@@ -127,7 +127,7 @@ pub fn stock_base_dates(stocks: &StockList) -> HashMap<String, datetime::SPDate>
         |stock, cur_date| if stock.date < *cur_date { stock.date } else { *cur_date })
 }
 
-pub fn match_list_to_symbols<Entry: GetSymbol>(entries: &mut Vec<Entry>, symbols: &Vec<String>) -> Result<(), Box<dyn Error>> {
+pub fn match_list_to_symbols<Entry: GetSymbol>(entries: &mut Vec<Entry>, symbols: &Vec<String>) -> Result<(), Error> {
     let mut score: u32 = 0;
     let ordering: HashMap<&String, u32> = symbols
         .iter()

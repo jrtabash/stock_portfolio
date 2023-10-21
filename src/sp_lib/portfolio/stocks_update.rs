@@ -1,5 +1,5 @@
-use std::error::Error;
 use crate::util::datetime;
+use crate::util::error::Error;
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::yfinance::query::HistoryQuery;
 use crate::yfinance::types::{Interval, Events};
@@ -7,7 +7,7 @@ use crate::datastore::datastore::DataStore;
 use crate::datastore::history::History;
 use crate::datastore::dividends;
 
-pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<dyn Error>> {
+pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Error> {
     let hist = History::parse_csv(&stock.symbol, csv)?;
     if hist.count() > 0 {
         let latest = &hist.entries()[hist.count() - 1];
@@ -19,7 +19,7 @@ pub fn update_stock_from_csv(stock: &mut Stock, csv: &str) -> Result<bool, Box<d
     Ok(false)
 }
 
-pub fn update_stock(stock: &mut Stock, opt_day: Option<datetime::SPDate>) -> Result<bool, Box<dyn Error>> {
+pub fn update_stock(stock: &mut Stock, opt_day: Option<datetime::SPDate>) -> Result<bool, Error> {
     let day = opt_day.unwrap_or_else(datetime::today);
     let back_delta =
         if datetime::is_monday(&day) {
@@ -43,7 +43,7 @@ pub fn update_stock(stock: &mut Stock, opt_day: Option<datetime::SPDate>) -> Res
     }
 }
 
-pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, Box<dyn Error>> {
+pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, Error> {
     let hist = History::ds_select_last(ds, &stock.symbol)?;
     if hist.count() != 1 {
         return Err(format!("Failed to find last history for {} in datastore {}", stock.symbol, ds).into())
@@ -62,7 +62,7 @@ pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, B
     Ok(false)
 }
 
-pub fn update_stocks(stocks: &mut StockList, opt_day: Option<datetime::SPDate>) -> Result<usize, Box<dyn Error>> {
+pub fn update_stocks(stocks: &mut StockList, opt_day: Option<datetime::SPDate>) -> Result<usize, Error> {
     let mut count: usize = 0;
     for stock in stocks.iter_mut() {
         if update_stock(stock, opt_day)? {
@@ -72,7 +72,7 @@ pub fn update_stocks(stocks: &mut StockList, opt_day: Option<datetime::SPDate>) 
     Ok(count)
 }
 
-pub fn update_stocks_from_ds(stocks: &mut StockList, ds: &DataStore) -> Result<usize, Box<dyn Error>> {
+pub fn update_stocks_from_ds(stocks: &mut StockList, ds: &DataStore) -> Result<usize, Error> {
     let mut count: usize = 0;
     for stock in stocks.iter_mut() {
         if update_stock_from_ds(stock, ds)? {

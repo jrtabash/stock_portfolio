@@ -1,8 +1,8 @@
 use std::io::prelude::*;
 use std::env;
-use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
+use crate::util::error::Error;
 use crate::portfolio::stock::StockList;
 use crate::portfolio::stocks_reader::StocksReader;
 use crate::portfolio::closed_position::ClosedPositionList;
@@ -35,7 +35,7 @@ impl StocksConfig {
         }
     }
 
-    pub fn from_file(config_file: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_file(config_file: &str) -> Result<Self, Error> {
         match File::open(config_file) {
             Ok(file) => {
                 let mut reader = BufReader::new(file);
@@ -50,7 +50,7 @@ impl StocksConfig {
     }
 
     #[allow(clippy::should_implement_trait)]
-    pub fn from_str(config_str: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_str(config_str: &str) -> Result<Self, Error> {
         Self::parse(config_str)
     }
 
@@ -66,7 +66,7 @@ impl StocksConfig {
     // --------------------------------------------------------------------------------
     // Private Helpers
 
-    fn parse(content: &str) -> Result<Self, Box<dyn Error>> {
+    fn parse(content: &str) -> Result<Self, Error> {
         let mut root: String = env::var("HOME")?;
         let mut name: String = String::from("sp_datastore");
         let mut stocks: Option<StockList> = None;

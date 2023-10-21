@@ -1,7 +1,7 @@
 use crate::arguments::Arguments;
 use sp_lib::util::{common_app, datetime};
+use sp_lib::util::error::Error;
 use sp_lib::yfinance::{query, types};
-use std::error::Error;
 
 const EVT_HISTORY: &str = "history";
 const EVT_DIVIDEND: &str = "dividend";
@@ -42,7 +42,7 @@ impl common_app::AppTrait for Application {
 }
 
 impl Application {
-    fn str2evts(estr: &str) -> Result<types::Events, Box<dyn Error>> {
+    fn str2evts(estr: &str) -> Result<types::Events, Error> {
         match estr {
             EVT_HISTORY => Ok(types::Events::History),
             EVT_DIVIDEND => Ok(types::Events::Dividend),
@@ -51,7 +51,7 @@ impl Application {
         }
     }
 
-    fn str2int(istr: &str) -> Result<types::Interval, Box<dyn Error>> {
+    fn str2int(istr: &str) -> Result<types::Interval, Error> {
         match istr {
             INT_DAY => Ok(types::Interval::Daily),
             INT_WEEK => Ok(types::Interval::Weekly),

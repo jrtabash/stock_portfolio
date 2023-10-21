@@ -1,8 +1,8 @@
 use std::io::prelude::*;
 use std::fs::File;
 use std::io::BufReader;
-use std::error::Error;
 
+use crate::util::error::Error;
 use crate::util::datetime;
 use crate::portfolio::stock_type;
 use crate::portfolio::closed_position::{Price, ClosedPosition, ClosedPositionList};
@@ -18,7 +18,7 @@ impl ClosedPositionsReader {
         }
     }
 
-    pub fn read(&self) -> Result<ClosedPositionList, Box<dyn Error>> {
+    pub fn read(&self) -> Result<ClosedPositionList, Error> {
         match File::open(&self.closed_positions_file) {
             Ok(file) => {
                 let mut reader = BufReader::new(file);
@@ -32,7 +32,7 @@ impl ClosedPositionsReader {
         }
     }
 
-    pub fn parse_content(content: &str) -> Result<ClosedPositionList, Box<dyn Error>> {
+    pub fn parse_content(content: &str) -> Result<ClosedPositionList, Error> {
         let mut positions = ClosedPositionList::new();
 
         let mut skip_header: bool = true;
@@ -84,7 +84,7 @@ impl ClosedPositionsReader {
         Ok(positions)
     }
 
-    fn parse_price(token: &str, which: &str) -> Result <Price, Box<dyn Error>> {
+    fn parse_price(token: &str, which: &str) -> Result <Price, Error> {
         match token.parse::<Price>() {
             Ok(px) => Ok(px),
             Err(e) => Err(format!("ClosedPositionsReader::parse_price - Invalid {} '{}'", which, e).into())

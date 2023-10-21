@@ -1,5 +1,4 @@
-use std::error::Error;
-
+use crate::util::error::Error;
 use crate::util::datetime;
 use crate::util::datetime::SPDate;
 use crate::util::price_type::PriceType;
@@ -31,7 +30,7 @@ impl DividendEntry {
         }
     }
 
-    pub fn parse_csv(csv: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_csv(csv: &str) -> Result<Self, Error> {
         let values: Vec<&str> = csv.split(',').map(|field| field.trim()).collect();
         if values.len() == DividendEntry::number_of_fields() {
             Ok(DividendEntry {
@@ -66,7 +65,7 @@ impl Dividends {
         }
     }
 
-    pub fn parse_csv(symbol: &str, csv: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_csv(symbol: &str, csv: &str) -> Result<Self, Error> {
         let mut div = Dividends::new(symbol);
         for line in csv.split('\n') {
             if line.is_empty() || line.starts_with(char::is_alphabetic) {
@@ -77,7 +76,7 @@ impl Dividends {
         Ok(div)
     }
 
-    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: impl Fn(&DividendEntry) -> bool) -> Result<Self, Box<dyn Error>> {
+    pub fn parse_filter_csv(symbol: &str, csv: &str, pred: impl Fn(&DividendEntry) -> bool) -> Result<Self, Error> {
         let mut div = Dividends::new(symbol);
         for line in csv.split('\n') {
             if line.is_empty() || line.starts_with(char::is_alphabetic) {
@@ -91,27 +90,27 @@ impl Dividends {
         Ok(div)
     }
 
-    pub fn ds_select_all(ds: &DataStore, symbol: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_all(ds: &DataStore, symbol: &str) -> Result<Self, Error> {
         let content = ds.select_symbol(tag(), symbol)?;
         Dividends::parse_csv(symbol, &content)
     }
 
-    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: impl Fn(&DividendEntry) -> bool) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_if(ds: &DataStore, symbol: &str, pred: impl Fn(&DividendEntry) -> bool) -> Result<Self, Error> {
         let content = ds.select_symbol(tag(), symbol)?;
         Dividends::parse_filter_csv(symbol, &content, pred)
     }
 
-    pub fn ds_select_last(ds: &DataStore, symbol: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_last(ds: &DataStore, symbol: &str) -> Result<Self, Error> {
         let content = ds.select_last(tag(), symbol)?;
         Dividends::parse_csv(symbol, &content)
     }
 
-    pub fn ds_select_last_n(ds: &DataStore, symbol: &str, n: usize) -> Result<Self, Box<dyn Error>> {
+    pub fn ds_select_last_n(ds: &DataStore, symbol: &str, n: usize) -> Result<Self, Error> {
         let content = ds.select_last_n(tag(), symbol, n)?;
         Dividends::parse_csv(symbol, &content)
     }
 
-    pub fn check_csv(csv: &str) -> Result<(), Box<dyn Error>> {
+    pub fn check_csv(csv: &str) -> Result<(), Error> {
         let div = Dividends::parse_csv("dividends_check", csv)?;
         let entries = div.entries;
         if !entries.is_empty() {
