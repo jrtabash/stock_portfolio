@@ -2,7 +2,7 @@ use crate::arguments::Arguments;
 use sp_lib::datastore::{datastore, dividends, history};
 use sp_lib::stats::{description, hist_desc, hist_ftns};
 use sp_lib::portfolio::stocks_config;
-use sp_lib::util::{common_app, datetime};
+use sp_lib::util::{common_app, datetime, misc};
 use sp_lib::util::error::Error;
 use std::collections::HashSet;
 
@@ -187,6 +187,7 @@ impl Application {
         if show_field {
             println!(" field: {}", self.args.field());
         }
+        println!("window: {}", misc::count_format(self.args.window(), "day"));
         println!("{:>6}: ", name);
         for (date, price) in dps.iter() {
             println!("{} {:.4}", date.format("%Y-%m-%d"), price);
