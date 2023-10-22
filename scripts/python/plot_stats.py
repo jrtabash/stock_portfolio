@@ -43,7 +43,7 @@ class PlotStats:
         # Read and parse sp_stats output
         for line in sys.stdin:
             tokens = line.strip().split(' ')
-            if len(tokens) > 2:
+            if len(tokens) > 3:
                 raise Exception(f"Invalid line - {line}")
 
             tok1 = tokens[0].strip()
@@ -58,6 +58,8 @@ class PlotStats:
                 self.symbol = tok2
             elif tok1 == "field:":
                 self.field = tok2
+            elif tok1.startswith("window:"):
+                pass # ignore window
             elif tok1.startswith("20"):
                 self.data.append(float(tok2))
             else:
