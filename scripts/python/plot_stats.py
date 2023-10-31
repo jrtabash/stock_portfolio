@@ -31,6 +31,7 @@ class PlotStats:
         self.to_date = None
         self.symbol = None
         self.field = None
+        self.window = None
         self.calc = None
         self.data = []
         self.tmp_gp_file = "/tmp/plot_stats.tmp"
@@ -47,7 +48,7 @@ class PlotStats:
                 raise Exception(f"Invalid line - {line}")
 
             tok1 = tokens[0].strip()
-            if len(tokens) == 2:
+            if len(tokens) >= 2:
                 tok2 = tokens[1].strip()
 
             if tok1 == "from:":
@@ -59,7 +60,7 @@ class PlotStats:
             elif tok1 == "field:":
                 self.field = tok2
             elif tok1.startswith("window:"):
-                pass # ignore window
+                self.window = tok2
             elif tok1.startswith("20"):
                 self.data.append(float(tok2))
             else:
@@ -80,16 +81,19 @@ class PlotStats:
         self.run_command(["gnuplot", "-p", self.tmp_gp_file])
 
     def make_title(self):
+        field = " ".join([t.capitalize() for t in self.field.split('_')]) if self.field is not None else ""
         return self.augment_or_override(
             "{} {} {} - {}".format(
                 self.symbol,
-                self.field.capitalize() if self.field is not None else "",
+                field,
                 self.from_date,
                 self.to_date),
             self.parsed_args.title)
 
     def make_ylabel(self):
-        return self.augment_or_override(self.calc, self.parsed_args.ylabel)
+        ucalc = self.calc.upper()
+        ylbl_text = f"{self.window} Day {ucalc}" if self.window is not None else ucalc
+        return self.augment_or_override(ylbl_text, self.parsed_args.ylabel)
 
     def augment_or_override(self, text, alt_text):
         if alt_text != "":
