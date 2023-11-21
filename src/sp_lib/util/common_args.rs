@@ -29,7 +29,7 @@ pub fn stocks_file_help() -> &'static str {
 }
 
 pub fn stocks_config_help() -> &'static str {
-    "Config file containing datastore root and name, stocks and closed positions in portfolio. \
+    "Config file containing datastore root and name, stocks, closed positions and cash in portfolio. \
      Both root and name can be set to \"$default\" which will use home path for root and sp_datastore for name.\n\
      \n\
      The stocks CSV block \"csv{\" should contain stocks in portfolio, with the following columns:\n\
@@ -54,6 +54,7 @@ pub fn stocks_config_help() -> &'static str {
      Sample config 2:\n\
      \tds_root: $default\n\
      \tds_name: my_datastore\n\
+     \tcash: 1250.00\n\
      \tstocks: csv_file{\n\
      \t  /path/to/my/stocks.csv\n\
      \t}\n\

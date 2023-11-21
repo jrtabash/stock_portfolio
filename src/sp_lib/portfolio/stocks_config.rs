@@ -3,7 +3,7 @@ use std::env;
 use std::fs::File;
 use std::io::BufReader;
 use crate::util::error::Error;
-use crate::portfolio::stock::StockList;
+use crate::portfolio::stock::{Price, StockList};
 use crate::portfolio::stocks_reader::StocksReader;
 use crate::portfolio::closed_position::ClosedPositionList;
 use crate::portfolio::closed_positions_reader::ClosedPositionsReader;
@@ -22,7 +22,8 @@ pub struct StocksConfig {
     ds_root: String,
     ds_name: String,
     stocks: StockList,
-    closed_positions: ClosedPositionList
+    closed_positions: ClosedPositionList,
+    cash: Price
 }
 
 impl StocksConfig {
@@ -31,7 +32,8 @@ impl StocksConfig {
             ds_root: String::new(),
             ds_name: String::new(),
             stocks: StockList::new(),
-            closed_positions: ClosedPositionList::new()
+            closed_positions: ClosedPositionList::new(),
+            cash: 0.0
         }
     }
 
@@ -63,6 +65,8 @@ impl StocksConfig {
     #[inline(always)] pub fn closed_positions(&self) -> &ClosedPositionList { &self.closed_positions }
     #[inline(always)] pub fn closed_positions_mut(&mut self) -> &mut ClosedPositionList { &mut self.closed_positions }
 
+    #[inline(always)] pub fn cash(&self) -> Price { self.cash }
+
     // --------------------------------------------------------------------------------
     // Private Helpers
 
@@ -71,6 +75,7 @@ impl StocksConfig {
         let mut name: String = String::from("sp_datastore");
         let mut stocks: Option<StockList> = None;
         let mut closed_positions: Option<ClosedPositionList> = None;
+        let mut cash: Price = 0.0;
 
         let mut collect_scontent = false;
         let mut scontent_type = SContentType::None;
@@ -111,6 +116,12 @@ impl StocksConfig {
             match tokens[0] {
                 "ds_root" => if value != "$default" { root = String::from(value) },
                 "ds_name" => if value != "$default" { name = String::from(value) },
+                "cash" => {
+                    match value.parse::<Price>() {
+                        Ok(v) => cash = v,
+                        Err(e) => return Err(format!("StocksConfig::parse - {}", e).into())
+                    };
+                },
                 "stocks" => {
                     collect_scontent = true;
                     match value {
@@ -137,7 +148,8 @@ impl StocksConfig {
             ds_root: root,
             ds_name: name,
             stocks: stocks.unwrap_or_default(),
-            closed_positions: closed_positions.unwrap_or_default()
+            closed_positions: closed_positions.unwrap_or_default(),
+            cash: cash
         })
     }
 }

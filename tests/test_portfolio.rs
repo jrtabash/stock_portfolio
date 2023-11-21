@@ -639,6 +639,7 @@ fn test_stock_config_from_file4() {
 fn test_stock_config_from_str() {
     let content: &str = "ds_root: sp_root\n\
                          ds_name: sp_name\n\
+                         cash: 1025.00\n\
                          stocks: csv{\n\
                          symbol,type,date,quantity,base_price\n\
                          AAPL,stock,2020-09-20,100,115.00\n\
@@ -650,6 +651,8 @@ fn test_stock_config_from_str() {
     assert_eq!(cfg.ds_root(), "sp_root");
     assert_eq!(cfg.ds_name(), "sp_name");
     assert_eq!(cfg.stocks().len(), 3);
+    assert_eq!(cfg.closed_positions().len(), 0);
+    assert_eq!(cfg.cash(), 1025.00);
 
     let list = cfg.stocks();
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
@@ -692,6 +695,8 @@ fn test_stock_config_default() {
         assert_eq!(c.ds_root(), env::var("HOME").unwrap());
         assert_eq!(c.ds_name(), "sp_datastore");
         assert_eq!(c.stocks().len(), 0);
+        assert_eq!(c.closed_positions().len(), 0);
+        assert_eq!(c.cash(), 0.0);
     }
 
     let content: &str = "ds_root: $default\n\
@@ -725,6 +730,7 @@ fn test_stock_config_errors() {
     check(&cfg("csv:{\n}\n"), "StocksConfig::parse - Invalid line 'stocks: csv:{'");
     check(&cfg("csv[\n]\n"), "StocksConfig::parse - Unsupported block type 'csv['");
     check(&cfg("csv{\n}\nwhat: who\n"), "StocksConfig::parse - Unknown config name 'what'");
+    check(&cfg("csv{\n}\ncash: amnt\n"), "StocksConfig::parse - invalid float literal");
 }
 
 // --------------------------------------------------------------------------------
