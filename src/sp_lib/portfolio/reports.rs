@@ -11,25 +11,22 @@ use crate::stats::hist_ftns;
 use crate::portfolio::closed_position::ClosedPositionList;
 use crate::portfolio::stock::{Price, Stock, StockList};
 use crate::portfolio::stock_type::StockType;
+use crate::portfolio::stocks_config::StocksConfig;
 use crate::portfolio::algorithms;
 use crate::portfolio::report_type::ReportType;
 
 pub struct ReportParams<'a, 'b> {
     rtype: ReportType,
-    stocks: &'a StockList,
-    closed_positions: &'a ClosedPositionList,
+    config: &'a StocksConfig,
     ds: Option<&'b DataStore>,
     groupby: bool
 }
 
 impl<'a, 'b> ReportParams<'a, 'b> {
-    pub fn new(rtype: ReportType,
-               stocks: &'a StockList,
-               closed_positions: &'a ClosedPositionList) -> Self {
+    pub fn new(rtype: ReportType, config: &'a StocksConfig) -> Self {
         ReportParams {
             rtype,
-            stocks,
-            closed_positions,
+            config,
             ds: None,
             groupby: false
         }
@@ -49,10 +46,10 @@ impl<'a, 'b> ReportParams<'a, 'b> {
     pub fn rtype(&self) -> ReportType { self.rtype }
 
     #[inline(always)]
-    pub fn stocks(&self) -> &'a StockList { self.stocks }
+    pub fn stocks(&self) -> &'a StockList { self.config.stocks() }
 
     #[inline(always)]
-    pub fn closed_positions(&self) -> &'a ClosedPositionList { self.closed_positions }
+    pub fn closed_positions(&self) -> &'a ClosedPositionList { self.config.closed_positions() }
 
     #[inline(always)]
     pub fn datastore(&self) -> Option<&'b DataStore> { self.ds }

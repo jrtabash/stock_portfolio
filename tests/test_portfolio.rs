@@ -5,7 +5,7 @@ use std::iter::zip;
 use sp_lib::util::datetime::*;
 use sp_lib::util::temp_file;
 use sp_lib::util::price_type::price_eql;
-use sp_lib::portfolio::closed_position::{ClosedPosition, ClosedPositionList};
+use sp_lib::portfolio::closed_position::ClosedPosition;
 use sp_lib::portfolio::stock_type::*;
 use sp_lib::portfolio::stock::*;
 use sp_lib::portfolio::algorithms::*;
@@ -361,16 +361,19 @@ fn test_stock_base_dates() {
 
 #[test]
 fn test_value_export() {
-    let mut list = StockList::new();
-    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 75.50, 80.0));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
-    list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 100, 24.10, 24.15));
+    let mut cfg = StocksConfig::new();
+    let stocks = cfg.stocks_mut();
+    stocks.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 75.50, 80.0));
+    stocks.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
+    stocks.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 100, 24.10, 24.15));
 
-    let positions = ClosedPositionList::new();
+    assert_eq!(cfg.ds_root(), "");
+    assert_eq!(cfg.ds_name(), "");
+    assert_eq!(cfg.stocks().len(), 3);
 
     let temp_name = "sp_test_value_export.csv";
     let csv_filename = temp_file::make_path(&temp_name);
-    let rparams = reports::ReportParams::new(ReportType::Value, &list, &positions);
+    let rparams = reports::ReportParams::new(ReportType::Value, &cfg);
     reports::export_report(rparams, &csv_filename.to_str().unwrap()).unwrap();
 
     let csv_content = fs::read_to_string(&csv_filename).unwrap();

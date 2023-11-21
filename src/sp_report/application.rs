@@ -92,7 +92,7 @@ impl Application {
 
     fn report(self: &Application) {
         reports::print_report(
-            reports::ReportParams::new(self.rtype, self.config.stocks(), self.config.closed_positions())
+            reports::ReportParams::new(self.rtype, &self.config)
                 .show_groupby(self.args.show_groupby())
                 .with_datastore(&self.ds)
         );
@@ -100,7 +100,7 @@ impl Application {
 
     fn export(self: &Application) -> Result<(), Error> {
         if let Some(export_file) = self.args.export_file() {
-            let report_params = reports::ReportParams::new(self.rtype, self.config.stocks(), self.config.closed_positions())
+            let report_params = reports::ReportParams::new(self.rtype, &self.config)
                 .with_datastore(&self.ds);
             reports::export_report(report_params, export_file)?;
         }
