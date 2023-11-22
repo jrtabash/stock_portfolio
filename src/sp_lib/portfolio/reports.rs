@@ -46,6 +46,9 @@ impl<'a, 'b> ReportParams<'a, 'b> {
     pub fn rtype(&self) -> ReportType { self.rtype }
 
     #[inline(always)]
+    pub fn config(&self) -> &'a StocksConfig { &self.config }
+
+    #[inline(always)]
     pub fn stocks(&self) -> &'a StockList { self.config.stocks() }
 
     #[inline(always)]
@@ -97,6 +100,7 @@ fn value_report(params: &ReportParams) {
     println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(stocks));
     println!("  Percent Change: {:.2}", pct_chg);
     println!("  Pct Chg w/ Div: {:.2}", pct_chg_wd);
+    println!("            Cash: {:.2}", params.config().cash());
     println!();
 
     println!("{:8} {:10} {:10} {:6} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10} {:8}",
