@@ -40,10 +40,11 @@ fn test_stock_list() {
 
 #[test]
 fn test_stock_aggregate() {
-    fn test(groupby: &HashMap<String, (u32, Price)>, symbol: &str, size: u32, price: Price) {
-        let size_price = groupby.get(symbol).unwrap();
-        assert_eq!(size_price.0, size);
-        assert!(price_eql(size_price.1, price));
+    fn test(groupby: &HashMap<String, (u32, Price, Price)>, symbol: &str, size: u32, bprice: Price, cprice: Price) {
+        let size_prices = groupby.get(symbol).unwrap();
+        assert_eq!(size_prices.0, size);
+        assert!(price_eql(size_prices.1, bprice));
+        assert!(price_eql(size_prices.2, cprice));
     }
 
     let mut list = StockList::new();
@@ -53,8 +54,8 @@ fn test_stock_aggregate() {
 
     let gby = stock_aggregate(&list);
     assert_eq!(gby.len(), 2);
-    test(&gby, "AAPL", 200, 25050.0);
-    test(&gby, "DELL", 100, 7971.0);
+    test(&gby, "AAPL", 200, 24225.0, 25050.0);
+    test(&gby, "DELL", 100, 7921.0, 7971.0);
 }
 
 #[test]

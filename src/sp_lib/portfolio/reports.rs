@@ -150,8 +150,8 @@ fn value_report(params: &ReportParams) {
 
     if groupby {
         println!();
-        println!("{:8} {:8} {:12}", "GroupBy", "Size", "Cur Value");
-        println!("{:8} {:8} {:12}", "-------", "----", "---------");
+        println!("{:8} {:8} {:12} {:12}", "GroupBy", "Size", "Base Value", "Cur Value");
+        println!("{:8} {:8} {:12} {:12}", "-------", "----", "----------", "---------");
 
         let groupby = algorithms::stock_aggregate(stocks);
 
@@ -160,8 +160,8 @@ fn value_report(params: &ReportParams) {
             if seen.contains(&stock.symbol) { continue; }
             seen.insert(&stock.symbol);
 
-            let size_value = groupby.get(&stock.symbol).unwrap();
-            println!("{:8} {:8} {:12.2}", stock.symbol, size_value.0, size_value.1);
+            let size_values = groupby.get(&stock.symbol).unwrap();
+            println!("{:8} {:8} {:12.2} {:12.2}", stock.symbol, size_values.0, size_values.1, size_values.2);
         }
     }
 }

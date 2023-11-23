@@ -47,14 +47,14 @@ pub fn stock_groupby<T>(stocks: &StockList,
     groupby
 }
 
-// Group by stock symbol, and calcuate aggregate quantity and current value.
-pub fn stock_aggregate(stocks: &StockList) -> HashMap<String, (u32, Price)> {
+// Group by stock symbol, and calcuate aggregate quantity, base value and current value.
+pub fn stock_aggregate(stocks: &StockList) -> HashMap<String, (u32, Price, Price)> {
     stock_groupby(
         stocks,
-        |_| (0, 0.0),
-        |stock, size_price| {
-            let sp = *size_price;
-            (sp.0 + stock.quantity, sp.1 + stock.latest_notional())
+        |_| (0, 0.0, 0.0),
+        |stock, size_prices| {
+            let sp = *size_prices;
+            (sp.0 + stock.quantity, sp.1 + stock.base_notional(), sp.2 + stock.latest_notional())
         })
 }
 
