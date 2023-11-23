@@ -16,7 +16,7 @@ volatility and 22 day volatility per stock. The day change report shows previous
 change, low, high and volume.
 
 The following features are supported:
-- **Group by**: Report quantities and current notional values grouped by symbol
+- **Group by**: Report quantities, base notional and current notional values grouped by symbol
 - **Order by**: Sort by pre-defined attributes in ascending or descending order
 - **Filter**: Include and/or exclude by type, list of symbols, or expression
 - **Export**: Export gains and losses table to a csv file
@@ -29,7 +29,7 @@ FLAGS:
     -d, --desc             Used with order by option to sort in descending order
     -h, --help             Prints help information
     -m, --match-symbols    Match closed positions to configured stock symbols post filtering and ordering
-    -g, --show-groupby     Show quantities and current notional values grouped by symbol
+    -g, --show-groupby     Show quantities, base notional and current notional values grouped by symbol
     -V, --version          Prints version information
 
 OPTIONS:

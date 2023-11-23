@@ -66,7 +66,7 @@ impl Arguments {
             .arg(Arg::with_name("show_groupby")
                  .short("g")
                  .long("show-groupby")
-                 .help("Show quantities and current notional values grouped by symbol"))
+                 .help("Show quantities, base notional and current notional values grouped by symbol"))
             .arg(Arg::with_name("desc")
                  .short("d")
                  .long("desc")
