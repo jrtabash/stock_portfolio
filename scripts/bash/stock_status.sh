@@ -5,6 +5,7 @@
 
 CONFIG=""
 SYMBOL=""
+GROUPBY=
 PLOT=0
 CLEAR=0
 
@@ -13,10 +14,11 @@ CLEAR=0
 
 function print_usage() {
     echo "Usage"
-    echo "    stock_status.sh [-h] [-c] [-p] <config> <symbol>"
+    echo "    stock_status.sh [-h] [-g] [-c] [-p] <config> <symbol>"
     echo ""
     echo "Options"
     echo "    -h : Print help"
+    echo "    -g : Report group by"
     echo "    -p : Plot close history"
     echo "    -c : Clear screen"
 }
@@ -29,6 +31,8 @@ do
     if [ "${arg}" == "-h" ]; then
         print_usage
         exit 0
+    elif [ "${arg}" == "-g" ]; then
+        GROUPBY="-g"
     elif [ "${arg}" == "-p" ]; then
         PLOT=1
     elif [ "${arg}" == "-c" ]; then
@@ -68,7 +72,7 @@ if [ ${CLEAR} -eq 1 ]; then
     clear
 fi
 
-sp_report -l "${CONFIG}" -o date -i "${SYMBOL}" -g
+sp_report -l "${CONFIG}" -o date -i "${SYMBOL}" "${GROUPBY}"
 
 if [ ${PLOT} -eq 1 ]; then
     sp_stats -c sma -w 1 -i close -l "${CONFIG}" -y "${SYMBOL}" | plot_stats.py
