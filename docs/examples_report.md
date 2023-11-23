@@ -26,7 +26,7 @@ $ sp_report --config ~/sp_sample.cfg --show-groupby
 
 Stocks Value Report
 -------------------
-            Date: 2023-02-03
+            Date: 2023-11-22
 Number of Stocks: 3
       Base Value: 30900.00
     Latest Value: 35124.00
@@ -34,6 +34,7 @@ Number of Stocks: 3
     Cum Dividend: 507.50
   Percent Change: 13.67
   Pct Chg w/ Div: 15.31
+            Cash: 5000.00
 
 Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value  Cum Div 
 ------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    ---------  ------- 
@@ -41,10 +42,10 @@ AAPL     2020-09-20 2023-02-03    866      100   115.00   154.50    39.50    34.
 AAPL     2020-11-12 2023-02-03    813      100   118.50   154.50    36.00    30.38     11850.00     15450.00    3600.00   177.50
 DELL     2021-02-10 2023-02-03    723      100    75.50    42.24   -33.26   -44.05      7550.00      4224.00   -3326.00   132.00
 
-GroupBy  Size     Cur Value   
--------  ----     ---------   
-AAPL          200     30900.00
-DELL          100      4224.00
+GroupBy  Size     Base Value   Cur Value   
+-------  ----     ----------   ---------   
+AAPL          200     23350.00     30900.00
+DELL          100      7550.00      4224.00
 ```
 
 ## Example Report 3
@@ -53,7 +54,7 @@ $ sp_report --config ~/sp_sample.cfg --show-groupby --orderby date --desc
 
 Stocks Value Report
 -------------------
-            Date: 2023-02-03
+            Date: 2023-11-22
 Number of Stocks: 3
       Base Value: 30900.00
     Latest Value: 35124.00
@@ -61,6 +62,7 @@ Number of Stocks: 3
     Cum Dividend: 507.50
   Percent Change: 13.67
   Pct Chg w/ Div: 15.31
+            Cash: 5000.00
 
 Symbol   Buy Date   Upd Date   Days   Size     Base     Cur      Net      Pct      Base Value   Cur Value    Net Value  Cum Div 
 ------   --------   --------   ----   ----     ----     ---      ---      ---      ----------   ---------    ---------  ------- 
@@ -68,10 +70,10 @@ DELL     2021-02-10 2023-02-03    723      100    75.50    42.24   -33.26   -44.
 AAPL     2020-11-12 2023-02-03    813      100   118.50   154.50    36.00    30.38     11850.00     15450.00    3600.00   177.50
 AAPL     2020-09-20 2023-02-03    866      100   115.00   154.50    39.50    34.35     11500.00     15450.00    3950.00   198.00
 
-GroupBy  Size     Cur Value   
--------  ----     ---------   
-DELL          100      4224.00
-AAPL          200     30900.00
+GroupBy  Size     Base Value   Cur Value   
+-------  ----     ----------   ---------   
+DELL          100      7550.00      4224.00
+AAPL          200     23350.00     30900.00
 ```
 
 ## Example Report 4
