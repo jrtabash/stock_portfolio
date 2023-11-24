@@ -65,6 +65,12 @@ if [ ! -f "${CONFIG}" ]; then
     exit 1
 fi
 
+CONSYM=$(sp_dstool -l ${CONFIG} -o consym -y ${SYMBOL} | grep -c "not in datastore")
+if [ ${CONSYM} -eq 1 ]; then
+    echo "Symbol ${SYMBOL} not in datastore"
+    exit 1
+fi
+
 # --------------------------------------------------------------------------------
 # Run
 

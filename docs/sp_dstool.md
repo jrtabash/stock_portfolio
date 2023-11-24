@@ -11,6 +11,7 @@ The following operations are supported:
 - **Showd**: Show symbol dividends
 - **Shows**: Show symbol splits
 - **Export**: Export symbol history and dividends
+- **Consym**: Check datastore contains symbol
 - **Check**: Check history, dividend and split data
 - **Stat**: Calculate files count and size
 
@@ -36,6 +37,7 @@ OPTIONS:
                                     showd  : show dividends for symbol
                                     shows  : show splits for symbol
                                     export : export symbol history and dividends
+                                    consym : check datastore contains symbol
                                     check  : check history, dividend and split data
                                     stat   : calculate files count and size
     -e, --export <export_file>      Export symbol history and dividends to csv file. Required with export operation
@@ -90,5 +92,5 @@ OPTIONS:
                                           /path/to/my/closed_positions.csv
                                         }
     -y, --symbol <symbol>           Stock symbol. Optional with update and check operations. Required with drop, reset,
-                                    showh, showd, shows, and export operations
+                                    showh, showd, shows, consym and export operations
 ```

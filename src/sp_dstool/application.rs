@@ -19,6 +19,7 @@ const SHOWH: &str = "showh";
 const SHOWD: &str = "showd";
 const SHOWS: &str = "shows";
 const EXPORT: &str = "export";
+const CONSYM: &str = "consym";
 
 struct StatAgg {
     tot_size: u64,
@@ -77,6 +78,7 @@ impl common_app::AppTrait for Application {
             SHOWD => self.show_dividends()?,
             SHOWS => self.show_splits()?,
             EXPORT => self.export()?,
+            CONSYM => self.contains_symbol()?,
             _ => return Err(format!("Invalid ds_operation - '{}'", self.args.ds_operation()).into())
         };
 
@@ -368,6 +370,22 @@ impl Application {
         let count = export::export_symbol(&self.ds, symbol, export_file)?;
 
         println!("Exported {} for symbol {}", misc::count_format(count, "row"), symbol);
+        Ok(())
+    }
+
+    fn contains_symbol(&self) -> Result<(), Error> {
+        if self.args.is_verbose() {
+            println!("Check datastore contains symbol");
+        }
+
+        match self.args.symbol() {
+            Some(sym) => {
+                let inds = if self.ds.symbol_exists(history::tag(), sym) { "" } else { "not " };
+                println!("Symbol {} {}in datastore", sym, inds);
+            }
+            None => println!("Missing symbol for consym operation")
+        };
+
         Ok(())
     }
 

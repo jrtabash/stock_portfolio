@@ -17,13 +17,13 @@ impl Arguments {
         #[rustfmt::skip]
         let parsed_args = App::new("Stock Portfolio Datastore Tool")
             .version(common_args::app_version())
-            .about("Datastore tool - create, delete, update, drop, showh, showd, shows, export, check or stat.")
+            .about("Datastore tool - create, delete, update, drop, reset, showh, showd, shows, export, check or stat.")
 
             // Options
             .arg(common_args::stocks_config())
             .arg(common_args::symbol(
                 false,
-                Some("Stock symbol. Optional with update and check operations. Required with drop, reset, showh, showd, shows, and export operations")))
+                Some("Stock symbol. Optional with update and check operations. Required with drop, reset, showh, showd, shows, consym and export operations")))
             .arg(common_args::export_file(
                 Some("Export symbol history and dividends to csv file. Required with export operation")))
             .arg(Arg::with_name("ds_operation")
@@ -39,6 +39,7 @@ impl Arguments {
                         showd  : show dividends for symbol\n\
                         shows  : show splits for symbol\n\
                         export : export symbol history and dividends\n\
+                        consym : check datastore contains symbol\n\
                         check  : check history, dividend and split data\n\
                         stat   : calculate files count and size")
                  .required(true)
