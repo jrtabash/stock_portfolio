@@ -72,8 +72,8 @@ if [ ${CLEAR} -eq 1 ]; then
     clear
 fi
 
-sp_report -l "${CONFIG}" -o date -i "${SYMBOL}" "${GROUPBY}"
+sp_report -l ${CONFIG} -o date -i ${SYMBOL} ${GROUPBY}
 
 if [ ${PLOT} -eq 1 ]; then
-    sp_stats -c sma -w 1 -i close -l "${CONFIG}" -y "${SYMBOL}" | plot_stats.py
+    sp_stats -c sma -w 1 -i close -l ${CONFIG} -y ${SYMBOL} | plot_stats.py
 fi
