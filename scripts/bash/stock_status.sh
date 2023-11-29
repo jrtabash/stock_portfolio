@@ -6,6 +6,7 @@
 CONFIG=""
 SYMBOL=""
 GROUPBY=
+DAYCH=0
 PLOT=0
 CLEAR=0
 
@@ -19,6 +20,7 @@ function print_usage() {
     echo "Options"
     echo "    -h : Print help"
     echo "    -g : Report group by"
+    echo "    -d : Report day change"
     echo "    -p : Plot close history"
     echo "    -c : Clear screen"
 }
@@ -33,6 +35,8 @@ do
         exit 0
     elif [ "${arg}" == "-g" ]; then
         GROUPBY="-g"
+    elif [ "${arg}" == "-d" ]; then
+        DAYCH=1
     elif [ "${arg}" == "-p" ]; then
         PLOT=1
     elif [ "${arg}" == "-c" ]; then
@@ -78,7 +82,12 @@ if [ ${CLEAR} -eq 1 ]; then
     clear
 fi
 
-sp_report -l ${CONFIG} -o date -i ${SYMBOL} ${GROUPBY}
+sp_report -l ${CONFIG} -i ${SYMBOL} ${GROUPBY}
+
+if [ ${DAYCH} -eq 1 ]; then
+    echo ""
+    sp_report -l ${CONFIG} -p daych -i ${SYMBOL}
+fi
 
 if [ ${PLOT} -eq 1 ]; then
     sp_stats -c sma -w 1 -i close -l ${CONFIG} -y ${SYMBOL} | plot_stats.py
