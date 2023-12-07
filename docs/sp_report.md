@@ -7,6 +7,7 @@ The following reports are supported:
 - **Volat**: Volatility of stocks in portfolio
 - **Daych**: Day change of stocks in portfolio
 - **Closed**: Closed positions value
+- **Divid**: Dividends of stocks in porfolio
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
 get the latest close prices and dividends from the datastore and generate a report. The value report shows base,
@@ -65,6 +66,7 @@ OPTIONS:
                                     volat  : Stocks volatility
                                     daych  : Stocks day change
                                     closed : Closed positions value
+                                    divid  : Stoks dividend
     -l, --config <stocks_config>    Config file containing datastore root and name, stocks, closed positions and cash in
                                     portfolio. Both root and name can be set to "$default" which will use home path for
                                     root and sp_datastore for name.

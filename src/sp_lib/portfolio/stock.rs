@@ -76,6 +76,26 @@ impl Stock {
     pub fn pct_change(self: &Stock) -> f64 {
         100.0 * self.net_price() / self.base_price
     }
+
+    #[inline(always)]
+    pub fn annual_dividend(self: &Stock) -> Price {
+        if self.days_held > 0 {
+            let div_per_day = self.cum_dividend / self.days_held as Price;
+            250.0 * div_per_day
+        } else {
+            0.0
+        }
+    }
+
+    #[inline(always)]
+    pub fn daily_unit_dividend(self: &Stock) -> Price {
+        if self.quantity > 0 && self.days_held > 0 {
+            let div_per_unit = self.cum_dividend / self.quantity as Price;
+            div_per_unit / self.days_held as Price
+        } else {
+            0.0
+        }
+    }
 }
 
 impl fmt::Display for Stock {
@@ -109,6 +129,8 @@ mod tests {
         assert_eq!(stock.latest_price, 0.0);
         assert_eq!(stock.latest_date, datetime::earliest_date());
         assert_eq!(stock.days_held, 0);
+        assert_eq!(stock.annual_dividend(), 0.0);
+        assert_eq!(stock.daily_unit_dividend(), 0.0);
     }
 
     #[test]
@@ -127,6 +149,7 @@ mod tests {
         assert_eq!(stock.latest_price, 125.0);
         assert_eq!(stock.latest_date, datetime::today_plus_days(10));
         assert_eq!(stock.days_held, 10);
+        assert_eq!(stock.daily_unit_dividend(), 0.0);
     }
 
     #[test]
@@ -147,5 +170,16 @@ mod tests {
         stock.set_latest_price(125.50, datetime::today());
 
         assert_eq!(format!("{}", stock), "Stock(AAPL 100@125.50)");
+    }
+
+    #[test]
+    fn test_stock_dividend_functions() {
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 200, 120.25);
+        stock.set_latest_price(125.50, datetime::today_plus_days(40));
+        stock.cum_dividend = 115.0;
+
+        assert_eq!(stock.days_held, 40);
+        assert!((stock.annual_dividend() - 718.75) <= 0.000000000001);
+        assert!((stock.daily_unit_dividend() - 0.014374999999999999).abs() <= 0.000000000001);
     }
 }

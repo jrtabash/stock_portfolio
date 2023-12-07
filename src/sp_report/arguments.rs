@@ -20,8 +20,8 @@ impl Arguments {
         #[rustfmt::skip]
         let parsed_args = App::new("Stock Portfolio Report")
             .version(common_args::app_version())
-            .about("Get latest close prices and generate portfolio report.\n\
-                    Supported reports include gains & losses, top/bottom performers, volatility, and day change.")
+            .about("Generate portfolio reports. Supported reports include gains & losses, \
+                    top/bottom performers, volatility, day change, closed positions and dividends.")
 
             // Options
             .arg(common_args::stocks_config())
@@ -34,7 +34,8 @@ impl Arguments {
                         top    : Top/Bottom performing stocks\n\
                         volat  : Stocks volatility\n\
                         daych  : Stocks day change\n\
-                        closed : Closed positions value")
+                        closed : Closed positions value\n\
+                        divid  : Stoks dividend")
                  .takes_value(true))
             .arg(Arg::with_name("order_by")
                  .short("o")

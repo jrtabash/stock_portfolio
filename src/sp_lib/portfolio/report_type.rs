@@ -8,7 +8,8 @@ pub enum ReportType {
     Top,    // Top/Last Performing
     Volat,  // Volatility
     Daych,  // Day Change
-    Closed  // Closed Positions Value
+    Closed, // Closed Positions Value
+    Divid   // Dividend
 }
 
 pub fn reporttype2str(rt: ReportType) -> &'static str {
@@ -17,7 +18,8 @@ pub fn reporttype2str(rt: ReportType) -> &'static str {
         ReportType::Top => "top",
         ReportType::Volat => "volat",
         ReportType::Daych => "daych",
-        ReportType::Closed => "closed"
+        ReportType::Closed => "closed",
+        ReportType::Divid => "divid"
     }
 }
 
@@ -28,6 +30,7 @@ pub fn str2reporttype(rtstr: &str) -> Result<ReportType, Error> {
         "volat" => Ok(ReportType::Volat),
         "daych" => Ok(ReportType::Daych),
         "closed" => Ok(ReportType::Closed),
+        "divid" => Ok(ReportType::Divid),
         _ => Err(format!("Unknown report type '{}'", rtstr).into())
     }
 }
@@ -52,22 +55,26 @@ mod tests {
         let volat = ReportType::Volat;
         let daych = ReportType::Daych;
         let closed = ReportType::Closed;
+        let divid = ReportType::Divid;
         let value_str = "value";
         let top_str = "top";
         let volat_str = "volat";
         let daych_str = "daych";
         let closed_str = "closed";
+        let divid_str = "divid";
 
         assert_eq!(reporttype2str(value), value_str);
         assert_eq!(reporttype2str(top), top_str);
         assert_eq!(reporttype2str(volat), volat_str);
         assert_eq!(reporttype2str(daych), daych_str);
         assert_eq!(reporttype2str(closed), closed_str);
+        assert_eq!(reporttype2str(divid), divid_str);
         assert!(str2reporttype(&value_str).unwrap() == value);
         assert!(str2reporttype(&top_str).unwrap() == top);
         assert!(str2reporttype(&volat_str).unwrap() == volat);
         assert!(str2reporttype(&daych_str).unwrap() == daych);
         assert!(str2reporttype(&closed_str).unwrap() == closed);
+        assert!(str2reporttype(&divid_str).unwrap() == divid);
 
         match str2reporttype("foobar") {
             Ok(_) => assert!(false),
