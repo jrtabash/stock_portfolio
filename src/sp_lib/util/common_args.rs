@@ -9,7 +9,7 @@ use crate::util::error::Error;
 // Common Version
 
 pub fn app_version() -> &'static str {
-    "0.9.2"
+    "0.9.3"
 }
 
 // --------------------------------------------------------------------------------
