@@ -154,7 +154,7 @@ fn test_sort_stocks() {
     let mut list = StockList::new();
     list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
     list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
-    list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
+    list.push(make_stock("ICLN", StockType::ETF, today_plus_days(-1), 300, 24.10, 24.12));
     list[0].cum_dividend = 0.0;
     list[1].cum_dividend = 20.15;
     list[2].cum_dividend = 15.25;
@@ -191,6 +191,12 @@ fn test_sort_stocks() {
 
     test_sort(&mut list, "div", desc, "AAPL", "ICLN", "DELL");
     test_sort(&mut list, "div", asc, "DELL", "ICLN", "AAPL");
+
+    test_sort(&mut list, "andiv", desc, "ICLN", "AAPL", "DELL");
+    test_sort(&mut list, "andiv", asc, "DELL", "AAPL", "ICLN");
+
+    test_sort(&mut list, "dudiv", desc, "ICLN", "AAPL", "DELL");
+    test_sort(&mut list, "dudiv", asc, "DELL", "AAPL", "ICLN");
 }
 
 #[test]
