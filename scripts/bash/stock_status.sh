@@ -82,10 +82,16 @@ if [ ${CLEAR} -eq 1 ]; then
     clear
 fi
 
+echo "-------------------"
 sp_report -l ${CONFIG} -i ${SYMBOL} ${GROUPBY}
+
+echo ""
+echo "----------------------"
+sp_report -l ${CONFIG} -p divid -i ${SYMBOL}
 
 if [ ${DAYCH} -eq 1 ]; then
     echo ""
+    echo "------------------------"
     sp_report -l ${CONFIG} -p daych -i ${SYMBOL}
 fi
 
