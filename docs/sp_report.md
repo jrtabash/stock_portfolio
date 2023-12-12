@@ -55,7 +55,7 @@ OPTIONS:
                                     price  : latest price       | size    : quantity
                                     net    : net price          | pct     : percent change
                                     value  : notional value     | div     : cumulative dividend
-                                    andiv  : Annual dividend    | dudiv   : Daily unit dividend
+                                    yrdiv  : Yearly dividend    | dudiv   : Daily unit dividend
                                     volat  : overall volatility | volat22 : 22 day volatility
                                     prevpr : previous day price | volume  : day volume
                                     change : day change         | pctchg  : day percent change

@@ -192,8 +192,8 @@ fn test_sort_stocks() {
     test_sort(&mut list, "div", desc, "AAPL", "ICLN", "DELL");
     test_sort(&mut list, "div", asc, "DELL", "ICLN", "AAPL");
 
-    test_sort(&mut list, "andiv", desc, "ICLN", "AAPL", "DELL");
-    test_sort(&mut list, "andiv", asc, "DELL", "AAPL", "ICLN");
+    test_sort(&mut list, "yrdiv", desc, "ICLN", "AAPL", "DELL");
+    test_sort(&mut list, "yrdiv", asc, "DELL", "AAPL", "ICLN");
 
     test_sort(&mut list, "dudiv", desc, "ICLN", "AAPL", "DELL");
     test_sort(&mut list, "dudiv", asc, "DELL", "AAPL", "ICLN");

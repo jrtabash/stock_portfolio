@@ -90,8 +90,8 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("div", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.cum_dividend, rhs.cum_dividend)),
         ("div", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.cum_dividend, lhs.cum_dividend)),
 
-        ("andiv", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.annual_dividend(), rhs.annual_dividend())),
-        ("andiv", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.annual_dividend(), lhs.annual_dividend())),
+        ("yrdiv", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.yearly_dividend(), rhs.yearly_dividend())),
+        ("yrdiv", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.yearly_dividend(), lhs.yearly_dividend())),
 
         ("dudiv", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.daily_unit_dividend(), rhs.daily_unit_dividend())),
         ("dudiv", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.daily_unit_dividend(), lhs.daily_unit_dividend())),

@@ -46,7 +46,7 @@ impl Arguments {
                         price  : latest price       | size    : quantity\n\
                         net    : net price          | pct     : percent change\n\
                         value  : notional value     | div     : cumulative dividend\n\
-                        andiv  : Annual dividend    | dudiv   : Daily unit dividend\n\
+                        yrdiv  : Yearly dividend    | dudiv   : Daily unit dividend\n\
                         volat  : overall volatility | volat22 : 22 day volatility\n\
                         prevpr : previous day price | volume  : day volume\n\
                         change : day change         | pctchg  : day percent change\n\

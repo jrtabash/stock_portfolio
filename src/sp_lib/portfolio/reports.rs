@@ -615,7 +615,7 @@ fn divid_report(params: &ReportParams) {
              "Days",
              "Size",
              "Cum Div",
-             "Annual Div",
+             "Yearly Div",
              "Day Unit Div");
     println!("{:8} {:10} {:10} {:6} {:8} {:8} {:10} {:12}",
              "------",
@@ -634,7 +634,7 @@ fn divid_report(params: &ReportParams) {
                  stock.days_held,
                  stock.quantity,
                  stock.cum_dividend,
-                 stock.annual_dividend(),
+                 stock.yearly_dividend(),
                  stock.daily_unit_dividend());
     }
 }
@@ -642,7 +642,7 @@ fn divid_report(params: &ReportParams) {
 fn divid_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
     let stocks = params.stocks();
     let mut file = File::create(filename)?;
-    writeln!(file, "SymbolBuy Date,Upd Date,Days,Size,Cum Div,Annual Div,Day Unit Div")?;
+    writeln!(file, "SymbolBuy Date,Upd Date,Days,Size,Cum Div,Yearly Div,Day Unit Div")?;
     for stock in stocks.iter() {
         writeln!(file, "{},{},{},{},{},{:.2},{:.2},{:.6}",
                  stock.symbol,
@@ -651,7 +651,7 @@ fn divid_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
                  stock.days_held,
                  stock.quantity,
                  stock.cum_dividend,
-                 stock.annual_dividend(),
+                 stock.yearly_dividend(),
                  stock.daily_unit_dividend())?;
     }
     Ok(())

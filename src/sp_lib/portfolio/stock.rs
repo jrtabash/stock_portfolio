@@ -78,10 +78,10 @@ impl Stock {
     }
 
     #[inline(always)]
-    pub fn annual_dividend(self: &Stock) -> Price {
+    pub fn yearly_dividend(self: &Stock) -> Price {
         if self.days_held > 0 {
             let div_per_day = self.cum_dividend / self.days_held as Price;
-            250.0 * div_per_day
+            365.0 * div_per_day
         } else {
             0.0
         }
@@ -129,7 +129,7 @@ mod tests {
         assert_eq!(stock.latest_price, 0.0);
         assert_eq!(stock.latest_date, datetime::earliest_date());
         assert_eq!(stock.days_held, 0);
-        assert_eq!(stock.annual_dividend(), 0.0);
+        assert_eq!(stock.yearly_dividend(), 0.0);
         assert_eq!(stock.daily_unit_dividend(), 0.0);
     }
 
@@ -179,7 +179,7 @@ mod tests {
         stock.cum_dividend = 115.0;
 
         assert_eq!(stock.days_held, 40);
-        assert!((stock.annual_dividend() - 718.75) <= 0.000000000001);
+        assert!((stock.yearly_dividend() - 1049.375) <= 0.000000000001);
         assert!((stock.daily_unit_dividend() - 0.014374999999999999).abs() <= 0.000000000001);
     }
 }
