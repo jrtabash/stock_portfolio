@@ -642,7 +642,7 @@ fn divid_report(params: &ReportParams) {
 fn divid_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
     let stocks = params.stocks();
     let mut file = File::create(filename)?;
-    writeln!(file, "SymbolBuy Date,Upd Date,Days,Size,Cum Div,Yearly Div,Day Unit Div")?;
+    writeln!(file, "Symbol,Buy Date,Upd Date,Days,Size,Cum Div,Yearly Div,Day Unit Div")?;
     for stock in stocks.iter() {
         writeln!(file, "{},{},{},{},{},{:.2},{:.2},{:.6}",
                  stock.symbol,
