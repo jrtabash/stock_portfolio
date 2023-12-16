@@ -91,18 +91,20 @@ fn value_report(params: &ReportParams) {
     let groupby = params.groupby();
 
     let (pct_chg, pct_chg_wd) = algorithms::calc_pct_change(stocks);
+    let latest_value = algorithms::latest_notional(stocks);
 
     println!("Stocks Value Report");
     println!("-------------------");
     println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
     println!("Number of Stocks: {}", stocks.len());
     println!("      Base Value: {:.2}", algorithms::base_notional(stocks));
-    println!("    Latest Value: {:.2}", algorithms::latest_notional(stocks));
+    println!("    Latest Value: {:.2}", latest_value);
     println!("       Net Value: {:.2}", algorithms::net_notional(stocks));
     println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(stocks));
     println!("  Percent Change: {:.2}", pct_chg);
     println!("  Pct Chg w/ Div: {:.2}", pct_chg_wd);
     println!("            Cash: {:.2}", params.config().cash());
+    println!("   Value w/ Cash: {:.2}", latest_value + params.config().cash());
     println!();
 
     println!("{:8} {:10} {:10} {:6} {:8} {:8} {:8} {:8} {:8} {:12} {:12} {:10} {:8}",
