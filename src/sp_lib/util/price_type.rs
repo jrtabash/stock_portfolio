@@ -37,6 +37,15 @@ pub fn prices_eql(lhs: &[PriceType], rhs: &[PriceType]) -> bool {
     true
 }
 
+#[inline(always)]
+pub fn calc_daily(price: PriceType, days: i64) -> PriceType {
+    if days > 0 {
+        price / days as PriceType
+    } else {
+        0.0
+    }
+}
+
 // --------------------------------------------------------------------------------
 // Unit Tests
 
@@ -90,5 +99,20 @@ mod tests {
         assert!(prices_eql(&lhs[1..3], &rhs1[1..3]));
         assert!(prices_eql(&lhs[1..3], &rhs2[1..3]));
         assert!(prices_eql(&lhs[1..3], &rhs3[1..3]));
+    }
+
+    #[test]
+    fn test_calc_daily() {
+        let price: PriceType = 1125.0;
+        let days0: i64 = 0;
+        let days1: i64 = 1;
+        let days2: i64 = 2;
+        let days5: i64 = 5;
+
+        assert_eq!(calc_daily(price, days0), 0.0);
+        assert_eq!(calc_daily(price, days1), price);
+
+        assert!(price_eql(calc_daily(price, days2), 562.5));
+        assert!(price_eql(calc_daily(price, days5), 225.0));
     }
 }

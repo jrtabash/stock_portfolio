@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::util::datetime;
 use crate::util::datetime::SPDate;
-use crate::util::price_type::PriceType;
+use crate::util::price_type::{PriceType, calc_daily};
 use crate::portfolio::stock_type::StockType;
 use crate::portfolio::symbol_trait::GetSymbol;
 
@@ -79,19 +79,13 @@ impl Stock {
 
     #[inline(always)]
     pub fn yearly_dividend(self: &Stock) -> Price {
-        if self.days_held > 0 {
-            let div_per_day = self.cum_dividend / self.days_held as Price;
-            365.0 * div_per_day
-        } else {
-            0.0
-        }
+        365.0 * calc_daily(self.cum_dividend, self.days_held)
     }
 
     #[inline(always)]
     pub fn daily_unit_dividend(self: &Stock) -> Price {
-        if self.quantity > 0 && self.days_held > 0 {
-            let div_per_unit = self.cum_dividend / self.quantity as Price;
-            div_per_unit / self.days_held as Price
+        if self.quantity > 0 {
+            calc_daily(self.cum_dividend / self.quantity as Price, self.days_held)
         } else {
             0.0
         }

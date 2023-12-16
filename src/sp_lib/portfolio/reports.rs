@@ -210,9 +210,9 @@ fn make_top_tuple(stock: &Stock) -> TopTuple {
      stock.pct_change(),
      stock.net_price(),
      stock.cum_dividend,
-     stock.pct_change() / stock.days_held as Price,
-     stock.net_price() / stock.days_held as Price,
-     stock.cum_dividend / stock.days_held as Price,
+     price_type::calc_daily(stock.pct_change(), stock.days_held),
+     price_type::calc_daily(stock.net_price(), stock.days_held),
+     price_type::calc_daily(stock.cum_dividend, stock.days_held),
      stock.daily_unit_dividend()
     )
 }
