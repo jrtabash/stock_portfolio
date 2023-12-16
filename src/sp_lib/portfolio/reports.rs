@@ -200,8 +200,9 @@ const CUM_DIV: &str = "Total Cum Div";
 const PCT_CHG_DAY: &str = "Daily Pct Change";
 const NET_CHG_DAY: &str = "Daily Net Change";
 const CUM_DIV_DAY: &str = "Daily Cum Div";
+const DU_DIV_DAY: &str = "Daily Unt Div";
 
-type TopTuple<'a> = (&'a str, Price, Price, Price, Price, Price, Price);
+type TopTuple<'a> = (&'a str, Price, Price, Price, Price, Price, Price, Price);
 type TopBottom<'a> = (&'a str, &'a str);
 
 fn make_top_tuple(stock: &Stock) -> TopTuple {
@@ -211,7 +212,8 @@ fn make_top_tuple(stock: &Stock) -> TopTuple {
      stock.cum_dividend,
      stock.pct_change() / stock.days_held as Price,
      stock.net_price() / stock.days_held as Price,
-     stock.cum_dividend / stock.days_held as Price
+     stock.cum_dividend / stock.days_held as Price,
+     stock.daily_unit_dividend()
     )
 }
 
@@ -226,6 +228,7 @@ fn tb_cum_div<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_botto
 fn tb_pct_chg_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.4) }
 fn tb_net_chg_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.5) }
 fn tb_cum_div_day<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.6) }
+fn tb_daily_unit_div<'a>(data: &'a mut Vec<TopTuple>) -> TopBottom<'a> { calc_top_bottom(data, |t| t.7) }
 
 fn top_report(params: &ReportParams) {
     fn print_row(name: &str, top_bottom: &TopBottom) {
@@ -257,6 +260,7 @@ fn top_report(params: &ReportParams) {
         print_row(PCT_CHG_DAY, &tb_pct_chg_day(&mut data));
         print_row(NET_CHG_DAY, &tb_net_chg_day(&mut data));
         print_row(CUM_DIV_DAY, &tb_cum_div_day(&mut data));
+        print_row(DU_DIV_DAY, &tb_daily_unit_div(&mut data));
     }
 }
 
@@ -278,6 +282,7 @@ fn top_export(params: &ReportParams, filename: &str) -> Result<(), Error> {
         write_row(&mut file, PCT_CHG_DAY, &tb_pct_chg_day(&mut data))?;
         write_row(&mut file, NET_CHG_DAY, &tb_net_chg_day(&mut data))?;
         write_row(&mut file, CUM_DIV_DAY, &tb_cum_div_day(&mut data))?;
+        write_row(&mut file, DU_DIV_DAY, &tb_daily_unit_div(&mut data))?;
     }
     Ok(())
 }
