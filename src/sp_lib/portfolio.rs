@@ -1,4 +1,5 @@
 pub mod stock_type;
+pub mod report_params;
 pub mod report_type;
 pub mod symbol_trait;
 pub mod stock;

@@ -1,5 +1,6 @@
 use crate::arguments::Arguments;
 use sp_lib::datastore::datastore;
+use sp_lib::portfolio::report_params::ReportParams;
 use sp_lib::portfolio::report_type::ReportType;
 use sp_lib::portfolio::{algorithms, extra_sort_ftns, report_type, reports, stocks_config, stocks_update};
 use sp_lib::util::common_app;
@@ -92,7 +93,7 @@ impl Application {
 
     fn report(self: &Application) {
         reports::print_report(
-            reports::ReportParams::new(self.rtype, &self.config)
+            ReportParams::new(self.rtype, &self.config)
                 .show_groupby(self.args.show_groupby())
                 .with_datastore(&self.ds)
         );
@@ -100,7 +101,7 @@ impl Application {
 
     fn export(self: &Application) -> Result<(), Error> {
         if let Some(export_file) = self.args.export_file() {
-            let report_params = reports::ReportParams::new(self.rtype, &self.config)
+            let report_params = ReportParams::new(self.rtype, &self.config)
                 .with_datastore(&self.ds);
             reports::export_report(report_params, export_file)?;
         }

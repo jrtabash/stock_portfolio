@@ -12,6 +12,7 @@ use sp_lib::portfolio::algorithms::*;
 use sp_lib::portfolio::stocks_update::*;
 use sp_lib::portfolio::stocks_config::*;
 use sp_lib::portfolio::stocks_reader::*;
+use sp_lib::portfolio::report_params::ReportParams;
 use sp_lib::portfolio::report_type::ReportType;
 use sp_lib::portfolio::reports;
 
@@ -380,7 +381,7 @@ fn test_value_export() {
 
     let temp_name = "sp_test_value_export.csv";
     let csv_filename = temp_file::make_path(&temp_name);
-    let rparams = reports::ReportParams::new(ReportType::Value, &cfg);
+    let rparams = ReportParams::new(ReportType::Value, &cfg);
     reports::export_report(rparams, &csv_filename.to_str().unwrap()).unwrap();
 
     let csv_content = fs::read_to_string(&csv_filename).unwrap();
