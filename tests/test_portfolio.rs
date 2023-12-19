@@ -12,9 +12,9 @@ use sp_lib::portfolio::algorithms::*;
 use sp_lib::portfolio::stocks_update::*;
 use sp_lib::portfolio::stocks_config::*;
 use sp_lib::portfolio::stocks_reader::*;
-use sp_lib::portfolio::report_params::ReportParams;
-use sp_lib::portfolio::report_type::ReportType;
-use sp_lib::portfolio::reports;
+use sp_lib::report::report_params::ReportParams;
+use sp_lib::report::report_type::ReportType;
+use sp_lib::report::reports;
 
 #[test]
 fn test_stock_list() {

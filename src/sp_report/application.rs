@@ -1,8 +1,10 @@
 use crate::arguments::Arguments;
 use sp_lib::datastore::datastore;
-use sp_lib::portfolio::report_params::ReportParams;
-use sp_lib::portfolio::report_type::ReportType;
-use sp_lib::portfolio::{algorithms, extra_sort_ftns, report_type, reports, stocks_config, stocks_update};
+use sp_lib::portfolio::{algorithms, extra_sort_ftns, stocks_config, stocks_update};
+use sp_lib::report::report_params::ReportParams;
+use sp_lib::report::report_type;
+use sp_lib::report::report_type::ReportType;
+use sp_lib::report::reports;
 use sp_lib::util::common_app;
 use sp_lib::util::error::Error;
 

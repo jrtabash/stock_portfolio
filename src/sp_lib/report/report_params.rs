@@ -1,8 +1,8 @@
 use crate::datastore::datastore::DataStore;
 use crate::portfolio::closed_position::ClosedPositionList;
-use crate::portfolio::report_type::ReportType;
 use crate::portfolio::stock::StockList;
 use crate::portfolio::stocks_config::StocksConfig;
+use crate::report::report_type::ReportType;
 
 pub struct ReportParams<'a, 'b> {
     rtype: ReportType,

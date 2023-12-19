@@ -1,6 +1,4 @@
 pub mod stock_type;
-pub mod report_params;
-pub mod report_type;
 pub mod symbol_trait;
 pub mod stock;
 pub mod algorithms;
@@ -9,6 +7,5 @@ pub mod stocks_config;
 pub mod stocks_filter;
 pub mod stocks_reader;
 pub mod stocks_update;
-pub mod reports;
 pub mod closed_position;
 pub mod closed_positions_reader;
