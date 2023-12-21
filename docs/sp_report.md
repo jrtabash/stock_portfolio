@@ -8,13 +8,16 @@ The following reports are supported:
 - **Daych**: Day change of stocks in portfolio
 - **Closed**: Closed positions value
 - **Divid**: Dividends of stocks in porfolio
+- **Sum**: Summary of stocks in portfolio
 
 Given a stocks file, containing symbol, type, date purchased, quantity purchased, and purchase/base price,
 get the latest close prices and dividends from the datastore and generate a report. The value report shows base,
 current and net prices and notional values, percent change, cumulative dividend, as well as cumulative dividends.
 The top report shows top and bottom performing stocks in several categories. The volatility report shows overall
 volatility and 22 day volatility per stock. The day change report shows previous price, price, change, percent
-change, low, high and volume.
+change, low, high and volume. The dividends report shows cumulative dividend, yearly dividend and daily unit
+dividend. The summary report shows value, minimum, average and maximum over aggregated base, latest and net
+prices as well as percent change.
 
 The following features are supported:
 - **Group by**: Report quantities, base notional and current notional values grouped by symbol
@@ -68,6 +71,7 @@ OPTIONS:
                                     daych  : Stocks day change
                                     closed : Closed positions value
                                     divid  : Stoks dividend
+                                    sum    : Stocks summary
     -l, --config <stocks_config>    Config file containing datastore root and name, stocks, closed positions and cash in
                                     portfolio. Both root and name can be set to "$default" which will use home path for
                                     root and sp_datastore for name.

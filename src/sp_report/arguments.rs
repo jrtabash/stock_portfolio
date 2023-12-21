@@ -21,7 +21,8 @@ impl Arguments {
         let parsed_args = App::new("Stock Portfolio Report")
             .version(common_args::app_version())
             .about("Generate portfolio reports. Supported reports include gains & losses, \
-                    top/bottom performers, volatility, day change, closed positions and dividends.")
+                    top/bottom performers, volatility, day change, closed positions, dividends \
+                    and summary.")
 
             // Options
             .arg(common_args::stocks_config())
@@ -35,7 +36,8 @@ impl Arguments {
                         volat  : Stocks volatility\n\
                         daych  : Stocks day change\n\
                         closed : Closed positions value\n\
-                        divid  : Stoks dividend")
+                        divid  : Stoks dividend\n\
+                        sum    : Stocks summary")
                  .takes_value(true))
             .arg(Arg::with_name("order_by")
                  .short("o")

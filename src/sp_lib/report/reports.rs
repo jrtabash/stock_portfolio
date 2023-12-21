@@ -6,6 +6,7 @@ use crate::report::report_type::ReportType;
 use crate::report::rpt_closed_report::ClosedReport;
 use crate::report::rpt_daych_report::DaychReport;
 use crate::report::rpt_divid_report::DividReport;
+use crate::report::rpt_sum_report::SumReport;
 use crate::report::rpt_top_report::TopReport;
 use crate::report::rpt_value_report::ValueReport;
 use crate::report::rpt_volat_report::VolatReport;
@@ -25,6 +26,7 @@ fn make_report(rtype: ReportType) -> Box<dyn Report> {
         ReportType::Volat => Box::new(VolatReport{}),
         ReportType::Daych => Box::new(DaychReport{}),
         ReportType::Closed => Box::new(ClosedReport{}),
-        ReportType::Divid => Box::new(DividReport{})
+        ReportType::Divid => Box::new(DividReport{}),
+        ReportType::Sum => Box::new(SumReport{})
     }
 }
