@@ -20,13 +20,13 @@ impl Report for SumReport {
         println!("Number of Stocks: {}", stocks.len());
         println!();
 
-        println!("{:>11} {:>12}", "Name", "Value");
-        println!("{:>11} {:>12}", "----", "-----");
+        println!("{:>11} {:>12} {:>12} {:>12} {:>12}", "Name", "Value", "Minimum", "Average", "Maximum");
+        println!("{:>11} {:>12} {:>12} {:>12} {:>12}", "----", "-----", "-------", "-------", "-------");
 
         write_table(
             stocks,
-            |name, value| {
-                println!("{:>11} {:>12.2}", name, value);
+            |name, value, min, avg, max| {
+                println!("{:>11} {:>12.2} {:>12.2} {:>12.2} {:>12.2}", name, value, min, avg, max);
                 Ok(())
             }).unwrap();
     }
@@ -35,12 +35,12 @@ impl Report for SumReport {
         let stocks = params.stocks();
         let mut file = File::create(filename)?;
 
-        writeln!(file, "Name,Value")?;
+        writeln!(file, "Name,Value,Minimum,Average,Maximum")?;
 
         write_table(
             stocks,
-            |name, value| {
-                writeln!(file, "{},{:.2}", name, value)?;
+            |name, value, min, avg, max| {
+                writeln!(file, "{},{:.2},{:.2},{:.2},{:.2}", name, value, min, avg, max)?;
                 Ok(())
             })?;
 
@@ -79,31 +79,19 @@ fn calc_stats(stocks: &StockList, extract: impl Fn(&Stock) -> Price) -> Stats {
     }
 }
 
-fn write_table(stocks: &StockList, mut writer: impl FnMut(&str, Price) -> Result<(), Error>) -> Result<(), Error> {
+fn write_table(stocks: &StockList, mut writer: impl FnMut(&str, Price, Price, Price, Price) -> Result<(), Error>) -> Result<(), Error> {
     let base_stat = calc_stats(stocks, |s| s.base_notional());
-    writer("Base Value", base_stat.sum)?;
-    writer("Min Base", base_stat.min)?;
-    writer("Avg Base", base_stat.mean())?;
-    writer("Max Base", base_stat.max)?;
+    writer("Base Value", base_stat.sum, base_stat.min, base_stat.mean(), base_stat.max)?;
 
     let latest_stat = calc_stats(stocks, |s| s.latest_notional());
-    writer("Last Value", latest_stat.sum)?;
-    writer("Min Last", latest_stat.min)?;
-    writer("Avg Last", latest_stat.mean())?;
-    writer("Max Last", latest_stat.max)?;
+    writer("Last Value", latest_stat.sum, latest_stat.min, latest_stat.mean(), latest_stat.max)?;
 
     let net_stat = calc_stats(stocks, |s| s.net_notional());
-    writer("Net Value", net_stat.sum)?;
-    writer("Min Net", net_stat.min)?;
-    writer("Avg Net", net_stat.mean())?;
-    writer("Max Net", net_stat.max)?;
+    writer("Net Value", net_stat.sum, net_stat.min, net_stat.mean(), net_stat.max)?;
 
     let pct_chg = algorithms::pct_change(stocks);
     let pct_stat = calc_stats(stocks, |s| s.pct_change());
-    writer("Pct Change", pct_chg)?;
-    writer("Min Pct", pct_stat.min)?;
-    writer("Avg Pct", pct_stat.mean())?;
-    writer("Max Pct", pct_stat.max)?;
+    writer("Pct Change", pct_chg, pct_stat.min, pct_stat.mean(), pct_stat.max)?;
 
     Ok(())
 }
