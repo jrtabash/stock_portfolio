@@ -19,8 +19,8 @@ use sp_lib::report::reports;
 #[test]
 fn test_stock_list() {
     let mut list = StockList::new();
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
-    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 100, 120.25, 125.25));
+    list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21, 79.71));
     assert_eq!(list.len(), 2);
     assert!(price_eql(net_notional(&list), 550.0));
     assert!(price_eql(latest_notional(&list), 20496.0));
@@ -49,9 +49,9 @@ fn test_stock_aggregate() {
     }
 
     let mut list = StockList::new();
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
-    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-2), 100, 122.0, 125.25));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 100, 120.25, 125.25));
+    list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21, 79.71));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-2), 100, 122.0, 125.25));
 
     let gby = stock_aggregate(&list);
     assert_eq!(gby.len(), 2);
@@ -62,10 +62,10 @@ fn test_stock_aggregate() {
 #[test]
 fn test_stock_groupby() {
     let mut list = StockList::new();
-    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21,  79.71));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21,  79.71));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 200, 120.25, 125.25));
     list.push(make_stock("ICLN", StockType::ETF,   today_plus_days(0),  400, 24.10,  24.12));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(0),  100, 125.50, 125.75));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(0),  100, 125.50, 125.75));
 
     let sym_sizes = stock_groupby(&list, |_| 0, |s, q| s.quantity + q);
     assert_eq!(sym_sizes.len(), 3);
@@ -78,7 +78,7 @@ fn test_stock_groupby() {
 fn test_stock_update_from_csv() {
     let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
                2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
-    let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
+    let mut stock = Stock::new(String::from("STCK"), StockType::Cash, make_date(2021, 2, 1), 100, 24.0);
     assert!(update_stock_from_csv(&mut stock, &csv).unwrap());
     assert!(price_eql(stock.latest_price, 28.25));
     assert_eq!(stock.latest_date, make_date(2021, 2, 26));
@@ -90,7 +90,7 @@ fn test_stock_update_from_csv2() {
                2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
                2021-02-25,26.10,31.0,22.0,24.0,24.0,9000\n\
                2021-02-26,24.90,32.0,24.0,28.0,28.25,11000";
-    let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
+    let mut stock = Stock::new(String::from("STCK"), StockType::Cash, make_date(2021, 2, 1), 100, 24.0);
     assert!(update_stock_from_csv(&mut stock, &csv).unwrap());
     assert!(price_eql(stock.latest_price, 28.25));
     assert_eq!(stock.latest_date, make_date(2021, 2, 26));
@@ -102,7 +102,7 @@ fn test_stock_update_from_csv_zero_price() {
                2021-02-24,25.0,30.0,20.0,26.0,26.0,10000\n\
                2021-02-25,26.10,31.0,22.0,24.0,24.0,9000\n\
                2021-02-26,24.90,32.0,24.0,28.0,0.00,11000";
-    let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
+    let mut stock = Stock::new(String::from("STCK"), StockType::Cash, make_date(2021, 2, 1), 100, 24.0);
     assert!(!update_stock_from_csv(&mut stock, &csv).unwrap());
     assert!(price_eql(stock.latest_price, 0.00));
     assert_eq!(stock.latest_date, earliest_date());
@@ -111,7 +111,7 @@ fn test_stock_update_from_csv_zero_price() {
 #[test]
 fn test_stock_update_from_csv_no_data() {
     let csv = "Date,Open,High,Low,Close,Adj Close,Volume";
-    let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
+    let mut stock = Stock::new(String::from("STCK"), StockType::Cash, make_date(2021, 2, 1), 100, 24.0);
     assert!(!update_stock_from_csv(&mut stock, &csv).unwrap());
     assert!(price_eql(stock.latest_price, 0.00));
     assert_eq!(stock.latest_date, earliest_date());
@@ -121,7 +121,7 @@ fn test_stock_update_from_csv_no_data() {
 fn test_stock_update_from_csv_incomplete_data() {
     let csv = "Date,Open,High,Low,Close,Adj Close,Volume\n\
                2021-02-24,25.0,30.0";
-    let mut stock = Stock::new(String::from("STCK"), StockType::Stock, make_date(2021, 2, 1), 100, 24.0);
+    let mut stock = Stock::new(String::from("STCK"), StockType::Cash, make_date(2021, 2, 1), 100, 24.0);
     assert!(update_stock_from_csv(&mut stock, &csv).is_err());
     assert!(price_eql(stock.latest_price, 0.00));
     assert_eq!(stock.latest_date, earliest_date());
@@ -130,8 +130,8 @@ fn test_stock_update_from_csv_incomplete_data() {
 #[test]
 fn test_stocks_update() {
     let mut stocks = StockList::new();
-    stocks.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 52.21, 0.00));
-    stocks.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 0.00));
+    stocks.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 52.21, 0.00));
+    stocks.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 200, 120.25, 0.00));
 
     let dt = make_date(2022, 02, 17);
 
@@ -153,8 +153,8 @@ fn test_sort_stocks() {
     }
 
     let mut list = StockList::new();
-    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21, 79.71));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 200, 120.25, 125.25));
     list.push(make_stock("ICLN", StockType::ETF, today_plus_days(-1), 300, 24.10, 24.12));
     list[0].cum_dividend = 0.0;
     list[1].cum_dividend = 20.15;
@@ -211,8 +211,8 @@ fn test_sort_stocks_by_extra_ftn() {
     }
 
     let mut list = StockList::new();
-    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21, 79.71));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 200, 120.25, 125.25));
     list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
     list[0].cum_dividend = 0.0;
     list[1].cum_dividend = 20.15;
@@ -232,8 +232,8 @@ fn test_sort_stocks_by_extra_ftn() {
 fn test_filter_stocks() {
     fn test_filter(expr: &str, keep: bool, symbols: &Vec<&str>) {
         let mut list = StockList::new();
-        list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
-        list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+        list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21, 79.71));
+        list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 200, 120.25, 125.25));
         list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
 
         filter_stocks(&mut list, expr, keep).unwrap();
@@ -249,8 +249,8 @@ fn test_filter_stocks() {
 
     test_filter("etf", keep, &vec!["ICLN"]);
     test_filter("etf", remove, &vec!["DELL", "AAPL"]);
-    test_filter("stock", keep, &vec!["DELL", "AAPL"]);
-    test_filter("stock", remove, &vec!["ICLN"]);
+    test_filter("cash", keep, &vec!["DELL", "AAPL"]);
+    test_filter("cash", remove, &vec!["ICLN"]);
     test_filter("AAPL", keep, &vec!["AAPL"]);
     test_filter("AAPL", remove, &vec!["DELL", "ICLN"]);
     test_filter("AAPL,DELL", keep, &vec!["DELL", "AAPL"]);
@@ -263,8 +263,8 @@ fn test_filter_stocks() {
 fn test_filter_stocks_by_expr() {
     fn test_filter_by(by_expr: &str, keep: bool, sz: usize, sym1: &str, sym2: &str, sym3: &str) {
         let mut list = StockList::new();
-        list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21, 79.71));
-        list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+        list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21, 79.71));
+        list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 200, 120.25, 125.25));
         list.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 300, 24.10, 24.12));
 
         filter_stocks(&mut list, by_expr, keep).unwrap();
@@ -311,7 +311,7 @@ fn test_match_list_to_symbols() {
             .map(|s| {
                 make_position(
                     s,
-                    StockType::Stock,
+                    StockType::Cash,
                     today_plus_days(-10),
                     today(),
                     100,
@@ -353,17 +353,17 @@ fn test_stock_base_dates() {
     }
 
     let mut list = StockList::new();
-    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21,  79.71));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21,  79.71));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 200, 120.25, 125.25));
     list.push(make_stock("ICLN", StockType::ETF,   today_plus_days(0),  300, 24.10,  24.12));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(0),  100, 125.50, 125.75));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(0),  100, 125.50, 125.75));
     test_dates(&list);
 
     let mut list = StockList::new();
-    list.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 79.21,  79.71));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(0),  100, 125.50, 125.75));
+    list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21,  79.71));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(0),  100, 125.50, 125.75));
     list.push(make_stock("ICLN", StockType::ETF,   today_plus_days(0),  300, 24.10,  24.12));
-    list.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 200, 120.25, 125.25));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 200, 120.25, 125.25));
     test_dates(&list);
 }
 
@@ -371,8 +371,8 @@ fn test_stock_base_dates() {
 fn test_value_export() {
     let mut cfg = StocksConfig::new();
     let stocks = cfg.stocks_mut();
-    stocks.push(make_stock("DELL", StockType::Stock, today_plus_days(-2), 100, 75.50, 80.0));
-    stocks.push(make_stock("AAPL", StockType::Stock, today_plus_days(-3), 100, 120.25, 125.25));
+    stocks.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 75.50, 80.0));
+    stocks.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 100, 120.25, 125.25));
     stocks.push(make_stock("ICLN", StockType::ETF, today_plus_days(0), 100, 24.10, 24.15));
 
     assert_eq!(cfg.ds_root(), "");
@@ -408,16 +408,16 @@ fn test_stock_reader() {
 
     assert!(temp_file::create_file(&temp_name,
                                    "symbol,type,date,quantity,base_price\n\
-                                    AAPL,stock,2020-09-20,100,115.00\n\
-                                    AAPL,stock,2020-11-12,100,118.50\n\
-                                    DELL,stock,2021-02-10,100,75.50\n"));
+                                    AAPL,cash,2020-09-20,100,115.00\n\
+                                    AAPL,cash,2020-11-12,100,118.50\n\
+                                    DELL,cash,2021-02-10,100,75.50\n"));
 
     let reader = StocksReader::new(String::from(stocks_filename.to_str().unwrap()));
     let list = reader.read().unwrap();
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["AAPL", "AAPL", "DELL"]);
     assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
-               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+               vec![StockType::Cash, StockType::Cash, StockType::Cash]);
     assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
                vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
     assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
@@ -438,9 +438,9 @@ fn test_stock_config_from_file() {
                                     ds_name: sp_name\n\
                                     stocks: csv{\n\
                                     symbol,type,date,quantity,base_price\n\
-                                    AAPL,stock,2020-09-20,100,115.00\n\
-                                    AAPL,stock,2020-11-12,100,118.50\n\
-                                    DELL,stock,2021-02-10,100,75.50\n\
+                                    AAPL,cash,2020-09-20,100,115.00\n\
+                                    AAPL,cash,2020-11-12,100,118.50\n\
+                                    DELL,cash,2021-02-10,100,75.50\n\
                                     }\n"));
 
     let cfg = StocksConfig::from_file(config_filename.to_str().unwrap()).unwrap();
@@ -453,7 +453,7 @@ fn test_stock_config_from_file() {
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["AAPL", "AAPL", "DELL"]);
     assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
-               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+               vec![StockType::Cash, StockType::Cash, StockType::Cash]);
     assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
                vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
     assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
@@ -473,9 +473,9 @@ fn test_stock_config_from_file2() {
 
     assert!(temp_file::create_file(&csv_file,
                                    "symbol,type,date,quantity,base_price\n\
-                                    AAPL,stock,2020-09-20,100,115.00\n\
-                                    AAPL,stock,2020-11-12,100,118.50\n\
-                                    DELL,stock,2021-02-10,100,75.50\n"));
+                                    AAPL,cash,2020-09-20,100,115.00\n\
+                                    AAPL,cash,2020-11-12,100,118.50\n\
+                                    DELL,cash,2021-02-10,100,75.50\n"));
     assert!(temp_file::create_file(&cfg_file,
                                    &format!("ds_root: sp_root\n\
                                              ds_name: sp_name\n\
@@ -494,7 +494,7 @@ fn test_stock_config_from_file2() {
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["AAPL", "AAPL", "DELL"]);
     assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
-               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+               vec![StockType::Cash, StockType::Cash, StockType::Cash]);
     assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
                vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
     assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
@@ -516,14 +516,14 @@ fn test_stock_config_from_file3() {
                                     ds_name: sp_name\n\
                                     stocks: csv{\n\
                                     symbol,type,date,quantity,base_price\n\
-                                    AAPL,stock,2020-09-20,100,115.00\n\
-                                    AAPL,stock,2020-11-12,100,118.50\n\
-                                    DELL,stock,2021-02-10,100,75.50\n\
+                                    AAPL,cash,2020-09-20,100,115.00\n\
+                                    AAPL,cash,2020-11-12,100,118.50\n\
+                                    DELL,cash,2021-02-10,100,75.50\n\
                                     }\n\
                                     closed_positions: csv{\n\
                                     symbol,type,base_date,exit_date,quantity,base_price,exit_price,base_fee,exit_fee,dividend\n\
-                                    DELL,stock,2021-02-10,2022-04-05,100,75.50,81.75,0.00,0.05,52.00\n\
-                                    DELL,stock,2021-02-10,2022-05-18,100,75.50,82.25,0.00,0.05,52.00\n\
+                                    DELL,cash,2021-02-10,2022-04-05,100,75.50,81.75,0.00,0.05,52.00\n\
+                                    DELL,cash,2021-02-10,2022-05-18,100,75.50,82.25,0.00,0.05,52.00\n\
                                     }\n"));
 
     let cfg = StocksConfig::from_file(config_filename.to_str().unwrap()).unwrap();
@@ -536,7 +536,7 @@ fn test_stock_config_from_file3() {
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["AAPL", "AAPL", "DELL"]);
     assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
-               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+               vec![StockType::Cash, StockType::Cash, StockType::Cash]);
     assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
                vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
     assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
@@ -548,7 +548,7 @@ fn test_stock_config_from_file3() {
     assert_eq!(positions.iter().map(|p| p.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["DELL", "DELL"]);
     assert_eq!(positions.iter().map(|p| p.stype).collect::<Vec<StockType>>(),
-               vec![StockType::Stock, StockType::Stock]);
+               vec![StockType::Cash, StockType::Cash]);
     assert_eq!(positions.iter().map(|p| p.base_date).collect::<Vec<SPDate>>(),
                vec![make_date(2021, 2, 10), make_date(2021, 2, 10)]);
     assert_eq!(positions.iter().map(|p| p.exit_date).collect::<Vec<SPDate>>(),
@@ -580,14 +580,14 @@ fn test_stock_config_from_file4() {
 
     assert!(temp_file::create_file(&csv_file,
                                    "symbol,type,date,quantity,base_price\n\
-                                    AAPL,stock,2020-09-20,100,115.00\n\
-                                    AAPL,stock,2020-11-12,100,118.50\n\
-                                    DELL,stock,2021-02-10,100,75.50\n"));
+                                    AAPL,cash,2020-09-20,100,115.00\n\
+                                    AAPL,cash,2020-11-12,100,118.50\n\
+                                    DELL,cash,2021-02-10,100,75.50\n"));
 
     assert!(temp_file::create_file(&pos_file,
                                    "symbol,type,base_date,exit_date,quantity,base_price,exit_price,base_fee,exit_fee,dividend\n\
-                                    DELL,stock,2021-02-10,2022-04-05,100,75.50,81.75,0.00,0.05,52.00\n\
-                                    DELL,stock,2021-02-10,2022-05-18,100,75.50,82.25,0.00,0.05,52.00\n"));
+                                    DELL,cash,2021-02-10,2022-04-05,100,75.50,81.75,0.00,0.05,52.00\n\
+                                    DELL,cash,2021-02-10,2022-05-18,100,75.50,82.25,0.00,0.05,52.00\n"));
 
     assert!(temp_file::create_file(&cfg_file,
                                    &format!("ds_root: sp_root\n\
@@ -611,7 +611,7 @@ fn test_stock_config_from_file4() {
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["AAPL", "AAPL", "DELL"]);
     assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
-               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+               vec![StockType::Cash, StockType::Cash, StockType::Cash]);
     assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
                vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
     assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
@@ -623,7 +623,7 @@ fn test_stock_config_from_file4() {
     assert_eq!(positions.iter().map(|p| p.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["DELL", "DELL"]);
     assert_eq!(positions.iter().map(|p| p.stype).collect::<Vec<StockType>>(),
-               vec![StockType::Stock, StockType::Stock]);
+               vec![StockType::Cash, StockType::Cash]);
     assert_eq!(positions.iter().map(|p| p.base_date).collect::<Vec<SPDate>>(),
                vec![make_date(2021, 2, 10), make_date(2021, 2, 10)]);
     assert_eq!(positions.iter().map(|p| p.exit_date).collect::<Vec<SPDate>>(),
@@ -653,9 +653,9 @@ fn test_stock_config_from_str() {
                          cash: 1025.00\n\
                          stocks: csv{\n\
                          symbol,type,date,quantity,base_price\n\
-                         AAPL,stock,2020-09-20,100,115.00\n\
-                         AAPL,stock,2020-11-12,100,118.50\n\
-                         DELL,stock,2021-02-10,100,75.50\n\
+                         AAPL,cash,2020-09-20,100,115.00\n\
+                         AAPL,cash,2020-11-12,100,118.50\n\
+                         DELL,cash,2021-02-10,100,75.50\n\
                          }\n";
 
     let cfg = StocksConfig::from_str(content).unwrap();
@@ -669,7 +669,7 @@ fn test_stock_config_from_str() {
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(),
                vec!["AAPL", "AAPL", "DELL"]);
     assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(),
-               vec![StockType::Stock, StockType::Stock, StockType::Stock]);
+               vec![StockType::Cash, StockType::Cash, StockType::Cash]);
     assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(),
                vec![make_date(2020, 9, 20), make_date(2020, 11, 12), make_date(2021, 02, 10)]);
     assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(),
@@ -686,7 +686,7 @@ fn test_stock_config_mut() {
     assert_eq!(cfg.stocks().len(), 0);
 
     let stocks = cfg.stocks_mut();
-    stocks.push(make_stock("AAPL", StockType::Stock, make_date(2020, 9, 20), 100, 120.25, 125.25));
+    stocks.push(make_stock("AAPL", StockType::Cash, make_date(2020, 9, 20), 100, 120.25, 125.25));
 
     assert_eq!(cfg.ds_root(), "");
     assert_eq!(cfg.ds_name(), "");
@@ -694,7 +694,7 @@ fn test_stock_config_mut() {
 
     let list = cfg.stocks();
     assert_eq!(list.iter().map(|s| s.symbol.as_str()).collect::<Vec<&str>>(), vec!["AAPL"]);
-    assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(), vec![StockType::Stock]);
+    assert_eq!(list.iter().map(|s| s.stype).collect::<Vec<StockType>>(), vec![StockType::Cash]);
     assert_eq!(list.iter().map(|s| s.date).collect::<Vec<SPDate>>(), vec![make_date(2020, 9, 20)]);
     assert_eq!(list.iter().map(|s| s.quantity).collect::<Vec<u32>>(), vec![100]);
     assert_eq!(list.iter().map(|s| s.base_price).collect::<Vec<f64>>(), vec![120.25]);

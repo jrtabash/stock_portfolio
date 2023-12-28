@@ -119,14 +119,14 @@ mod tests {
 
     fn make_content() -> &'static str {
         "symbol,type,base_date,exit_date,quantity,base_price,exit_price,base_fee,exit_fee,dividend\n\
-         MYSYM,stock,2016-04-15,2023-03-28,100,44.10,131.56,0.00,0.12,1009.00\n\
-         MYSYM,stock,2016-04-15,2023-03-28,100,44.10,131.55,0.00,0.12,1009.00\n\
-         MYOTH,stock,2021-10-18,2023-09-06,44,85.60,165.45,0.00,0.07,1205.60\n"
+         MYSYM,cash,2016-04-15,2023-03-28,100,44.10,131.56,0.00,0.12,1009.00\n\
+         MYSYM,cash,2016-04-15,2023-03-28,100,44.10,131.55,0.00,0.12,1009.00\n\
+         MYOTH,cash,2021-10-18,2023-09-06,44,85.60,165.45,0.00,0.07,1205.60\n"
     }
 
     fn position_0() -> ClosedPosition {
         ClosedPosition::new("MYSYM".to_string(),
-                            StockType::Stock,
+                            StockType::Cash,
                             datetime::make_date(2016, 4, 15),
                             datetime::make_date(2023, 3, 28),
                             100,
@@ -139,7 +139,7 @@ mod tests {
 
     fn position_1() -> ClosedPosition {
         ClosedPosition::new("MYSYM".to_string(),
-                            StockType::Stock,
+                            StockType::Cash,
                             datetime::make_date(2016, 4, 15),
                             datetime::make_date(2023, 3, 28),
                             100,
@@ -152,7 +152,7 @@ mod tests {
 
     fn position_2() -> ClosedPosition {
         ClosedPosition::new("MYOTH".to_string(),
-                            StockType::Stock,
+                            StockType::Cash,
                             datetime::make_date(2021, 10, 18),
                             datetime::make_date(2023, 9, 6),
                             44,

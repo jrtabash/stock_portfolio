@@ -51,9 +51,9 @@ OPTIONS:
                                         date
                                         quantity
                                         base_price
-                                    including a header line. Supported type values include stock, etf and index. A
-                                    stocks CSV file block "csv_file{" can be used instead of a stocks CSV block. It
-                                    should contain the path to a CSV file. The file should contain the CSV stocks data.
+                                    including a header line. Supported type values include cash, etf and index. A stocks
+                                    CSV file block "csv_file{" can be used instead of a stocks CSV block. It should
+                                    contain the path to a CSV file. The file should contain the CSV stocks data.
                                     
                                     The closed positions CSV block "csv{" should contain closed positions in portfolio,
                                     with the following columns:
@@ -67,7 +67,7 @@ OPTIONS:
                                         base_fee
                                         exit_fee
                                         dividend
-                                    including a header line. Supported type values include stock, etf and index. The
+                                    including a header line. Supported type values include cash, etf and index. The
                                     closed positions CSV file block "csv_file{" can be used instead of a closed
                                     positions CSV block. It should contain the path to a CSV file. The file should
                                     contain the CSV closed positions data.
@@ -77,7 +77,7 @@ OPTIONS:
                                         ds_name: my_datastore
                                         stocks: csv{
                                           symbol,type,date,quantity,base_price
-                                          AAPL,stock,2020-09-20,100,115.00
+                                          AAPL,cash,2020-09-20,100,115.00
                                         }
                                     
                                     Sample config 2:

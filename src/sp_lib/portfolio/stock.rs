@@ -113,9 +113,9 @@ mod tests {
 
     #[test]
     fn test_stock_new() {
-        let stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
+        let stock = Stock::new(String::from("AAPL"), StockType::Cash, datetime::today(), 100, 120.25);
         assert_eq!(stock.symbol, "AAPL");
-        assert!(stock.stype == StockType::Stock);
+        assert!(stock.stype == StockType::Cash);
         assert_eq!(stock.date, datetime::today());
         assert_eq!(stock.quantity, 100);
         assert_eq!(stock.base_price, 120.25);
@@ -129,7 +129,7 @@ mod tests {
 
     #[test]
     fn test_stock_set_latest_price() {
-        let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Cash, datetime::today(), 100, 120.25);
         assert_eq!(stock.latest_price, 0.0);
         assert_eq!(stock.latest_date, datetime::earliest_date());
         assert_eq!(stock.days_held, 0);
@@ -148,7 +148,7 @@ mod tests {
 
     #[test]
     fn test_stock_getters() {
-        let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Cash, datetime::today(), 100, 120.25);
         stock.set_latest_price(125.50, datetime::today());
 
         assert_eq!(stock.net_price(), 5.25);
@@ -160,7 +160,7 @@ mod tests {
 
     #[test]
     fn test_stock_display() {
-        let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 100, 120.25);
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Cash, datetime::today(), 100, 120.25);
         stock.set_latest_price(125.50, datetime::today());
 
         assert_eq!(format!("{}", stock), "Stock(AAPL 100@125.50)");
@@ -168,7 +168,7 @@ mod tests {
 
     #[test]
     fn test_stock_dividend_functions() {
-        let mut stock = Stock::new(String::from("AAPL"), StockType::Stock, datetime::today(), 200, 120.25);
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Cash, datetime::today(), 200, 120.25);
         stock.set_latest_price(125.50, datetime::today_plus_days(40));
         stock.cum_dividend = 115.0;
 

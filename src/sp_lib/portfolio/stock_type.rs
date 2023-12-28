@@ -4,14 +4,14 @@ use crate::util::error::Error;
 #[derive(Debug, Copy, Clone)]
 #[derive(PartialOrd, Ord, PartialEq, Eq)]
 pub enum StockType {
-    Stock,
+    Cash,
     ETF,
     Index
 }
 
 pub fn stocktype2str(st: StockType) -> &'static str {
     match st {
-        StockType::Stock => "stock",
+        StockType::Cash => "cash",
         StockType::ETF => "etf",
         StockType::Index => "index"
     }
@@ -19,7 +19,7 @@ pub fn stocktype2str(st: StockType) -> &'static str {
 
 pub fn str2stocktype(ststr: &str) -> Result<StockType, Error> {
     match ststr.to_lowercase().as_str() {
-        "stock" => Ok(StockType::Stock),
+        "cash" | "stock" => Ok(StockType::Cash),
         "etf" => Ok(StockType::ETF),
         "index" => Ok(StockType::Index),
         _ => Err(format!("Unknown stock type '{}'", ststr).into())
@@ -41,19 +41,22 @@ mod tests {
 
     #[test]
     fn test_stock_type() {
-        let stock = StockType::Stock;
+        let cash = StockType::Cash;
         let etf = StockType::ETF;
         let index = StockType::Index;
-        let stock_str = "stock";
+        let cash_str = "cash";
         let etf_str = "etf";
         let index_str = "index";
 
-        assert_eq!(stocktype2str(stock), stock_str);
+        assert_eq!(stocktype2str(cash), cash_str);
         assert_eq!(stocktype2str(etf), etf_str);
         assert_eq!(stocktype2str(index), index_str);
-        assert!(str2stocktype(&stock_str).unwrap() == stock);
+        assert!(str2stocktype(&cash_str).unwrap() == cash);
         assert!(str2stocktype(&etf_str).unwrap() == etf);
         assert!(str2stocktype(&index_str).unwrap() == index);
+
+        // Make sure str2stocktype is backward compatible.
+        assert!(str2stocktype("stock").unwrap() == cash);
 
         match str2stocktype("foobar") {
             Ok(_) => assert!(false),

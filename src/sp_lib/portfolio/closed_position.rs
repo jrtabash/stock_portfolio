@@ -92,7 +92,7 @@ mod tests {
     fn test_closed_position_new() {
         let cp = default_closed_position();
         assert_eq!(cp.symbol, "AAPL");
-        assert!(cp.stype == StockType::Stock);
+        assert!(cp.stype == StockType::Cash);
         assert_eq!(cp.base_date, datetime::today_plus_days(-10));
         assert_eq!(cp.exit_date, datetime::today());
         assert_eq!(cp.quantity, 100);
@@ -113,7 +113,7 @@ mod tests {
     fn default_closed_position() -> ClosedPosition {
         ClosedPosition::new(
             String::from("AAPL"),
-            StockType::Stock,
+            StockType::Cash,
             datetime::today_plus_days(-10),
             datetime::today(),
             100,

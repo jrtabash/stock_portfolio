@@ -39,8 +39,8 @@ function initialize() {
     echo "ds_name: ${DS_NAME}" >> ${DS_CONFIG}
     echo "stocks: csv{" >> ${DS_CONFIG}
     echo "  symbol,type,date,quantity,base_price" >> ${DS_CONFIG}
-    echo "  AAPL,stock,${dt},100,115.50" >> ${DS_CONFIG}
-    echo "  DELL,stock,${dt},100,50.25" >> ${DS_CONFIG}
+    echo "  AAPL,cash,${dt},100,115.50" >> ${DS_CONFIG}
+    echo "  DELL,cash,${dt},100,50.25" >> ${DS_CONFIG}
     echo "}" >> ${DS_CONFIG}
 }
 

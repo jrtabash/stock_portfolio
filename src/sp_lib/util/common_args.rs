@@ -34,12 +34,12 @@ pub fn stocks_config_help() -> &'static str {
      \n\
      The stocks CSV block \"csv{\" should contain stocks in portfolio, with the following columns:\n\
      \tsymbol\n\ttype\n\tdate\n\tquantity\n\tbase_price\n\
-     including a header line. Supported type values include stock, etf and index. A stocks CSV file block \"csv_file{\" can \
+     including a header line. Supported type values include cash, etf and index. A stocks CSV file block \"csv_file{\" can \
      be used instead of a stocks CSV block. It should contain the path to a CSV file. The file should contain the CSV stocks data.\n\
      \n\
      The closed positions CSV block \"csv{\" should contain closed positions in portfolio, with the following columns:\n\
      \tsymbol\n\ttype\n\tbase_date\n\texit_date\n\tquantity\n\tbase_price\n\texit_price\n\tbase_fee\n\texit_fee\n\tdividend\n\
-     including a header line. Supported type values include stock, etf and index. The closed positions CSV \
+     including a header line. Supported type values include cash, etf and index. The closed positions CSV \
      file block \"csv_file{\" can be used instead of a closed positions CSV block. It should contain the path to a CSV file. \
      The file should contain the CSV closed positions data.\n\
      \n\
@@ -48,7 +48,7 @@ pub fn stocks_config_help() -> &'static str {
      \tds_name: my_datastore\n\
      \tstocks: csv{\n\
      \t  symbol,type,date,quantity,base_price\n\
-     \t  AAPL,stock,2020-09-20,100,115.00\n\
+     \t  AAPL,cash,2020-09-20,100,115.00\n\
      \t}\n\
      \n\
      Sample config 2:\n\
@@ -81,7 +81,7 @@ pub fn export_file_help() -> &'static str {
 
 pub fn filter_help() -> &'static str {
     "Filter stocks by type, symbols or expression;\n\
-     If type, must be one of 'stock', 'etf', or 'index'.\n\
+     If type, must be one of 'cash', 'etf', or 'index'.\n\
      If symbols, must be a comma separated list of symbol names.\n\
      If expression, must follow the format '<field> <op> <value>', where:\n\
      <field> : one of days, price, net, pct, div, size, value\n\

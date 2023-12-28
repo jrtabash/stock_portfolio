@@ -80,7 +80,7 @@ class MakeDSProcessor:
             fd.write("  symbol,type,date,quantity,base_price\n")
             base_date = self.parsed_args.base_date
             for sym in self.parsed_args.symbols:
-                fd.write(f"  {sym},stock,{base_date},100,0.00\n")
+                fd.write(f"  {sym},cash,{base_date},100,0.00\n")
             fd.write("}\n")
 
     def sp_dstool(self, dsop):

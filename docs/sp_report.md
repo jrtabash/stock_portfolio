@@ -38,7 +38,7 @@ FLAGS:
 
 OPTIONS:
     -x, --exclude <exclude>         Filter stocks by type, symbols or expression;
-                                    If type, must be one of 'stock', 'etf', or 'index'.
+                                    If type, must be one of 'cash', 'etf', or 'index'.
                                     If symbols, must be a comma separated list of symbol names.
                                     If expression, must follow the format '<field> <op> <value>', where:
                                     <field> : one of days, price, net, pct, div, size, value
@@ -46,7 +46,7 @@ OPTIONS:
                                     Example : 'days > 365'
     -e, --export <export_file>      Export gains and losses table to a csv file
     -i, --include <include>         Filter stocks by type, symbols or expression;
-                                    If type, must be one of 'stock', 'etf', or 'index'.
+                                    If type, must be one of 'cash', 'etf', or 'index'.
                                     If symbols, must be a comma separated list of symbol names.
                                     If expression, must follow the format '<field> <op> <value>', where:
                                     <field> : one of days, price, net, pct, div, size, value
@@ -83,9 +83,9 @@ OPTIONS:
                                         date
                                         quantity
                                         base_price
-                                    including a header line. Supported type values include stock, etf and index. A
-                                    stocks CSV file block "csv_file{" can be used instead of a stocks CSV block. It
-                                    should contain the path to a CSV file. The file should contain the CSV stocks data.
+                                    including a header line. Supported type values include cash, etf and index. A stocks
+                                    CSV file block "csv_file{" can be used instead of a stocks CSV block. It should
+                                    contain the path to a CSV file. The file should contain the CSV stocks data.
                                     
                                     The closed positions CSV block "csv{" should contain closed positions in portfolio,
                                     with the following columns:
@@ -99,7 +99,7 @@ OPTIONS:
                                         base_fee
                                         exit_fee
                                         dividend
-                                    including a header line. Supported type values include stock, etf and index. The
+                                    including a header line. Supported type values include cash, etf and index. The
                                     closed positions CSV file block "csv_file{" can be used instead of a closed
                                     positions CSV block. It should contain the path to a CSV file. The file should
                                     contain the CSV closed positions data.
@@ -109,7 +109,7 @@ OPTIONS:
                                         ds_name: my_datastore
                                         stocks: csv{
                                           symbol,type,date,quantity,base_price
-                                          AAPL,stock,2020-09-20,100,115.00
+                                          AAPL,cash,2020-09-20,100,115.00
                                         }
                                     
                                     Sample config 2:
