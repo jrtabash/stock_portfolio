@@ -20,13 +20,13 @@ impl Report for SumReport {
         println!("Number of Stocks: {}", stocks.len());
         println!();
 
-        println!("{:>11} {:>12} {:>12} {:>12} {:>12}", "Name", "Value", "Minimum", "Average", "Maximum");
-        println!("{:>11} {:>12} {:>12} {:>12} {:>12}", "----", "-----", "-------", "-------", "-------");
+        println!("{:11} {:12} {:12} {:12} {:12}", "Name", "Value", "Minimum", "Average", "Maximum");
+        println!("{:11} {:12} {:12} {:12} {:12}", "----", "-----", "-------", "-------", "-------");
 
         write_table(
             stocks,
             |name, value, min, avg, max| {
-                println!("{:>11} {:>12.2} {:>12.2} {:>12.2} {:>12.2}", name, value, min, avg, max);
+                println!("{:11} {:12.2} {:12.2} {:12.2} {:12.2}", name, value, min, avg, max);
                 Ok(())
             }).unwrap();
     }
