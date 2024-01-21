@@ -11,6 +11,7 @@ The following operations are supported:
 - **Showd**: Show symbol dividends
 - **Shows**: Show symbol splits
 - **Export**: Export symbol history and dividends
+- **Syms**: List symbols
 - **Consym**: Check datastore contains symbol
 - **Check**: Check history, dividend and split data
 - **Stat**: Calculate files count and size
@@ -37,6 +38,7 @@ OPTIONS:
                                     showd  : show dividends for symbol
                                     shows  : show splits for symbol
                                     export : export symbol history and dividends
+                                    syms   : list symbols
                                     consym : check datastore contains symbol
                                     check  : check history, dividend and split data
                                     stat   : calculate files count and size
