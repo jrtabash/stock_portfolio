@@ -4,7 +4,7 @@ use sp_lib::portfolio::{algorithms, stocks_config};
 use sp_lib::util::{common_app, datetime, misc};
 use sp_lib::util::error::Error;
 use sp_lib::yfinance::{query, types};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 
@@ -20,6 +20,7 @@ const SHOWD: &str = "showd";
 const SHOWS: &str = "shows";
 const EXPORT: &str = "export";
 const CONSYM: &str = "consym";
+const SYMS: &str = "syms";
 
 struct StatAgg {
     tot_size: u64,
@@ -79,6 +80,7 @@ impl common_app::AppTrait for Application {
             SHOWS => self.show_splits()?,
             EXPORT => self.export()?,
             CONSYM => self.contains_symbol()?,
+            SYMS => self.list_symbols()?,
             _ => return Err(format!("Invalid ds_operation - '{}'", self.args.ds_operation()).into())
         };
 
@@ -385,6 +387,24 @@ impl Application {
             }
             None => println!("Missing symbol for consym operation")
         };
+
+        Ok(())
+    }
+
+    fn list_symbols(&self) -> Result<(), Error> {
+        if self.args.is_verbose() {
+            println!("List datastore symbols");
+        }
+
+        let stocks: HashSet<&str> = self.config.stocks().iter()
+            .map(|s| s.symbol.as_str())
+            .collect();
+        let positions: HashSet<&str> = self.config.closed_positions().iter()
+            .map(|p| p.symbol.as_str())
+            .collect();
+        for s in stocks.union(&positions) {
+            println!("{}", s);
+        }
 
         Ok(())
     }

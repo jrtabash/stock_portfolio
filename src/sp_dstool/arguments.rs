@@ -17,7 +17,7 @@ impl Arguments {
         #[rustfmt::skip]
         let parsed_args = App::new("Stock Portfolio Datastore Tool")
             .version(common_args::app_version())
-            .about("Datastore tool - create, delete, update, drop, reset, showh, showd, shows, export, check or stat.")
+            .about("Datastore tool - manage, update and query symbols in datastore.")
 
             // Options
             .arg(common_args::stocks_config())
@@ -39,6 +39,7 @@ impl Arguments {
                         showd  : show dividends for symbol\n\
                         shows  : show splits for symbol\n\
                         export : export symbol history and dividends\n\
+                        syms   : list symbols\n\
                         consym : check datastore contains symbol\n\
                         check  : check history, dividend and split data\n\
                         stat   : calculate files count and size")
