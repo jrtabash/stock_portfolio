@@ -22,16 +22,14 @@ impl Report for DaychReport {
             .iter()
             .map(|s| calc_daych(s, ds))
             .collect();
-        let value_change: Price = changes
-            .iter()
-            .filter(|c| c.is_some())
-            .map(|c| c.as_ref().unwrap().val_change)
-            .sum::<Price>();
+        let (value_change, pos_change, neg_change) = sum_changes(&changes);
 
         println!("Stocks Day Change Report");
         println!("------------------------");
         println!("              Date: {}", datetime::today().format("%Y-%m-%d"));
         println!("  Number of Stocks: {}", stocks.len());
+        println!("  Pos Value Change: {:0.2}", pos_change);
+        println!("  Neg Value Change: {:0.2}", neg_change);
         println!("Total Value Change: {:0.2}", value_change);
         println!();
 
@@ -164,4 +162,23 @@ fn calc_agg_value_changes(stocks: &StockList, changes: &DayChangeList) -> AggVal
         }
     }
     agg_value_changes
+}
+
+fn sum_changes(changes: &DayChangeList) -> (Price, Price, Price) {
+    let (pos, neg): (Price, Price) = changes
+        .iter()
+        .filter(|c| c.is_some())
+        .map(|c| {
+            let p = c.as_ref().unwrap().val_change;
+            if p > 0.0 {
+                (p, 0.0)
+            } else {
+                (0.0, p)
+            }
+        })
+        .reduce(|acc, pp| {
+            (acc.0 + pp.0, acc.1 + pp.1)
+        })
+        .unwrap_or((0.0, 0.0));
+    (pos + neg, pos, neg)
 }
