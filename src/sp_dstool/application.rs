@@ -493,20 +493,19 @@ impl Application {
                 splt_count: 0
             },
             |entry, agg| {
-                let mut agg_ref = &mut *agg;
                 let size = fs::metadata(entry.path())?.len();
-                agg_ref.tot_size += size;
+                agg.tot_size += size;
 
                 let filename = misc::direntry_filename(entry);
                 if filename.starts_with(history::tag()) {
-                    agg_ref.hist_count += 1;
-                    agg_ref.hist_size += size;
+                    agg.hist_count += 1;
+                    agg.hist_size += size;
                 } else if filename.starts_with(dividends::tag()) {
-                    agg_ref.div_count += 1;
-                    agg_ref.div_size += size;
+                    agg.div_count += 1;
+                    agg.div_size += size;
                 } else if filename.starts_with(splits::tag()) {
-                    agg_ref.splt_count += 1;
-                    agg_ref.splt_size += size;
+                    agg.splt_count += 1;
+                    agg.splt_size += size;
                 }
 
                 if self.args.is_verbose() {
