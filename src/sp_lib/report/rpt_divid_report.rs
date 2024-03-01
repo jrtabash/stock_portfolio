@@ -20,31 +20,34 @@ impl Report for DividReport {
         println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(stocks));
         println!();
 
-        println!("{:8} {:10} {:10} {:6} {:8} {:8} {:10} {:12}",
+        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:8} {:10} {:12}",
                  "Symbol",
                  "Buy Date",
                  "Upd Date",
                  "Days",
                  "Size",
+                 "Latest Div",
                  "Cum Div",
                  "Yearly Div",
                  "Day Unit Div");
-        println!("{:8} {:10} {:10} {:6} {:8} {:8} {:10} {:12}",
+        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:8} {:10} {:12}",
                  "------",
                  "--------",
                  "--------",
                  "----",
                  "----",
+                 "----------",
                  "-------",
                  "----------",
                  "------------");
         for stock in stocks.iter() {
-            println!("{:8} {:10} {:10} {:6} {:8} {:8.2} {:10.2} {:12.6}",
+            println!("{:8} {:10} {:10} {:6} {:8} {:10.2} {:8.2} {:10.2} {:12.6}",
                      stock.symbol,
                      stock.date.format("%Y-%m-%d"),
                      stock.latest_date.format("%Y-%m-%d"),
                      stock.days_held,
                      stock.quantity,
+                     stock.latest_dividend(),
                      stock.cum_dividend,
                      stock.yearly_dividend(),
                      stock.daily_unit_dividend());
@@ -54,14 +57,15 @@ impl Report for DividReport {
     fn export(&self, params: &ReportParams, filename: &str) -> Result<(), Error> {
         let stocks = params.stocks();
         let mut file = File::create(filename)?;
-        writeln!(file, "Symbol,Buy Date,Upd Date,Days,Size,Cum Div,Yearly Div,Day Unit Div")?;
+        writeln!(file, "Symbol,Buy Date,Upd Date,Days,Size,Latest Div,Cum Div,Yearly Div,Day Unit Div")?;
         for stock in stocks.iter() {
-            writeln!(file, "{},{},{},{},{},{:.2},{:.2},{:.6}",
+            writeln!(file, "{},{},{},{},{},{:.2},{:.2},{:.2},{:.6}",
                      stock.symbol,
                      stock.date.format("%Y-%m-%d"),
                      stock.latest_date.format("%Y-%m-%d"),
                      stock.days_held,
                      stock.quantity,
+                     stock.latest_dividend(),
                      stock.cum_dividend,
                      stock.yearly_dividend(),
                      stock.daily_unit_dividend())?;

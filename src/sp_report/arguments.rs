@@ -47,13 +47,13 @@ impl Arguments {
                         date   : base date          | days    : days held\n\
                         price  : latest price       | size    : quantity\n\
                         net    : net price          | pct     : percent change\n\
-                        value  : notional value     | div     : cumulative dividend\n\
-                        yrdiv  : Yearly dividend    | dudiv   : Daily unit dividend\n\
+                        value  : notional value     | prevpr  : previous day price\n\
+                        ladiv  : latest dividend    | div     : cumulative dividend\n\
+                        yrdiv  : yearly dividend    | dudiv   : daily unit dividend\n\
                         volat  : overall volatility | volat22 : 22 day volatility\n\
-                        prevpr : previous day price | volume  : day volume\n\
-                        change : day change         | pctchg  : day percent change\n\
-                        valchg : day value change   | low     : day low price\n\
-                        high   : day high price")
+                        volume : day volume         | change  : day change\n\
+                        pctchg : day percent change | valchg  : day value change\n\
+                        low    : day low price      | high    : day high price")
                  .takes_value(true))
             .arg(Arg::with_name("include")
                  .short("i")

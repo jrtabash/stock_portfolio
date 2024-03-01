@@ -15,9 +15,9 @@ get the latest close prices and dividends from the datastore and generate a repo
 current and net prices and notional values, percent change, cumulative dividend, as well as cumulative dividends.
 The top report shows top and bottom performing stocks in several categories. The volatility report shows overall
 volatility and 22 day volatility per stock. The day change report shows previous price, price, change, percent
-change, low, high and volume. The dividends report shows cumulative dividend, yearly dividend and daily unit
-dividend. The summary report shows value, minimum, average and maximum over aggregated base, latest and net
-prices as well as percent change.
+change, low, high and volume. The dividends report shows latest dividend, cumulative dividend, yearly dividend
+xand daily unit dividend. The summary report shows value, minimum, average and maximum over aggregated base,
+latest and net prices as well as percent change.
 
 The following features are supported:
 - **Group by**: Report quantities, base notional and current notional values grouped by symbol
@@ -57,13 +57,13 @@ OPTIONS:
                                     date   : base date          | days    : days held
                                     price  : latest price       | size    : quantity
                                     net    : net price          | pct     : percent change
-                                    value  : notional value     | div     : cumulative dividend
-                                    yrdiv  : Yearly dividend    | dudiv   : Daily unit dividend
+                                    value  : notional value     | prevpr  : previous day price
+                                    ladiv  : latest dividend    | div     : cumulative dividend
+                                    yrdiv  : yearly dividend    | dudiv   : daily unit dividend
                                     volat  : overall volatility | volat22 : 22 day volatility
-                                    prevpr : previous day price | volume  : day volume
-                                    change : day change         | pctchg  : day percent change
-                                    valchg : day value change   | low     : day low price
-                                    high   : day high price
+                                    volume : day volume         | change  : day change
+                                    pctchg : day percent change | valchg  : day value change
+                                    low    : day low price      | high    : day high price
     -p, --type <report_type>        Report type, one of value, top, volat (default: value)
                                     value  : stocks value (gains & losses)
                                     top    : Top/Bottom performing stocks

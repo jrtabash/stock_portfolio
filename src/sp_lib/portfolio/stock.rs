@@ -17,6 +17,7 @@ pub struct Stock {
     pub cum_dividend: Price,     // Cumulative Dividend
     pub latest_price: Price,     // Latest Price
     pub latest_date: SPDate,     // Latest Date
+    pub latest_div_price: Price, // Latest Dividend Price
     pub days_held: i64,          // Days Held
 
     // For temporary use with extra sorting and other algorithms
@@ -40,6 +41,7 @@ impl Stock {
             cum_dividend: 0.0,
             latest_price: 0.0,
             latest_date: datetime::earliest_date(),
+            latest_div_price: 0.0,
             days_held: 0,
             user_data: 0.0
         }
@@ -75,6 +77,11 @@ impl Stock {
     #[inline(always)]
     pub fn pct_change(self: &Stock) -> f64 {
         100.0 * self.net_price() / self.base_price
+    }
+
+    #[inline(always)]
+    pub fn latest_dividend(self: &Stock) -> Price {
+        self.quantity as Price * self.latest_div_price
     }
 
     #[inline(always)]
@@ -144,6 +151,17 @@ mod tests {
         assert_eq!(stock.latest_date, datetime::today_plus_days(10));
         assert_eq!(stock.days_held, 10);
         assert_eq!(stock.daily_unit_dividend(), 0.0);
+    }
+
+    #[test]
+    fn test_stock_latest_div_price() {
+        let mut stock = Stock::new(String::from("AAPL"), StockType::Cash, datetime::today(), 100, 120.25);
+        assert_eq!(stock.latest_div_price, 0.0);
+        assert_eq!(stock.latest_dividend(), 0.0);
+
+        stock.latest_div_price = 0.5;
+        assert_eq!(stock.latest_div_price, 0.5);
+        assert_eq!(stock.latest_dividend(), 50.0);
     }
 
     #[test]

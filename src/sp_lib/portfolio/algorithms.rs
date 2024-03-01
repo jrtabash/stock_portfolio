@@ -87,6 +87,9 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("days", false) => stocks.sort_by(|lhs, rhs| lhs.days_held.cmp(&rhs.days_held)),
         ("days", true) => stocks.sort_by(|lhs, rhs| rhs.days_held.cmp(&lhs.days_held)),
 
+        ("ladiv", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.latest_dividend(), rhs.latest_dividend())),
+        ("ladiv", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.latest_dividend(), lhs.latest_dividend())),
+
         ("div", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.cum_dividend, rhs.cum_dividend)),
         ("div", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.cum_dividend, lhs.cum_dividend)),
 
