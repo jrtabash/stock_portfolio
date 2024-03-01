@@ -16,7 +16,7 @@ current and net prices and notional values, percent change, cumulative dividend,
 The top report shows top and bottom performing stocks in several categories. The volatility report shows overall
 volatility and 22 day volatility per stock. The day change report shows previous price, price, change, percent
 change, low, high and volume. The dividends report shows latest dividend, cumulative dividend, yearly dividend
-xand daily unit dividend. The summary report shows value, minimum, average and maximum over aggregated base,
+and daily unit dividend. The summary report shows value, minimum, average and maximum over aggregated base,
 latest and net prices as well as percent change.
 
 The following features are supported:
