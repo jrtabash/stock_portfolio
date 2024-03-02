@@ -9,11 +9,12 @@ pub struct FixedPrice {
     value: Scaled
 }
 
-pub const ZERO: FixedPrice = FixedPrice { value: 0 };
-pub const ONE: FixedPrice = FixedPrice { value: SCALE };
-pub const HUNDRED: FixedPrice = FixedPrice { value: 100 * SCALE };
-pub const MIN: FixedPrice = FixedPrice { value: SCALE_MIN };
-pub const MAX: FixedPrice = FixedPrice { value: SCALE_MAX };
+pub const FP_0: FixedPrice = FixedPrice { value: 0 };
+pub const FP_1: FixedPrice = FixedPrice { value: SCALE };
+pub const FP_100: FixedPrice = FixedPrice { value: 100 * SCALE };
+pub const FP_365: FixedPrice = FixedPrice { value: 365 * SCALE };
+pub const FP_MIN: FixedPrice = FixedPrice { value: SCALE_MIN };
+pub const FP_MAX: FixedPrice = FixedPrice { value: SCALE_MAX };
 
 impl FixedPrice {
     #[inline(always)]
@@ -112,9 +113,9 @@ impl FixedPrice {
     #[inline(always)]
     pub fn sign(&self) -> FixedPrice {
         if self.value >= 0 {
-            ONE
+            FP_1
         } else {
-            -ONE
+            -FP_1
         }
     }
 
@@ -293,8 +294,8 @@ mod tests {
         assert!(zero1 != nonzero1);
         assert!(nonzero1 == nonzero2);
 
-        assert!(zero1 == ZERO);
-        assert!(nonzero1 != ZERO);
+        assert!(zero1 == FP_0);
+        assert!(nonzero1 != FP_0);
     }
 
     #[test]
@@ -323,11 +324,12 @@ mod tests {
 
     #[test]
     fn test_price_consts() {
-        assert_eq!(FixedPrice::new(), ZERO);
-        assert_eq!(FixedPrice::from_scaled(SCALE), ONE);
-        assert_eq!(FixedPrice::from_scaled(100 * SCALE), HUNDRED);
-        assert_eq!(FixedPrice::from_scaled(SCALE_MIN), MIN);
-        assert_eq!(FixedPrice::from_scaled(SCALE_MAX), MAX);
+        assert_eq!(FixedPrice::new(), FP_0);
+        assert_eq!(FixedPrice::from_scaled(SCALE), FP_1);
+        assert_eq!(FixedPrice::from_scaled(100 * SCALE), FP_100);
+        assert_eq!(FixedPrice::from_scaled(365 * SCALE), FP_365);
+        assert_eq!(FixedPrice::from_scaled(SCALE_MIN), FP_MIN);
+        assert_eq!(FixedPrice::from_scaled(SCALE_MAX), FP_MAX);
     }
 
     #[test]
@@ -423,7 +425,7 @@ mod tests {
     fn test_price_neg() {
         let p1 = FixedPrice::from_string("2.00");
         let p2 = FixedPrice::from_string("-3.00");
-        let p3 = ZERO;
+        let p3 = FP_0;
         assert_eq!((-p1).to_scaled(), -20000);
         assert_eq!((-p2).to_scaled(), 30000);
         assert_eq!((-p3).to_scaled(), 0);
