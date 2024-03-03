@@ -131,6 +131,27 @@ impl Default for FixedPrice {
     }
 }
 
+impl From<f64> for FixedPrice {
+    #[inline(always)]
+    fn from(item: f64) -> Self {
+        FixedPrice::from_float(item)
+    }
+}
+
+impl From<i32> for FixedPrice {
+    #[inline(always)]
+    fn from(item: i32) -> Self {
+        FixedPrice::from_signed(item)
+    }
+}
+
+impl From<u32> for FixedPrice {
+    #[inline(always)]
+    fn from(item: u32) -> Self {
+        FixedPrice::from_unsigned(item)
+    }
+}
+
 impl fmt::Display for FixedPrice {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (whole, partial) = scaled_to_parts(self.value);
@@ -466,5 +487,17 @@ mod tests {
         assert!(!FixedPrice::slices_eql(&[p1], &[q2]));
         assert!(!FixedPrice::slices_eql(&[p1, p2], &[q1, q3]));
         assert!(!FixedPrice::slices_eql(&[p1, p2], &[q2, q1]));
+    }
+
+    #[test]
+    fn test_price_from() {
+        let p: FixedPrice = 10.50.into();
+        assert_eq!(p, FixedPrice::from_float(10.50));
+
+        let p: FixedPrice = (10 as i32).into();
+        assert_eq!(p, FixedPrice::from_signed(10));
+
+        let p: FixedPrice = (10 as u32).into();
+        assert_eq!(p, FixedPrice::from_unsigned(10));
     }
 }
