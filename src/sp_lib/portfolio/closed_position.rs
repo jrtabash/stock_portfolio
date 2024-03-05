@@ -1,11 +1,11 @@
 use std::fmt;
 
 use crate::util::datetime::SPDate;
-use crate::util::price_type::PriceType;
+use crate::util::fixed_price::FixedPrice;
 use crate::portfolio::stock_type::StockType;
 use crate::portfolio::symbol_trait::GetSymbol;
 
-pub type Price = PriceType;
+pub type Price = FixedPrice;
 
 pub struct ClosedPosition {
     pub symbol: String,
@@ -54,17 +54,17 @@ impl ClosedPosition {
 
     #[inline(always)]
     pub fn net_notional(&self) -> Price {
-        self.quantity as Price * self.net_price()
+        Price::from_unsigned(self.quantity) * self.net_price()
     }
 
     #[inline(always)]
     pub fn base_notional(&self) -> Price {
-        self.quantity as Price * self.base_price
+        Price::from_unsigned(self.quantity) * self.base_price
     }
 
     #[inline(always)]
     pub fn exit_notional(&self) -> Price {
-        self.quantity as Price * self.exit_price
+        Price::from_unsigned(self.quantity) * self.exit_price
     }
 }
 
@@ -87,6 +87,7 @@ impl GetSymbol for ClosedPosition {
 mod tests {
     use super::*;
     use crate::util::datetime;
+    use crate::util::fixed_price::FP_0;
 
     #[test]
     fn test_closed_position_new() {
@@ -96,18 +97,18 @@ mod tests {
         assert_eq!(cp.base_date, datetime::today_plus_days(-10));
         assert_eq!(cp.exit_date, datetime::today());
         assert_eq!(cp.quantity, 100);
-        assert_eq!(cp.base_price, 115.00);
-        assert_eq!(cp.exit_price, 120.00);
-        assert_eq!(cp.base_fee, 0.00);
-        assert_eq!(cp.exit_fee, 0.05);
-        assert_eq!(cp.dividend, 5.00);
+        assert_eq!(cp.base_price, Price::from_string("115.00"));
+        assert_eq!(cp.exit_price, Price::from_string("120.00"));
+        assert_eq!(cp.base_fee, FP_0);
+        assert_eq!(cp.exit_fee, Price::from_string("0.05"));
+        assert_eq!(cp.dividend, Price::from_string("5.00"));
     }
 
     #[test]
     fn test_net_functions() {
         let cp = default_closed_position();
-        assert_eq!(cp.net_price(), 5.00);
-        assert_eq!(cp.net_notional(), 500.00);
+        assert_eq!(cp.net_price(), Price::from_string("5.00"));
+        assert_eq!(cp.net_notional(), Price::from_string("500.00"));
     }
 
     fn default_closed_position() -> ClosedPosition {
@@ -117,10 +118,10 @@ mod tests {
             datetime::today_plus_days(-10),
             datetime::today(),
             100,
-            115.00,
-            120.00,
-            0.00,
-            0.05,
-            5.00)
+            Price::from_string("115.00"),
+            Price::from_string("120.00"),
+            FP_0,
+            Price::from_string("0.05"),
+            Price::from_string("5.00"))
     }
 }

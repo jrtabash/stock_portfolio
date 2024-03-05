@@ -323,9 +323,9 @@ fn test_match_list_to_symbols() {
                     today_plus_days(-10),
                     today(),
                     100,
-                    FixedPrice::from_float(10.00),
-                    FixedPrice::from_float(15.00),
-                    FixedPrice::from_float(0.05),
+                    FixedPrice::from_string("10.00"),
+                    FixedPrice::from_string("15.00"),
+                    FixedPrice::from_string("0.05"),
                     FP_0) })
             .collect();
         let syms = syms
@@ -564,15 +564,15 @@ fn test_stock_config_from_file3() {
     assert_eq!(positions.iter().map(|p| p.quantity).collect::<Vec<u32>>(),
                vec![100, 100]);
     assert_eq!(positions.iter().map(|p| p.base_price).collect::<Vec<FixedPrice>>(),
-               vec![FixedPrice::from_float(75.50), FixedPrice::from_float(75.50)]);
+               vec![FixedPrice::from_string("75.50"), FixedPrice::from_string("75.50")]);
     assert_eq!(positions.iter().map(|p| p.exit_price).collect::<Vec<FixedPrice>>(),
-               vec![FixedPrice::from_float(81.75), FixedPrice::from_float(82.25)]);
+               vec![FixedPrice::from_string("81.75"), FixedPrice::from_string("82.25")]);
     assert_eq!(positions.iter().map(|p| p.base_fee).collect::<Vec<FixedPrice>>(),
                vec![FP_0, FP_0]);
     assert_eq!(positions.iter().map(|p| p.exit_fee).collect::<Vec<FixedPrice>>(),
-               vec![FixedPrice::from_float(0.05), FixedPrice::from_float(0.05)]);
+               vec![FixedPrice::from_string("0.05"), FixedPrice::from_string("0.05")]);
     assert_eq!(positions.iter().map(|p| p.dividend).collect::<Vec<FixedPrice>>(),
-               vec![FixedPrice::from_float(52.00), FixedPrice::from_float(52.00)]);
+               vec![FixedPrice::from_string("52.00"), FixedPrice::from_string("52.00")]);
 
     assert!(temp_file::remove_file(&temp_name));
 }
@@ -639,15 +639,15 @@ fn test_stock_config_from_file4() {
     assert_eq!(positions.iter().map(|p| p.quantity).collect::<Vec<u32>>(),
                vec![100, 100]);
     assert_eq!(positions.iter().map(|p| p.base_price).collect::<Vec<FixedPrice>>(),
-               vec![FixedPrice::from_float(75.50), FixedPrice::from_float(75.50)]);
+               vec![FixedPrice::from_string("75.50"), FixedPrice::from_string("75.50")]);
     assert_eq!(positions.iter().map(|p| p.exit_price).collect::<Vec<FixedPrice>>(),
-               vec![FixedPrice::from_float(81.75), FixedPrice::from_float(82.25)]);
+               vec![FixedPrice::from_string("81.75"), FixedPrice::from_string("82.25")]);
     assert_eq!(positions.iter().map(|p| p.base_fee).collect::<Vec<FixedPrice>>(),
                vec![FP_0, FP_0]);
     assert_eq!(positions.iter().map(|p| p.exit_fee).collect::<Vec<FixedPrice>>(),
-               vec![FixedPrice::from_float(0.05), FixedPrice::from_float(0.05)]);
+               vec![FixedPrice::from_string("0.05"), FixedPrice::from_string("0.05")]);
     assert_eq!(positions.iter().map(|p| p.dividend).collect::<Vec<FixedPrice>>(),
-               vec![FixedPrice::from_float(52.00), FixedPrice::from_float(52.00)]);
+               vec![FixedPrice::from_string("52.00"), FixedPrice::from_string("52.00")]);
 
     assert!(temp_file::remove_file(&cfg_file));
     assert!(temp_file::remove_file(&pos_file));

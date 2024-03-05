@@ -85,7 +85,7 @@ impl ClosedPositionsReader {
     }
 
     fn parse_price(token: &str, which: &str) -> Result <Price, Error> {
-        match token.parse::<Price>() {
+        match Price::parse(token) {
             Ok(px) => Ok(px),
             Err(e) => Err(format!("ClosedPositionsReader::parse_price - Invalid {} '{}'", which, e).into())
         }
@@ -99,6 +99,7 @@ impl ClosedPositionsReader {
 mod tests {
     use super::*;
     use crate::portfolio::stock_type::StockType;
+    use crate::util::fixed_price::FP_0;
 
     #[test]
     fn test_parse_content() {
@@ -130,11 +131,11 @@ mod tests {
                             datetime::make_date(2016, 4, 15),
                             datetime::make_date(2023, 3, 28),
                             100,
-                            44.10,
-                            131.56,
-                            0.00,
-                            0.12,
-                            1009.00)
+                            Price::from_string("44.10"),
+                            Price::from_string("131.56"),
+                            FP_0,
+                            Price::from_string("0.12"),
+                            Price::from_string("1009.00"))
     }
 
     fn position_1() -> ClosedPosition {
@@ -143,11 +144,11 @@ mod tests {
                             datetime::make_date(2016, 4, 15),
                             datetime::make_date(2023, 3, 28),
                             100,
-                            44.10,
-                            131.55,
-                            0.00,
-                            0.12,
-                            1009.00)
+                            Price::from_string("44.10"),
+                            Price::from_string("131.55"),
+                            FP_0,
+                            Price::from_string("0.12"),
+                            Price::from_string("1009.00"))
     }
 
     fn position_2() -> ClosedPosition {
@@ -156,11 +157,11 @@ mod tests {
                             datetime::make_date(2021, 10, 18),
                             datetime::make_date(2023, 9, 6),
                             44,
-                            85.60,
-                            165.45,
-                            0.00,
-                            0.07,
-                            1205.60)
+                            Price::from_string("85.60"),
+                            Price::from_string("165.45"),
+                            FP_0,
+                            Price::from_string("0.07"),
+                            Price::from_string("1205.60"))
     }
 
     fn check_equal(lhs: &ClosedPosition, rhs: &ClosedPosition) {

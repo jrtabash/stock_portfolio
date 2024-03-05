@@ -1,11 +1,12 @@
 use std::fs::File;
 use std::io::prelude::*;
 
-use crate::portfolio::stock::Price;
+use crate::portfolio::closed_position::Price;
 use crate::report::report_params::ReportParams;
 use crate::report::report_trait::Report;
 use crate::util::datetime;
 use crate::util::error::Error;
+use crate::util::fixed_price::FP_0;
 
 pub struct ClosedReport {}
 
@@ -13,11 +14,11 @@ impl Report for ClosedReport {
     fn write(&self, params: &ReportParams) {
         let positions = params.closed_positions();
 
-        let mut base_ntnl: Price = 0.0;
-        let mut exit_ntnl: Price = 0.0;
-        let mut net_ntnl: Price = 0.0;
-        let mut tot_fees: Price = 0.0;
-        let mut tot_div: Price = 0.0;
+        let mut base_ntnl: Price = FP_0;
+        let mut exit_ntnl: Price = FP_0;
+        let mut net_ntnl: Price = FP_0;
+        let mut tot_fees: Price = FP_0;
+        let mut tot_div: Price = FP_0;
 
         for pos in positions.iter() {
             base_ntnl += pos.base_notional();
@@ -30,12 +31,12 @@ impl Report for ClosedReport {
         println!("Closed Positions Report");
         println!("-----------------------");
         println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
-        println!("Total Base Value: {:.2}", base_ntnl);
-        println!("Total Exit Value: {:.2}", exit_ntnl);
-        println!(" Total Net Value: {:.2}", net_ntnl);
-        println!("      Total Fees: {:.2}", tot_fees);
-        println!("  Total Dividend: {:.2}", tot_div);
-        println!("Net + Div - Fees: {:.2}", net_ntnl + tot_div - tot_fees);
+        println!("Total Base Value: {}", base_ntnl.to_formatted(2));
+        println!("Total Exit Value: {}", exit_ntnl.to_formatted(2));
+        println!(" Total Net Value: {}", net_ntnl.to_formatted(2));
+        println!("      Total Fees: {}", tot_fees.to_formatted(2));
+        println!("  Total Dividend: {}", tot_div.to_formatted(2));
+        println!("Net + Div - Fees: {}", (net_ntnl + tot_div - tot_fees).to_formatted(2));
         println!();
 
         println!("{:8} {:10} {:10} {:12} {:12} {:12} {:6} {:10}",
@@ -58,15 +59,15 @@ impl Report for ClosedReport {
                  "--------");
 
         for pos in positions.iter() {
-            println!("{:8} {:10} {:10} {:12.2} {:12.2} {:12.2} {:6.2} {:10.2}",
+            println!("{:8} {:10} {:10} {:>12} {:>12} {:>12} {:>6} {:>10}",
                      pos.symbol,
                      pos.base_date.format("%Y-%m-%d"),
                      pos.exit_date.format("%Y-%m-%d"),
-                     pos.base_notional(),
-                     pos.exit_notional(),
-                     pos.net_notional(),
-                     pos.base_fee + pos.exit_fee,
-                     pos.dividend);
+                     pos.base_notional().to_formatted(2),
+                     pos.exit_notional().to_formatted(2),
+                     pos.net_notional().to_formatted(2),
+                     (pos.base_fee + pos.exit_fee).to_formatted(2),
+                     pos.dividend.to_formatted(2));
         }
     }
 
