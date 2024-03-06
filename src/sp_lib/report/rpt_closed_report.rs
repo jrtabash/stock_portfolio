@@ -78,7 +78,7 @@ impl Report for ClosedReport {
         writeln!(file, "Symbol,Base Date,Exit Date,Base Value,Exit Value,Net Value,Fees,Dividend")?;
 
         for pos in positions.iter() {
-            writeln!(file, "{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2}",
+            writeln!(file, "{},{},{},{},{},{},{},{}",
                      pos.symbol,
                      pos.base_date.format("%Y-%m-%d"),
                      pos.exit_date.format("%Y-%m-%d"),
