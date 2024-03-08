@@ -16,6 +16,8 @@ pub const FP_365: FixedPrice = FixedPrice { value: 365 * SCALE };
 pub const FP_MIN: FixedPrice = FixedPrice { value: SCALE_MIN };
 pub const FP_MAX: FixedPrice = FixedPrice { value: SCALE_MAX };
 
+const MAX_U64: u64 = (Scaled::MAX / SCALE) as u64;
+
 impl FixedPrice {
     #[inline(always)]
     pub fn new() -> Self {
@@ -59,6 +61,17 @@ impl FixedPrice {
     pub fn from_string(value: &str) -> Self {
         FixedPrice {
             value: string_to_scaled(value)
+        }
+    }
+
+    #[inline(always)]
+    pub fn try_from_u64(value: u64) -> Option<Self> {
+        if value <= MAX_U64 {
+            Some(FixedPrice {
+                value: value as Scaled * SCALE
+            })
+        } else {
+            None
         }
     }
 
@@ -499,5 +512,21 @@ mod tests {
 
         let p: FixedPrice = (10 as u32).into();
         assert_eq!(p, FixedPrice::from_unsigned(10));
+    }
+
+    #[test]
+    fn test_price_try_from_u64() {
+        let optp = FixedPrice::try_from_u64(0);
+        assert_eq!(optp, Some(FP_0));
+
+        let optp = FixedPrice::try_from_u64(1250);
+        assert_eq!(optp, Some(FixedPrice::from_unsigned(1250)));
+
+        let u: u64 = (Scaled::MAX / SCALE) as u64;
+        let optp = FixedPrice::try_from_u64(u);
+        assert_eq!(optp, Some(FixedPrice::from_scaled(Scaled::MAX / SCALE * SCALE)));
+
+        let optp = FixedPrice::try_from_u64(u + 1);
+        assert_eq!(optp, None);
     }
 }
