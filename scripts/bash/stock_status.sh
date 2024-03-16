@@ -10,18 +10,21 @@ DAYCH=0
 PLOT=0
 CLEAR=0
 
+PLOT_SCRIPT="plot_stats.py"
+
 # --------------------------------------------------------------------------------
 # Functions
 
 function print_usage() {
     echo "Usage"
-    echo "    stock_status.sh [-h] [-g] [-c] [-p] <config> <symbol>"
+    echo "    stock_status.sh [-h] [-g] [-c] [-p] [-y] <config> <symbol>"
     echo ""
     echo "Options"
     echo "    -h : Print help"
     echo "    -g : Report group by"
     echo "    -d : Report day change"
     echo "    -p : Plot close history"
+    echo "    -y : Plot using pyplot, requires -p"
     echo "    -c : Clear screen"
 }
 
@@ -39,6 +42,8 @@ do
         DAYCH=1
     elif [ "${arg}" == "-p" ]; then
         PLOT=1
+    elif [ "${arg}" == "-y" ]; then
+        PLOT_SCRIPT="pyplot_stats.py"
     elif [ "${arg}" == "-c" ]; then
         CLEAR=1
     elif [ "${CONFIG}" == "" ]; then
@@ -96,5 +101,5 @@ if [ ${DAYCH} -eq 1 ]; then
 fi
 
 if [ ${PLOT} -eq 1 ]; then
-    sp_stats -c sma -w 1 -i close -l ${CONFIG} -y ${SYMBOL} | plot_stats.py
+    sp_stats -c sma -w 1 -i close -l ${CONFIG} -y ${SYMBOL} | ${PLOT_SCRIPT}
 fi
