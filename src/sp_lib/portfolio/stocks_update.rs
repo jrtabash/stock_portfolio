@@ -54,7 +54,7 @@ pub fn update_stock_from_ds(stock: &mut Stock, ds: &DataStore) -> Result<bool, E
         stock.cum_dividend = stock.quantity as Price * div.entries().iter().fold(0.0, |cum, d| cum + d.price);
         if div.count() > 0 {
             let dent = &div.entries()[div.count() - 1];
-            stock.latest_div_price = dent.price;
+            stock.set_latest_dividend(dent.price, dent.date);
         }
     }
 

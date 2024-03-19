@@ -18,6 +18,7 @@ pub struct Stock {
     pub latest_price: Price,     // Latest Price
     pub latest_date: SPDate,     // Latest Date
     pub latest_div_price: Price, // Latest Dividend Price
+    pub latest_div_date: SPDate, // Latest Dividend Date
     pub days_held: i64,          // Days Held
 
     // For temporary use with extra sorting and other algorithms
@@ -42,6 +43,7 @@ impl Stock {
             latest_price: 0.0,
             latest_date: datetime::earliest_date(),
             latest_div_price: 0.0,
+            latest_div_date: datetime::earliest_date(),
             days_held: 0,
             user_data: 0.0
         }
@@ -52,6 +54,12 @@ impl Stock {
         self.latest_price = price;
         self.latest_date = date;
         self.days_held = datetime::count_days(&self.date, &self.latest_date)
+    }
+
+    #[inline(always)]
+    pub fn set_latest_dividend(self: &mut Stock, price: Price, date: SPDate) {
+        self.latest_div_price = price;
+        self.latest_div_date = date;
     }
 
     #[inline(always)]
@@ -154,12 +162,14 @@ mod tests {
     }
 
     #[test]
-    fn test_stock_latest_div_price() {
+    fn test_stock_latest_dividend() {
         let mut stock = Stock::new(String::from("AAPL"), StockType::Cash, datetime::today(), 100, 120.25);
+        assert_eq!(stock.latest_div_date, datetime::earliest_date());
         assert_eq!(stock.latest_div_price, 0.0);
         assert_eq!(stock.latest_dividend(), 0.0);
 
-        stock.latest_div_price = 0.5;
+        stock.set_latest_dividend(0.5, datetime::today());
+        assert_eq!(stock.latest_div_date, datetime::today());
         assert_eq!(stock.latest_div_price, 0.5);
         assert_eq!(stock.latest_dividend(), 50.0);
     }
