@@ -161,9 +161,9 @@ fn test_sort_stocks() {
     list[0].cum_dividend = 0.0;
     list[1].cum_dividend = 20.15;
     list[2].cum_dividend = 15.25;
-    list[0].latest_div_price = 0.0;
-    list[1].latest_div_price = 0.5;
-    list[2].latest_div_price = 0.55;
+    list[0].set_latest_dividend(0.0, earliest_date());
+    list[1].set_latest_dividend(0.5, today_plus_days(-2));
+    list[2].set_latest_dividend(0.55, today_plus_days(-1));
 
     let asc = false;
     let desc = true;
@@ -194,6 +194,9 @@ fn test_sort_stocks() {
 
     test_sort(&mut list, "days", desc, "AAPL", "DELL", "ICLN");
     test_sort(&mut list, "days", asc, "ICLN", "DELL", "AAPL");
+
+    test_sort(&mut list, "laddt", desc, "ICLN", "AAPL", "DELL");
+    test_sort(&mut list, "laddt", asc, "DELL", "AAPL", "ICLN");
 
     test_sort(&mut list, "ladiv", desc, "ICLN", "AAPL", "DELL");
     test_sort(&mut list, "ladiv", asc, "DELL", "AAPL", "ICLN");
