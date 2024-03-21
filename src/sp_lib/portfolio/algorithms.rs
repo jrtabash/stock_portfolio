@@ -22,6 +22,10 @@ pub fn cumulative_dividend(stocks: &StockList) -> Price {
     stocks.iter().map(|stock| stock.cum_dividend).sum()
 }
 
+pub fn latest_dividend(stocks: &StockList) -> Price {
+    stocks.iter().map(|stock| stock.latest_dividend()).sum()
+}
+
 pub fn pct_change(stocks: &StockList) -> f64 {
     let base = base_notional(stocks);
     let latest = latest_notional(stocks);

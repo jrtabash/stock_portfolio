@@ -32,6 +32,10 @@ fn test_stock_list() {
     list[1].cum_dividend = 10.50;
     assert!(price_eql(cumulative_dividend(&list), 110.75));
 
+    list[0].set_latest_dividend(0.2, earliest_date());
+    list[1].set_latest_dividend(0.5, today_plus_days(-2));
+    assert!(price_eql(latest_dividend(&list), 70.0));
+
     let (pct_chg, pct_chg_wd) = calc_pct_change(&list);
     assert!(price_eql(pct_chg, 2.757445));
     assert!(price_eql(pct_chg_wd, 3.312694));

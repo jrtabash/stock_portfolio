@@ -17,6 +17,7 @@ impl Report for DividReport {
         println!("----------------------");
         println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
         println!("Number of Stocks: {}", stocks.len());
+        println!(" Latest Dividend: {:.2}", algorithms::latest_dividend(stocks));
         println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(stocks));
         println!();
 
