@@ -30,7 +30,7 @@ impl Report for DividReport {
                  "Latest DDt",
                  "Latest Div",
                  "Cum Div",
-                 "Yearly Div",
+                 "Yr Div Est",
                  "Day Unit Div");
         println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:8} {:10} {:12}",
                  "------",
@@ -61,7 +61,7 @@ impl Report for DividReport {
     fn export(&self, params: &ReportParams, filename: &str) -> Result<(), Error> {
         let stocks = params.stocks();
         let mut file = File::create(filename)?;
-        writeln!(file, "Symbol,Buy Date,Upd Date,Days,Size,Latest DDt,Latest Div,Cum Div,Yearly Div,Day Unit Div")?;
+        writeln!(file, "Symbol,Buy Date,Upd Date,Days,Size,Latest DDt,Latest Div,Cum Div,Yr Div Est,Day Unit Div")?;
         for stock in stocks.iter() {
             writeln!(file, "{},{},{},{},{},{},{:.2},{:.2},{:.2},{:.6}",
                      stock.symbol,
