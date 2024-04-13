@@ -18,6 +18,7 @@ pub const FP_MIN: FixedPrice = FixedPrice { value: SCALE_MIN };
 pub const FP_MAX: FixedPrice = FixedPrice { value: SCALE_MAX };
 
 const MAX_U64: u64 = (Scaled::MAX / SCALE) as u64;
+const MAX_I64: i64 = (Scaled::MAX / SCALE) as i64;
 
 impl FixedPrice {
     #[inline(always)]
@@ -62,6 +63,17 @@ impl FixedPrice {
     pub fn from_string(value: &str) -> Self {
         FixedPrice {
             value: string_to_scaled(value)
+        }
+    }
+
+    #[inline(always)]
+    pub fn try_from_i64(value: i64) -> Result<Self, Error> {
+        if value <= MAX_I64 {
+            Ok(FixedPrice {
+                value: value as Scaled * SCALE
+            })
+        } else {
+            Err("Cannot convert i64 to price".into())
         }
     }
 
@@ -172,6 +184,15 @@ impl TryFrom<u64> for FixedPrice {
     #[inline(always)]
     fn try_from(item: u64) -> Result<FixedPrice, Error> {
         FixedPrice::try_from_u64(item)
+    }
+}
+
+impl TryFrom<i64> for FixedPrice {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(item: i64) -> Result<FixedPrice, Error> {
+        FixedPrice::try_from_i64(item)
     }
 }
 
@@ -541,7 +562,24 @@ mod tests {
     }
 
     #[test]
+    fn test_price_try_from_i64() {
+        let p = FixedPrice::try_from_i64(0);
+        assert_eq!(p, Ok(FP_0));
+
+        let p = FixedPrice::try_from_i64(1250);
+        assert_eq!(p, Ok(FixedPrice::from_unsigned(1250)));
+
+        let i: i64 = (Scaled::MAX / SCALE) as i64;
+        let p = FixedPrice::try_from_i64(i);
+        assert_eq!(p, Ok(FixedPrice::from_scaled(Scaled::MAX / SCALE * SCALE)));
+
+        let p = FixedPrice::try_from_i64(i + 1);
+        assert!(p.is_err());
+    }
+
+    #[test]
     fn test_price_try_from() {
+        // ----- u64 -----
         let p = FixedPrice::try_from(0 as u64);
         assert_eq!(p, Ok(FP_0));
 
@@ -553,6 +591,20 @@ mod tests {
         assert_eq!(p, Ok(FixedPrice::from_scaled(Scaled::MAX / SCALE * SCALE)));
 
         let p = FixedPrice::try_from(u + 1);
+        assert!(p.is_err());
+
+        // ----- i64 -----
+        let p = FixedPrice::try_from(0 as i64);
+        assert_eq!(p, Ok(FP_0));
+
+        let p = FixedPrice::try_from(1250 as i64);
+        assert_eq!(p, Ok(FixedPrice::from_unsigned(1250)));
+
+        let i: i64 = (Scaled::MAX / SCALE) as i64;
+        let p = FixedPrice::try_from(i);
+        assert_eq!(p, Ok(FixedPrice::from_scaled(Scaled::MAX / SCALE * SCALE)));
+
+        let p = FixedPrice::try_from(i + 1);
         assert!(p.is_err());
     }
 }
