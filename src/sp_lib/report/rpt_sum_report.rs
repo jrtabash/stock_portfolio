@@ -89,6 +89,9 @@ fn write_table(stocks: &StockList, mut writer: impl FnMut(&str, Price, Price, Pr
     let net_stat = calc_stats(stocks, |s| s.net_notional());
     writer("Net Value", net_stat.sum, net_stat.min, net_stat.mean(), net_stat.max)?;
 
+    let div_stat = calc_stats(stocks, |s| s.cum_dividend);
+    writer("Cum Divid", div_stat.sum, div_stat.min, div_stat.mean(), div_stat.max)?;
+
     let pct_chg = algorithms::pct_change(stocks);
     let pct_stat = calc_stats(stocks, |s| s.pct_change());
     writer("Pct Change", pct_chg, pct_stat.min, pct_stat.mean(), pct_stat.max)?;
