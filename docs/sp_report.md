@@ -20,7 +20,7 @@ and daily unit dividend. The summary report shows value, minimum, average and ma
 latest and net prices as well as percent change.
 
 The following features are supported:
-- **Group by**: Report quantities, base notional and current notional values grouped by symbol
+- **Group by**: Group by symbol, applies to value and divid reports
 - **Order by**: Sort by pre-defined attributes in ascending or descending order
 - **Filter**: Include and/or exclude by type, list of symbols, or expression
 - **Export**: Export gains and losses table to a csv file
@@ -33,7 +33,8 @@ FLAGS:
     -d, --desc             Used with order by option to sort in descending order
     -h, --help             Prints help information
     -m, --match-symbols    Match closed positions to configured stock symbols post filtering and ordering
-    -g, --show-groupby     Show quantities, base notional and current notional values grouped by symbol
+    -g, --show-groupby     For value report, show quantities, base notional and current notional values grouped by
+                           symbol. For divid report, show quantities and cumulative dividend grouped by symbol
     -V, --version          Prints version information
 
 OPTIONS:
@@ -64,6 +65,7 @@ OPTIONS:
                                     volume : day volume         | change  : day change
                                     pctchg : day percent change | valchg  : day value change
                                     low    : day low price      | high    : day high price
+                                    laddt  : Latest div date
     -p, --type <report_type>        Report type, one of value, top, volat (default: value)
                                     value  : stocks value (gains & losses)
                                     top    : Top/Bottom performing stocks

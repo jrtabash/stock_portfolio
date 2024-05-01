@@ -62,6 +62,17 @@ pub fn stock_aggregate(stocks: &StockList) -> HashMap<String, (u32, Price, Price
         })
 }
 
+// Group by stock symbol, and calculate aggregate quantity and cumulative dividend
+pub fn dividend_aggregate(stocks: &StockList) -> HashMap<String, (u32, Price)> {
+    stock_groupby(
+        stocks,
+        |_| (0, 0.0),
+        |stock, size_price| {
+            let sp = *size_price;
+            (sp.0 + stock.quantity, sp.1 + stock.cum_dividend)
+        })
+}
+
 pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result<(), Error> {
     match (order_by, desc) {
         ("symbol", false) => stocks.sort_by(|lhs, rhs| lhs.symbol.cmp(&rhs.symbol)),

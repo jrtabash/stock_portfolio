@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -12,6 +13,7 @@ pub struct DividReport {}
 impl Report for DividReport {
     fn write(&self, params: &ReportParams) {
         let stocks = params.stocks();
+        let groupby = params.groupby();
 
         println!("Stocks Dividend Report");
         println!("----------------------");
@@ -21,7 +23,7 @@ impl Report for DividReport {
         println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(stocks));
         println!();
 
-        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:8} {:10} {:12}",
+        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:10} {:10} {:12}",
                  "Symbol",
                  "Buy Date",
                  "Upd Date",
@@ -32,7 +34,7 @@ impl Report for DividReport {
                  "Cum Div",
                  "Yr Div Est",
                  "Day Unit Div");
-        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:8} {:10} {:12}",
+        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:10} {:10} {:12}",
                  "------",
                  "--------",
                  "--------",
@@ -44,7 +46,7 @@ impl Report for DividReport {
                  "----------",
                  "------------");
         for stock in stocks.iter() {
-            println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10.2} {:8.2} {:10.2} {:12.6}",
+            println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10.2} {:10.2} {:10.2} {:12.6}",
                      stock.symbol,
                      stock.date.format("%Y-%m-%d"),
                      stock.latest_date.format("%Y-%m-%d"),
@@ -55,6 +57,23 @@ impl Report for DividReport {
                      stock.cum_dividend,
                      stock.yearly_dividend(),
                      stock.daily_unit_dividend());
+        }
+
+        if groupby {
+            println!();
+            println!("{:8} {:8} {:10}", "GroupBy", "Size", "Cum Duv");
+            println!("{:8} {:8} {:10}", "-------", "----", "-------");
+
+            let groupby = algorithms::dividend_aggregate(stocks);
+
+            let mut seen = HashSet::new();
+            for stock in stocks.iter() {
+                if seen.contains(&stock.symbol) { continue; }
+                seen.insert(&stock.symbol);
+
+                let size_price = groupby.get(&stock.symbol).unwrap();
+                println!("{:8} {:8} {:10.2}", stock.symbol, size_price.0, size_price.1);
+            }
         }
     }
 

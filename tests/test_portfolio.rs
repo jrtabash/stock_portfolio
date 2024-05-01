@@ -65,6 +65,29 @@ fn test_stock_aggregate() {
 }
 
 #[test]
+fn test_dividend_aggregate() {
+    fn test(groupby: &HashMap<String, (u32, Price)>, symbol: &str, size: u32, price: Price) {
+        let size_price = groupby.get(symbol).unwrap();
+        assert_eq!(size_price.0, size);
+        assert!(price_eql(size_price.1, price));
+    }
+
+    let mut list = StockList::new();
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-3), 100, 120.25, 125.25));
+    list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21, 79.71));
+    list.push(make_stock("AAPL", StockType::Cash, today_plus_days(-2), 100, 122.0, 125.25));
+
+    list[0].cum_dividend = 10.0;
+    list[1].cum_dividend = 20.15;
+    list[2].cum_dividend = 15.25;
+
+    let gby = dividend_aggregate(&list);
+    assert_eq!(gby.len(), 2);
+    test(&gby, "AAPL", 200, 25.25);
+    test(&gby, "DELL", 100, 20.15);
+}
+
+#[test]
 fn test_stock_groupby() {
     let mut list = StockList::new();
     list.push(make_stock("DELL", StockType::Cash, today_plus_days(-2), 100, 79.21,  79.71));
