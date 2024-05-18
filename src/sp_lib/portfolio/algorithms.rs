@@ -117,6 +117,9 @@ pub fn sort_stocks(stocks: &mut StockList, order_by: &str, desc: bool) -> Result
         ("dudiv", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.daily_unit_dividend(), rhs.daily_unit_dividend())),
         ("dudiv", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.daily_unit_dividend(), lhs.daily_unit_dividend())),
 
+        ("divret", false) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(lhs.cum_dividend_return(), rhs.cum_dividend_return())),
+        ("divret", true) => stocks.sort_by(|lhs, rhs| price_type::price_cmp(rhs.cum_dividend_return(), lhs.cum_dividend_return())),
+
         _ => return Err(format!("Unsupported sort stocks order by '{}'", order_by).into())
     }
     Ok(())

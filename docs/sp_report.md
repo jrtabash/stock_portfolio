@@ -65,7 +65,7 @@ OPTIONS:
                                     volume : day volume         | change  : day change
                                     pctchg : day percent change | valchg  : day value change
                                     low    : day low price      | high    : day high price
-                                    laddt  : Latest div date
+                                    laddt  : Latest div date    | divret  : Cumulative dividend return
     -p, --type <report_type>        Report type, one of value, top, volat (default: value)
                                     value  : stocks value (gains & losses)
                                     top    : Top/Bottom performing stocks

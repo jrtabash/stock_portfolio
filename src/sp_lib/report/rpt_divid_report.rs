@@ -15,15 +15,19 @@ impl Report for DividReport {
         let stocks = params.stocks();
         let groupby = params.groupby();
 
+        let cum_div = algorithms::cumulative_dividend(stocks);
+        let bas_val = algorithms::base_notional(stocks);
+
         println!("Stocks Dividend Report");
         println!("----------------------");
         println!("            Date: {}", datetime::today().format("%Y-%m-%d"));
         println!("Number of Stocks: {}", stocks.len());
         println!(" Latest Dividend: {:.2}", algorithms::latest_dividend(stocks));
-        println!("    Cum Dividend: {:.2}", algorithms::cumulative_dividend(stocks));
+        println!("    Cum Dividend: {:.2}", cum_div);
+        println!("Cum Dividend Ret: {:.2}", 100.0 * cum_div / bas_val);
         println!();
 
-        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:10} {:10} {:12}",
+        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:10} {:10} {:12} {:11}",
                  "Symbol",
                  "Buy Date",
                  "Upd Date",
@@ -33,8 +37,9 @@ impl Report for DividReport {
                  "Latest Div",
                  "Cum Div",
                  "Yr Div Est",
-                 "Day Unit Div");
-        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:10} {:10} {:12}",
+                 "Day Unit Div",
+                 "Cum Div Ret");
+        println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10} {:10} {:10} {:12} {:11}",
                  "------",
                  "--------",
                  "--------",
@@ -44,9 +49,10 @@ impl Report for DividReport {
                  "----------",
                  "-------",
                  "----------",
-                 "------------");
+                 "------------",
+                 "----------");
         for stock in stocks.iter() {
-            println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10.2} {:10.2} {:10.2} {:12.6}",
+            println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10.2} {:10.2} {:10.2} {:12.6} {:11.2}",
                      stock.symbol,
                      stock.date.format("%Y-%m-%d"),
                      stock.latest_date.format("%Y-%m-%d"),
@@ -56,7 +62,8 @@ impl Report for DividReport {
                      stock.latest_dividend(),
                      stock.cum_dividend,
                      stock.yearly_dividend(),
-                     stock.daily_unit_dividend());
+                     stock.daily_unit_dividend(),
+                     stock.cum_dividend_return());
         }
 
         if groupby {
@@ -80,9 +87,9 @@ impl Report for DividReport {
     fn export(&self, params: &ReportParams, filename: &str) -> Result<(), Error> {
         let stocks = params.stocks();
         let mut file = File::create(filename)?;
-        writeln!(file, "Symbol,Buy Date,Upd Date,Days,Size,Latest DDt,Latest Div,Cum Div,Yr Div Est,Day Unit Div")?;
+        writeln!(file, "Symbol,Buy Date,Upd Date,Days,Size,Latest DDt,Latest Div,Cum Div,Yr Div Est,Day Unit Div,Cum Div Ret")?;
         for stock in stocks.iter() {
-            writeln!(file, "{},{},{},{},{},{},{:.2},{:.2},{:.2},{:.6}",
+            writeln!(file, "{},{},{},{},{},{},{:.2},{:.2},{:.2},{:.6},{:.2}",
                      stock.symbol,
                      stock.date.format("%Y-%m-%d"),
                      stock.latest_date.format("%Y-%m-%d"),
@@ -92,7 +99,8 @@ impl Report for DividReport {
                      stock.latest_dividend(),
                      stock.cum_dividend,
                      stock.yearly_dividend(),
-                     stock.daily_unit_dividend())?;
+                     stock.daily_unit_dividend(),
+                     stock.cum_dividend_return())?;
         }
         Ok(())
     }

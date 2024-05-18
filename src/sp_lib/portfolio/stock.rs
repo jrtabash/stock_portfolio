@@ -105,6 +105,11 @@ impl Stock {
             0.0
         }
     }
+
+    #[inline(always)]
+    pub fn cum_dividend_return(self: &Stock) -> Price {
+        100.0 * self.cum_dividend / self.base_notional()
+    }
 }
 
 impl fmt::Display for Stock {
@@ -140,6 +145,7 @@ mod tests {
         assert_eq!(stock.days_held, 0);
         assert_eq!(stock.yearly_dividend(), 0.0);
         assert_eq!(stock.daily_unit_dividend(), 0.0);
+        assert_eq!(stock.cum_dividend_return(), 0.0);
     }
 
     #[test]
@@ -159,6 +165,7 @@ mod tests {
         assert_eq!(stock.latest_date, datetime::today_plus_days(10));
         assert_eq!(stock.days_held, 10);
         assert_eq!(stock.daily_unit_dividend(), 0.0);
+        assert_eq!(stock.cum_dividend_return(), 0.0);
     }
 
     #[test]
@@ -203,5 +210,6 @@ mod tests {
         assert_eq!(stock.days_held, 40);
         assert!((stock.yearly_dividend() - 1049.375) <= 0.000000000001);
         assert!((stock.daily_unit_dividend() - 0.014374999999999999).abs() <= 0.000000000001);
+        assert!((stock.cum_dividend_return() - 0.478170478170478170).abs() <= 0.000000000001);
     }
 }

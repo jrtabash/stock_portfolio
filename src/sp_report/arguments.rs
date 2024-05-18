@@ -54,7 +54,7 @@ impl Arguments {
                         volume : day volume         | change  : day change\n\
                         pctchg : day percent change | valchg  : day value change\n\
                         low    : day low price      | high    : day high price\n\
-                        laddt  : Latest div date")
+                        laddt  : Latest div date    | divret  : Cumulative dividend return")
                  .takes_value(true))
             .arg(Arg::with_name("include")
                  .short("i")
