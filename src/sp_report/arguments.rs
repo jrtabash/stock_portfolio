@@ -72,7 +72,7 @@ impl Arguments {
                  .short("g")
                  .long("show-groupby")
                  .help("For value report, show quantities, base notional and current notional values grouped by symbol. \
-                        For divid report, show quantities and cumulative dividend grouped by symbol"))
+                        For divid report, show quantities, cumulative dividend and cumulative dividend return grouped by symbol"))
             .arg(Arg::with_name("desc")
                  .short("d")
                  .long("desc")

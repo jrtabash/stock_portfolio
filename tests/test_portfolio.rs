@@ -66,10 +66,11 @@ fn test_stock_aggregate() {
 
 #[test]
 fn test_dividend_aggregate() {
-    fn test(groupby: &HashMap<String, (u32, Price)>, symbol: &str, size: u32, price: Price) {
-        let size_price = groupby.get(symbol).unwrap();
-        assert_eq!(size_price.0, size);
-        assert!(price_eql(size_price.1, price));
+    fn test(groupby: &HashMap<String, (u32, Price, Price)>, symbol: &str, size: u32, price: Price, base: Price) {
+        let size_prices = groupby.get(symbol).unwrap();
+        assert_eq!(size_prices.0, size);
+        assert!(price_eql(size_prices.1, price));
+        assert!(price_eql(size_prices.2, base));
     }
 
     let mut list = StockList::new();
@@ -83,8 +84,8 @@ fn test_dividend_aggregate() {
 
     let gby = dividend_aggregate(&list);
     assert_eq!(gby.len(), 2);
-    test(&gby, "AAPL", 200, 25.25);
-    test(&gby, "DELL", 100, 20.15);
+    test(&gby, "AAPL", 200, 25.25, 24225.00);
+    test(&gby, "DELL", 100, 20.15, 7921.00);
 }
 
 #[test]

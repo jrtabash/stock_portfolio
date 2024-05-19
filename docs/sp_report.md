@@ -34,7 +34,8 @@ FLAGS:
     -h, --help             Prints help information
     -m, --match-symbols    Match closed positions to configured stock symbols post filtering and ordering
     -g, --show-groupby     For value report, show quantities, base notional and current notional values grouped by
-                           symbol. For divid report, show quantities and cumulative dividend grouped by symbol
+                           symbol. For divid report, show quantities, cumulative dividend and cumulative dividend return
+                           grouped by symbol
     -V, --version          Prints version information
 
 OPTIONS:

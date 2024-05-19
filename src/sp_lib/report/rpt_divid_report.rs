@@ -50,7 +50,7 @@ impl Report for DividReport {
                  "-------",
                  "----------",
                  "------------",
-                 "----------");
+                 "-----------");
         for stock in stocks.iter() {
             println!("{:8} {:10} {:10} {:6} {:8} {:10} {:10.2} {:10.2} {:10.2} {:12.6} {:11.2}",
                      stock.symbol,
@@ -68,8 +68,8 @@ impl Report for DividReport {
 
         if groupby {
             println!();
-            println!("{:8} {:8} {:10}", "GroupBy", "Size", "Cum Duv");
-            println!("{:8} {:8} {:10}", "-------", "----", "-------");
+            println!("{:8} {:8} {:10} {:11}", "GroupBy", "Size", "Cum Duv", "Cum Div Ret");
+            println!("{:8} {:8} {:10} {:11}", "-------", "----", "-------", "-----------");
 
             let groupby = algorithms::dividend_aggregate(stocks);
 
@@ -78,8 +78,8 @@ impl Report for DividReport {
                 if seen.contains(&stock.symbol) { continue; }
                 seen.insert(&stock.symbol);
 
-                let size_price = groupby.get(&stock.symbol).unwrap();
-                println!("{:8} {:8} {:10.2}", stock.symbol, size_price.0, size_price.1);
+                let size_prices = groupby.get(&stock.symbol).unwrap();
+                println!("{:8} {:8} {:10.2} {:11.2}", stock.symbol, size_prices.0, size_prices.1, 100.0 * size_prices.1 / size_prices.2);
             }
         }
     }
