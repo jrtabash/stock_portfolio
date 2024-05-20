@@ -92,7 +92,7 @@ sp_report -l ${CONFIG} -i ${SYMBOL} ${GROUPBY}
 
 echo ""
 echo "----------------------"
-sp_report -l ${CONFIG} -p divid -i ${SYMBOL}
+sp_report -l ${CONFIG} -p divid -i ${SYMBOL} ${GROUPBY}
 
 if [ ${DAYCH} -eq 1 ]; then
     echo ""
